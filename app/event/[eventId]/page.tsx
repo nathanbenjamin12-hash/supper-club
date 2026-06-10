@@ -22,6 +22,7 @@ export default function PublicEventPage() {
   const eventId = params.eventId;
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [currentGuest, setCurrentGuest] = useState<Guest | undefined>();
+  const [showContributions, setShowContributions] = useState(false);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
 
@@ -41,6 +42,7 @@ export default function PublicEventPage() {
   function handleRsvp(draft: GuestDraft) {
     const guest = createGuest(eventId, draft);
     setCurrentGuest(guest);
+    setShowContributions(false);
     reload();
     return guest;
   }
@@ -122,36 +124,44 @@ export default function PublicEventPage() {
               </CardContent>
             </Card>
 
-            <Card className={cn("border", theme.accentBorder)}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                  What should people bring?
-                </CardTitle>
-                <p className="text-sm text-ink/60">
-                  RSVP first, then claim a dish, drink, supply, or game.
-                </p>
-              </CardHeader>
-              <CardContent>
-                {message ? (
-                  <p className={cn("mb-4 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
-                    {message}
+            {showContributions && currentGuest?.rsvpStatus === "yes" ? (
+              <Card className={cn("border", theme.accentBorder)}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
+                    Pick a contribution
+                  </CardTitle>
+                  <p className="text-sm text-ink/60">
+                    Claim an open item or chip in for a shared cost.
                   </p>
-                ) : null}
-                <ChecklistBoard
-                  items={bundle.checklistItems}
-                  event={bundle.event}
-                  currentGuest={currentGuest}
-                  onClaim={handleClaim}
-                  onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
-                />
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  {message ? (
+                    <p className={cn("mb-4 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
+                      {message}
+                    </p>
+                  ) : null}
+                  <ChecklistBoard
+                    items={bundle.checklistItems}
+                    event={bundle.event}
+                    currentGuest={currentGuest}
+                    onClaim={handleClaim}
+                    onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
+                  />
+                </CardContent>
+              </Card>
+            ) : null}
           </div>
 
           <aside className="space-y-5">
-            <RSVPCard event={bundle.event} onSubmit={handleRsvp} />
-            <PitchInCard event={bundle.event} />
+            <RSVPCard
+              event={bundle.event}
+              onSubmit={handleRsvp}
+              onContributionChoice={setShowContributions}
+            />
+            {showContributions && currentGuest?.rsvpStatus === "yes" ? (
+              <PitchInCard event={bundle.event} />
+            ) : null}
             <Card className={cn("border", theme.accentBorder)}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

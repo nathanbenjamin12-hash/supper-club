@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, Send, Utensils } from "lucide-react";
+import { CheckCircle2, Heart, Send, Utensils } from "lucide-react";
 import type { DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
@@ -14,10 +14,12 @@ const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
 
 export function RSVPCard({
   event,
-  onSubmit
+  onSubmit,
+  onContributionChoice
 }: {
   event?: DinnerEvent;
   onSubmit: (guest: GuestDraft) => Guest | undefined;
+  onContributionChoice?: (showContributions: boolean) => void;
 }) {
   const theme = getEventTheme(event?.coverStyle);
   const [name, setName] = useState("");
@@ -28,6 +30,8 @@ export function RSVPCard({
   const [noteToHost, setNoteToHost] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [submittedStatus, setSubmittedStatus] = useState<RSVPStatus | undefined>();
+  const [contributionChoice, setContributionChoice] = useState<"bring" | "later" | undefined>();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,11 +57,15 @@ export function RSVPCard({
     }
 
     setError("");
-    setMessage(
-      status === "no"
-        ? "Thanks for letting the host know."
-        : "You're on the list! Want to bring something?"
-    );
+    setSubmittedStatus(status);
+    setContributionChoice(undefined);
+    onContributionChoice?.(false);
+    setMessage(status === "yes" ? "You're in! Want to contribute?" : "Thanks for letting the host know.");
+  }
+
+  function chooseContribution(showContributions: boolean) {
+    setContributionChoice(showContributions ? "bring" : "later");
+    onContributionChoice?.(showContributions);
   }
 
   return (
@@ -129,9 +137,30 @@ export function RSVPCard({
 
           {error ? <p className="text-sm font-semibold text-wine">{error}</p> : null}
           {message ? (
-            <p className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
-              {message}
-            </p>
+            <div className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
+              <p className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                {message}
+              </p>
+              {submittedStatus === "yes" ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    className={cn(theme.cta)}
+                    onClick={() => chooseContribution(true)}
+                  >
+                    I&apos;ll bring something
+                  </Button>
+                  <Button type="button" variant="secondary" onClick={() => chooseContribution(false)}>
+                    Maybe later
+                  </Button>
+                </div>
+              ) : null}
+              {contributionChoice === "later" ? (
+                <p className="mt-2 text-xs font-medium text-ink/60">You can come back to the invite anytime.</p>
+              ) : null}
+            </div>
           ) : null}
 
           <Button type="submit" className={cn("w-full", theme.cta)} variant="default">

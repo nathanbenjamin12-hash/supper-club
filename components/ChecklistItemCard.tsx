@@ -300,7 +300,7 @@ export function ChecklistItemCard({
                 ? "Spot claimed"
                 : moneyItemIsFull
                   ? "All spots claimed"
-                  : "Claim a spot"
+                  : "I'll chip in"
               : claimedByCurrentGuest
                 ? "Update note"
                 : "I'll bring this"}
