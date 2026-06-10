@@ -206,7 +206,7 @@ export default function HostDashboardPage() {
           title="Event not found"
           description="This host dashboard needs a valid event link."
         />
-        <Link href="/" className={cn(buttonVariants({ variant: "clay" }), "mt-5")}>
+        <Link href="/" className={cn(buttonVariants({ variant: "default" }), "mt-5")}>
           Go home
         </Link>
       </main>
@@ -293,7 +293,7 @@ export default function HostDashboardPage() {
                         onClick={() => setItemType("bring")}
                         className={cn(
                           "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "bring" ? theme.cta : "bg-white text-ink ring-1 ring-ink/10"
+                          itemType === "bring" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
                         )}
                       >
                         Bring item
@@ -303,7 +303,7 @@ export default function HostDashboardPage() {
                         onClick={() => setItemType("money")}
                         className={cn(
                           "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "money" ? theme.cta : "bg-white text-ink ring-1 ring-ink/10"
+                          itemType === "money" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
                         )}
                       >
                         Pitch-in money
@@ -371,7 +371,7 @@ export default function HostDashboardPage() {
                       className="mt-3 min-h-20"
                     />
                     <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <Button type="submit" variant="clay">
+                      <Button type="submit" variant="default" className={cn(theme.cta)}>
                         <ListPlus className="h-4 w-4" aria-hidden="true" />
                         Add item
                       </Button>

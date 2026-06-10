@@ -27,12 +27,12 @@ export function GuestList({
         return (
           <div
             key={guest.id}
-            className="rounded-lg border border-ink/8 bg-white p-4 shadow-sm"
+            className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-semibold">
-                  <UsersRound className="h-4 w-4 shrink-0 text-sage" aria-hidden="true" />
+                  <UsersRound className="h-4 w-4 shrink-0 text-olive" aria-hidden="true" />
                   <span className="truncate">{guest.name}</span>
                 </p>
                 {contributions.length > 0 ? (

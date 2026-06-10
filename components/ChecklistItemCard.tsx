@@ -128,7 +128,7 @@ export function ChecklistItemCard({
 
   if (isEditing) {
     return (
-      <div className="rounded-lg border border-clay/25 bg-clay/6 p-4">
+      <div className="rounded-lg border border-olive/18 bg-stone/70 p-4">
         <div className="grid gap-3">
           <Input value={title} onChange={(event) => setTitle(event.target.value)} />
           <Select
@@ -191,9 +191,9 @@ export function ChecklistItemCard({
               onChange={(event) => setIsRequired(event.target.checked)}
               className="h-4 w-4 rounded border-ink/20"
             />
-            Needed for the party
+            Needed for the gathering
           </label>
-          {editError ? <p className="text-sm font-semibold text-wine">{editError}</p> : null}
+          {editError ? <p className="text-sm font-semibold text-terracotta">{editError}</p> : null}
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={handleSave}>
               <Save className="h-4 w-4" aria-hidden="true" />
@@ -212,8 +212,8 @@ export function ChecklistItemCard({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-white p-4 shadow-sm",
-        claimed ? "border-sage/20" : "border-ink/8"
+        "rounded-lg border bg-cream p-4 shadow-sm",
+        claimed ? "border-olive/18" : "border-ink/8"
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -233,10 +233,10 @@ export function ChecklistItemCard({
         </Badge>
       </div>
 
-      <div className="mt-3 rounded-lg bg-oat/45 p-3 text-sm">
+      <div className="mt-3 rounded-lg bg-stone/70 p-3 text-sm">
         {isMoneyItem ? (
           <div>
-            <p className={cn("font-medium", moneyItemIsFull ? "text-sage" : "text-clay")}>
+            <p className={cn("font-medium", moneyItemIsFull ? "text-olive" : "text-terracotta")}>
               <DollarSign className="mr-1 inline h-4 w-4" aria-hidden="true" />
               {claimedMoneySpots} of {totalMoneySpots} claimed
             </p>
@@ -252,12 +252,12 @@ export function ChecklistItemCard({
             ) : null}
           </div>
         ) : claimed ? (
-          <p className="font-medium text-sage">
+          <p className="font-medium text-olive">
             <CheckCircle2 className="mr-1 inline h-4 w-4" aria-hidden="true" />
             {item.claimedByName} is bringing this
           </p>
         ) : (
-          <p className="font-medium text-clay">Still needed</p>
+          <p className="font-medium text-terracotta">Still needed</p>
         )}
         {item.claimNote ? <p className="mt-1 text-ink/65">{item.claimNote}</p> : null}
       </div>
@@ -277,7 +277,7 @@ export function ChecklistItemCard({
               target="_blank"
               rel="noreferrer"
               className={cn(
-                "inline-flex h-11 items-center justify-center gap-2 rounded-full text-sm font-semibold transition",
+                "inline-flex h-11 items-center justify-center gap-2 rounded-md text-sm font-semibold transition",
                 theme.cta
               )}
             >
@@ -287,7 +287,8 @@ export function ChecklistItemCard({
           ) : null}
           <Button
             type="button"
-            variant={claimedByCurrentGuest || currentGuestMoneyClaim ? "secondary" : "sage"}
+            variant={claimedByCurrentGuest || currentGuestMoneyClaim ? "secondary" : "default"}
+            className={claimedByCurrentGuest || currentGuestMoneyClaim ? undefined : theme.cta}
             onClick={handleClaim}
             disabled={
               isMoneyItem

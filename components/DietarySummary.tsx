@@ -22,15 +22,15 @@ export function DietarySummary({ guests }: { guests: Guest[] }) {
   return (
     <div className="grid gap-3">
       {notes.map(({ guest, details }) => (
-        <div key={guest.id} className="rounded-lg border border-ink/8 bg-white p-4 shadow-sm">
+        <div key={guest.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
           <p className="flex items-center gap-2 font-semibold">
-            <Salad className="h-4 w-4 text-sage" aria-hidden="true" />
+            <Salad className="h-4 w-4 text-olive" aria-hidden="true" />
             {guest.name}
           </p>
           <div className="mt-2 space-y-1 text-sm text-ink/65">
             {details.map((detail) => (
               <p key={detail} className="flex gap-2">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-clay" aria-hidden="true" />
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-terracotta" aria-hidden="true" />
                 <span>{detail}</span>
               </p>
             ))}

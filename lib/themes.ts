@@ -12,93 +12,110 @@ export type EventTheme = {
   chip: string;
   cta: string;
   glow: string;
+  imageUrl: string;
+  imageAlt: string;
 };
 
 export const eventThemes: EventTheme[] = [
   {
     id: "tomato tablecloth",
-    label: "Tomato Table",
-    description: "Bold red-orange, golden candlelight, classic dinner party energy.",
-    swatch: "bg-gradient-to-br from-tomato via-clay to-marigold",
+    label: "Candlelit Table",
+    description: "Warm ivory, terracotta, and candlelight for intimate dinners.",
+    swatch: "bg-gradient-to-br from-cream via-clay to-terracotta",
     heroGradient:
-      "bg-[radial-gradient(circle_at_80%_18%,rgba(255,255,255,0.34),transparent_15rem),linear-gradient(135deg,#ef6a4c_0%,#d75b35_48%,#e8ad3f_100%)]",
+      "bg-[linear-gradient(135deg,#4f433a_0%,#7a5143_48%,#c9a66b_100%)]",
     pageBackground:
-      "bg-[radial-gradient(circle_at_12%_8%,rgba(239,106,76,0.28),transparent_22rem),radial-gradient(circle_at_92%_22%,rgba(232,173,63,0.25),transparent_20rem),linear-gradient(135deg,#fff5eb_0%,#fdf3e5_50%,#f2f6ea_100%)]",
-    softPanel: "bg-clay/10",
-    accentText: "text-clay",
-    accentBorder: "border-clay/30",
-    iconText: "text-clay",
-    chip: "bg-clay/12 text-clay ring-1 ring-clay/25",
-    cta: "bg-clay text-white hover:bg-[#bd4829]",
-    glow: "bg-marigold/45"
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#f1ece5_100%)]",
+    softPanel: "bg-clay/55",
+    accentText: "text-terracotta",
+    accentBorder: "border-terracotta/18",
+    iconText: "text-olive",
+    chip: "bg-terracotta/10 text-terracotta ring-1 ring-terracotta/15",
+    cta: "bg-olive text-cream hover:bg-[#556149]",
+    glow: "bg-honey/25",
+    imageUrl:
+      "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "A candlelit dinner table set for guests"
   },
   {
     id: "sage garden",
     label: "Sage Garden",
-    description: "Fresh greens, herb garden calm, outdoor supper feel.",
-    swatch: "bg-gradient-to-br from-sage via-[#9aae74] to-marigold",
+    description: "Soft greens, herbs, and unfussy outdoor hosting.",
+    swatch: "bg-gradient-to-br from-cream via-sage to-olive",
     heroGradient:
-      "bg-[radial-gradient(circle_at_76%_18%,rgba(255,255,255,0.34),transparent_14rem),linear-gradient(135deg,#5f825f_0%,#8ba56b_48%,#e2b84a_100%)]",
+      "bg-[linear-gradient(135deg,#68735f_0%,#8aa17b_58%,#c9a66b_100%)]",
     pageBackground:
-      "bg-[radial-gradient(circle_at_12%_8%,rgba(111,143,114,0.28),transparent_22rem),radial-gradient(circle_at_92%_22%,rgba(232,173,63,0.18),transparent_20rem),linear-gradient(135deg,#f6faee_0%,#edf5e7_48%,#fff4e2_100%)]",
-    softPanel: "bg-sage/12",
-    accentText: "text-sage",
-    accentBorder: "border-sage/30",
-    iconText: "text-sage",
-    chip: "bg-sage/14 text-sage ring-1 ring-sage/25",
-    cta: "bg-sage text-white hover:bg-[#58745b]",
-    glow: "bg-sage/45"
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#eef2e9_52%,#f1ece5_100%)]",
+    softPanel: "bg-sage/14",
+    accentText: "text-olive",
+    accentBorder: "border-olive/18",
+    iconText: "text-olive",
+    chip: "bg-sage/18 text-olive ring-1 ring-olive/15",
+    cta: "bg-olive text-cream hover:bg-[#556149]",
+    glow: "bg-sage/25",
+    imageUrl:
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "A quiet restaurant table with dinner service"
   },
   {
     id: "wine night",
-    label: "Wine Night",
-    description: "Deep berry, candlelit, a little dramatic in the best way.",
-    swatch: "bg-gradient-to-br from-wine via-clay to-[#39232c]",
+    label: "Wine Room",
+    description: "Deep charcoal, clay, and a restrained terracotta accent.",
+    swatch: "bg-gradient-to-br from-ink via-terracotta to-clay",
     heroGradient:
-      "bg-[radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.2),transparent_13rem),linear-gradient(135deg,#8f3d5a_0%,#6f293f_48%,#2e2028_100%)]",
+      "bg-[linear-gradient(135deg,#2a2623_0%,#6f4b40_52%,#b86a4f_100%)]",
     pageBackground:
-      "bg-[radial-gradient(circle_at_12%_8%,rgba(143,61,90,0.22),transparent_22rem),radial-gradient(circle_at_92%_22%,rgba(215,91,53,0.18),transparent_20rem),linear-gradient(135deg,#fff1f4_0%,#f7e9ef_48%,#f5efe8_100%)]",
-    softPanel: "bg-wine/10",
-    accentText: "text-wine",
-    accentBorder: "border-wine/30",
-    iconText: "text-wine",
-    chip: "bg-wine/12 text-wine ring-1 ring-wine/25",
-    cta: "bg-wine text-white hover:bg-[#743047]",
-    glow: "bg-wine/40"
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#f3ece6_48%,#f1ece5_100%)]",
+    softPanel: "bg-terracotta/10",
+    accentText: "text-terracotta",
+    accentBorder: "border-terracotta/18",
+    iconText: "text-terracotta",
+    chip: "bg-terracotta/10 text-terracotta ring-1 ring-terracotta/15",
+    cta: "bg-olive text-cream hover:bg-[#556149]",
+    glow: "bg-terracotta/20",
+    imageUrl:
+      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Wine glasses arranged for an evening gathering"
   },
   {
     id: "sunny brunch",
-    label: "Sunny Brunch",
-    description: "Golden, bright, citrusy, and easygoing.",
-    swatch: "bg-gradient-to-br from-marigold via-[#f3ca78] to-tomato",
+    label: "Sunday Brunch",
+    description: "Honey, stone, and morning light without feeling bright.",
+    swatch: "bg-gradient-to-br from-cream via-honey to-sage",
     heroGradient:
-      "bg-[radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.38),transparent_14rem),linear-gradient(135deg,#e8ad3f_0%,#f0c96b_44%,#ef6a4c_100%)]",
+      "bg-[linear-gradient(135deg,#8a7a58_0%,#c9a66b_48%,#8aa17b_100%)]",
     pageBackground:
-      "bg-[radial-gradient(circle_at_12%_8%,rgba(232,173,63,0.28),transparent_22rem),radial-gradient(circle_at_92%_22%,rgba(239,106,76,0.18),transparent_20rem),linear-gradient(135deg,#fff9e8_0%,#fff0cf_48%,#f9ede4_100%)]",
-    softPanel: "bg-marigold/18",
-    accentText: "text-[#865f16]",
-    accentBorder: "border-marigold/40",
-    iconText: "text-[#b97816]",
-    chip: "bg-marigold/20 text-[#865f16] ring-1 ring-marigold/30",
-    cta: "bg-[#c27d19] text-white hover:bg-[#a96711]",
-    glow: "bg-marigold/50"
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#f5efe4_50%,#f1ece5_100%)]",
+    softPanel: "bg-honey/14",
+    accentText: "text-[#735b2e]",
+    accentBorder: "border-honey/24",
+    iconText: "text-olive",
+    chip: "bg-honey/16 text-[#735b2e] ring-1 ring-honey/18",
+    cta: "bg-olive text-cream hover:bg-[#556149]",
+    glow: "bg-honey/25",
+    imageUrl:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "A warmly lit dining room ready for service"
   },
   {
     id: "game table",
-    label: "Game Table",
-    description: "Emerald, ink, and berry for cards, snacks, and a little chaos.",
-    swatch: "bg-gradient-to-br from-sage via-ink to-wine",
+    label: "Table Games",
+    description: "Charcoal, sage, and good snacks for lingering after dinner.",
+    swatch: "bg-gradient-to-br from-ink via-olive to-sage",
     heroGradient:
-      "bg-[radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.2),transparent_13rem),linear-gradient(135deg,#6f8f72_0%,#25211d_52%,#8f3d5a_100%)]",
+      "bg-[linear-gradient(135deg,#2a2623_0%,#68735f_58%,#8aa17b_100%)]",
     pageBackground:
-      "bg-[radial-gradient(circle_at_12%_8%,rgba(111,143,114,0.22),transparent_22rem),radial-gradient(circle_at_92%_22%,rgba(143,61,90,0.2),transparent_20rem),linear-gradient(135deg,#f1f7ed_0%,#f5f1e9_46%,#f5eaf0_100%)]",
-    softPanel: "bg-ink/10",
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#eef2e9_48%,#f1ece5_100%)]",
+    softPanel: "bg-olive/10",
     accentText: "text-ink",
-    accentBorder: "border-ink/25",
-    iconText: "text-ink",
-    chip: "bg-ink/10 text-ink ring-1 ring-ink/20",
-    cta: "bg-ink text-cream hover:bg-[#3a3029]",
-    glow: "bg-wine/35"
+    accentBorder: "border-ink/12",
+    iconText: "text-olive",
+    chip: "bg-ink/8 text-ink ring-1 ring-ink/12",
+    cta: "bg-olive text-cream hover:bg-[#556149]",
+    glow: "bg-olive/20",
+    imageUrl:
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Shared dishes on a table ready for guests"
   }
 ];
 

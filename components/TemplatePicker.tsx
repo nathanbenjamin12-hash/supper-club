@@ -18,7 +18,7 @@ const descriptions: Record<EventType, string> = {
   bbq: "Grill basics, cold drinks, lawn games.",
   game_night: "Snacks, drinks, games, and score pads.",
   friendsgiving: "Classic sides, pies, serving pieces.",
-  birthday: "Cake, snacks, candles, and party bits.",
+  birthday: "Cake, snacks, candles, and table details.",
   custom: "Start with an empty board."
 };
 
@@ -52,16 +52,16 @@ export function TemplatePicker({
             className={cn(
               "min-h-28 rounded-lg border p-4 text-left transition",
               selected
-                ? "border-clay bg-clay/8 shadow-sm"
-                : "border-ink/10 bg-white hover:border-clay/40"
+                ? "border-olive/35 bg-sage/10 shadow-sm"
+                : "border-ink/8 bg-cream hover:border-olive/25"
             )}
           >
             <span className="flex items-center justify-between gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-ink text-cream">
+              <span className="grid h-10 w-10 place-items-center rounded-md bg-stone text-olive">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
               {selected ? (
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-clay text-white">
+                <span className="grid h-6 w-6 place-items-center rounded-md bg-olive text-cream">
                   <Check className="h-4 w-4" aria-hidden="true" />
                 </span>
               ) : null}

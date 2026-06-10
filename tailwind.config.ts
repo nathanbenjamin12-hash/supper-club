@@ -9,17 +9,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#25211d",
-        clay: "#d75b35",
-        tomato: "#ef6a4c",
-        sage: "#6f8f72",
-        wine: "#8f3d5a",
-        marigold: "#e8ad3f",
-        cream: "#fbf7ef",
-        oat: "#efe5d8"
+        ink: "#2A2623",
+        charcoal: "#2A2623",
+        cream: "#FAF7F2",
+        stone: "#F1ECE5",
+        oat: "#F1ECE5",
+        clay: "#E8DED2",
+        olive: "#68735F",
+        sage: "#8AA17B",
+        terracotta: "#B86A4F",
+        honey: "#C9A66B",
+        tomato: "#B86A4F",
+        wine: "#8A4E42",
+        marigold: "#C9A66B"
+      },
+      fontFamily: {
+        sans: ["var(--font-body)"],
+        display: ["var(--font-heading)"]
       },
       boxShadow: {
-        soft: "0 18px 55px rgba(55, 43, 31, 0.10)"
+        soft: "0 16px 42px rgba(42, 38, 35, 0.08)",
+        subtle: "0 8px 24px rgba(42, 38, 35, 0.06)"
       }
     }
   },

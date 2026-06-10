@@ -39,7 +39,7 @@ export default function EditEventPage() {
           title="Event not found"
           description="Check the dashboard link before editing."
         />
-        <Link href="/" className={cn(buttonVariants({ variant: "clay" }), "mt-5")}>
+        <Link href="/" className={cn(buttonVariants({ variant: "default" }), "mt-5")}>
           Go home
         </Link>
       </main>
@@ -60,8 +60,8 @@ export default function EditEventPage() {
         Dashboard
       </Link>
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-clay">Edit</p>
-        <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">Tune the invite</h1>
+        <p className="eyebrow">Edit</p>
+        <h1 className="mt-2 text-5xl font-semibold leading-tight sm:text-6xl">Refine the invite</h1>
         <p className="mt-3 max-w-2xl text-ink/65">
           Update the details guests see on the public invite page.
         </p>

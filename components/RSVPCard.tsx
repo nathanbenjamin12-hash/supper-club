@@ -52,7 +52,7 @@ export function RSVPCard({
     });
 
     if (!created) {
-      setError("Something went sideways. Try that again.");
+      setError("Something went wrong. Try again.");
       return;
     }
 
@@ -89,7 +89,7 @@ export function RSVPCard({
                   "min-h-12 rounded-lg px-2 text-sm font-semibold transition",
                   status === candidate
                     ? theme.cta
-                    : "bg-oat/50 text-ink hover:bg-white"
+                    : "bg-stone/70 text-ink hover:bg-cream"
                 )}
               >
                 {rsvpLabels[candidate]}
@@ -110,7 +110,7 @@ export function RSVPCard({
             />
           </label>
 
-          <div className="rounded-lg bg-oat/55 p-4">
+          <div className="rounded-lg bg-stone/70 p-4">
             <p className="flex items-center gap-2 text-sm font-semibold">
               <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
               Anything the host should know?
@@ -135,7 +135,7 @@ export function RSVPCard({
             </div>
           </div>
 
-          {error ? <p className="text-sm font-semibold text-wine">{error}</p> : null}
+          {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
           {message ? (
             <div className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
               <p className="flex items-center gap-2">

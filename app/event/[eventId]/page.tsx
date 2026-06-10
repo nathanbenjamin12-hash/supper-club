@@ -83,7 +83,7 @@ export default function PublicEventPage() {
           title="Invite not found"
           description="Check the link or ask the host to send it again."
         />
-        <Link href="/" className={cn(buttonVariants({ variant: "clay" }), "mt-5")}>
+        <Link href="/" className={cn(buttonVariants({ variant: "default" }), "mt-5")}>
           Go home
         </Link>
       </main>
@@ -100,9 +100,9 @@ export default function PublicEventPage() {
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-        <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-5 bg-white/55 backdrop-blur")}>
+        <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-5 bg-cream/65 backdrop-blur")}>
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          SupperClub
+          Supper Club
         </Link>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">

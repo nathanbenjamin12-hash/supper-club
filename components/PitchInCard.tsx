@@ -25,7 +25,7 @@ export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; h
       </CardHeader>
       <CardContent>
         <p className="text-sm leading-6 text-ink/65">
-          Help cover groceries, drinks, delivery, or party supplies.
+          Help cover groceries, drinks, delivery, or hosting supplies.
         </p>
         {venmoHandle ? (
           <p className={cn("mt-3 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
@@ -51,7 +51,7 @@ export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; h
             Open Venmo
           </a>
         ) : (
-          <p className="mt-3 rounded-lg bg-oat/50 p-3 text-sm text-ink/60">
+          <p className="mt-3 rounded-lg bg-stone/70 p-3 text-sm text-ink/60">
             {hostView
               ? "Add a Venmo handle on the edit page if you want guests to tap straight through."
               : "The host did not add a Venmo handle yet."}

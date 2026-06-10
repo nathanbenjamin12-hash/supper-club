@@ -1,4 +1,5 @@
-import { CalendarDays, MapPin, Sparkles, UserRound } from "lucide-react";
+import Image from "next/image";
+import { CalendarDays, MapPin, UserRound } from "lucide-react";
 import type { DinnerEvent } from "@/types/events";
 import { cn, eventTypeLabels, formatEventDate } from "@/lib/utils";
 import { getEventTheme } from "@/lib/themes";
@@ -8,22 +9,28 @@ export function EventHero({ event }: { event: DinnerEvent }) {
   const theme = getEventTheme(event.coverStyle);
 
   return (
-    <section className={cn("overflow-hidden rounded-lg border bg-white shadow-soft", theme.accentBorder)}>
-      <div className={cn("relative isolate min-h-52 overflow-hidden p-5 text-white sm:min-h-64 sm:p-8", theme.heroGradient)}>
-        <div className={cn("absolute -right-12 -top-12 -z-10 h-48 w-48 rounded-full blur-3xl", theme.glow)} />
-        <div className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-black/18 to-transparent" />
-        <div className="absolute right-5 top-5 hidden rotate-3 rounded-lg border border-white/25 bg-white/12 px-4 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur sm:block">
+    <section className={cn("overflow-hidden rounded-lg bg-cream shadow-soft ring-1 ring-ink/8", theme.accentBorder)}>
+      <div className={cn("relative isolate min-h-[26rem] overflow-hidden p-5 text-cream sm:min-h-[30rem] sm:p-8", theme.heroGradient)}>
+        <Image
+          src={theme.imageUrl}
+          alt={theme.imageAlt}
+          fill
+          sizes="(min-width: 1024px) 760px, 100vw"
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/82 via-ink/42 to-ink/12" />
+        <div className="absolute right-5 top-5 hidden rounded-md border border-cream/25 bg-cream/12 px-4 py-3 text-sm font-semibold text-cream shadow-subtle backdrop-blur sm:block">
           {theme.label}
         </div>
-        <Badge className="bg-white/90 text-ink" tone="neutral">
+        <Badge className="bg-cream/90 text-ink ring-cream/30" tone="neutral">
           {eventTypeLabels[event.eventType]}
         </Badge>
-        <div className="mt-16 max-w-2xl">
-          <p className="flex items-center gap-2 text-sm font-semibold text-white/85">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
+        <div className="mt-28 max-w-2xl sm:mt-36">
+          <p className="flex items-center gap-2 text-sm font-semibold text-cream/85">
+            <UserRound className="h-4 w-4" aria-hidden="true" />
             Hosted by {event.hostName}
           </p>
-          <h1 className="mt-2 text-4xl font-semibold leading-tight sm:text-6xl">
+          <h1 className="mt-3 font-display text-5xl font-semibold leading-[1.02] sm:text-7xl">
             {event.title}
           </h1>
         </div>

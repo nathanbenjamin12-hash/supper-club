@@ -7,8 +7,8 @@ import {
   DollarSign,
   ListPlus,
   MapPin,
-  Sparkles,
   Trash2,
+  Utensils,
   UserRound
 } from "lucide-react";
 import type {
@@ -240,7 +240,7 @@ export function EventForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-clay" aria-hidden="true" />
+            <Utensils className="h-5 w-5 text-olive" aria-hidden="true" />
             Invite details
           </CardTitle>
         </CardHeader>
@@ -273,12 +273,12 @@ export function EventForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold">
               Date
-              <span className="relative block h-11 overflow-hidden rounded-lg">
+              <span className="relative block h-11 overflow-hidden rounded-md">
                 <CalendarDays
                   className="pointer-events-none absolute left-3 top-3 z-10 h-5 w-5 text-ink/35"
                   aria-hidden="true"
                 />
-                <span className="pointer-events-none flex h-11 w-full items-center rounded-lg border border-ink/10 bg-white px-3 pl-10 text-left text-sm font-semibold text-ink shadow-sm">
+                <span className="pointer-events-none flex h-11 w-full items-center rounded-md border border-ink/10 bg-cream px-3 pl-10 text-left text-sm font-semibold text-ink shadow-sm">
                   {formatDisplayDate(date)}
                 </span>
                 <Input
@@ -322,7 +322,7 @@ export function EventForm({
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Casual dinner. Bring wine, dessert, or a game if you want."
+              placeholder="A relaxed dinner. Bring wine, dessert, or a game if you would like."
             />
           </label>
         </CardContent>
@@ -332,13 +332,13 @@ export function EventForm({
         <CardHeader>
           <CardTitle>Starter checklist</CardTitle>
           <p className="text-sm text-ink/60">
-            Pick a vibe and SupperClub will pre-fill the first batch of items.
+            Pick a template and Supper Club will pre-fill the first batch of items.
           </p>
         </CardHeader>
         <CardContent>
           <TemplatePicker value={eventType} onChange={setEventType} />
           {eventType === "custom" && allowStarterItems ? (
-            <div className="mt-5 rounded-lg bg-oat/50 p-4">
+            <div className="mt-5 rounded-lg bg-stone/70 p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-semibold">Build your empty board</p>
@@ -346,7 +346,7 @@ export function EventForm({
                     Add any food, drinks, games, or supplies you already know you need.
                   </p>
                 </div>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink/60 ring-1 ring-ink/8">
+                <span className="rounded-md bg-cream px-3 py-1 text-xs font-semibold text-ink/60 ring-1 ring-ink/8">
                   {customItems.length}
                 </span>
               </div>
@@ -378,7 +378,7 @@ export function EventForm({
                       ))}
                     </Select>
                   ) : (
-                    <div className="flex h-11 items-center rounded-lg bg-white px-3 text-sm font-semibold text-ink/60 shadow-sm ring-1 ring-ink/10">
+                    <div className="flex h-11 items-center rounded-md bg-cream px-3 text-sm font-semibold text-ink/60 shadow-sm ring-1 ring-ink/10">
                       {categoryLabels[selectedPreset?.category ?? "other"]}
                     </div>
                   )}
@@ -414,7 +414,7 @@ export function EventForm({
                   {customItems.map((item, index) => (
                     <div
                       key={`${item.title}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-lg bg-white p-3 text-sm shadow-sm"
+                      className="flex items-center justify-between gap-3 rounded-md bg-cream p-3 text-sm shadow-sm"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold">{item.title}</p>
@@ -444,7 +444,7 @@ export function EventForm({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-sage" aria-hidden="true" />
+            <DollarSign className="h-5 w-5 text-olive" aria-hidden="true" />
             Pitch in money
           </CardTitle>
           <p className="text-sm text-ink/60">
@@ -452,7 +452,7 @@ export function EventForm({
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <label className="flex items-start gap-3 rounded-lg bg-oat/45 p-4 text-sm font-semibold">
+          <label className="flex items-start gap-3 rounded-lg bg-stone/70 p-4 text-sm font-semibold">
             <input
               type="checkbox"
               checked={pitchInEnabled}
@@ -485,7 +485,7 @@ export function EventForm({
                 </span>
               </label>
 
-              <div className="rounded-lg bg-oat/50 p-4">
+              <div className="rounded-lg bg-stone/70 p-4">
                 <p className="font-semibold">Add a pitch-in contribution</p>
                 <p className="mt-1 text-sm text-ink/60">
                   Set how many guests can claim a money spot.
@@ -538,7 +538,7 @@ export function EventForm({
                     {moneyItems.map((item, index) => (
                       <div
                         key={`${item.title}-${index}`}
-                        className="flex items-center justify-between gap-3 rounded-lg bg-white p-3 text-sm shadow-sm"
+                        className="flex items-center justify-between gap-3 rounded-md bg-cream p-3 text-sm shadow-sm"
                       >
                         <div className="min-w-0">
                           <p className="truncate font-semibold">{item.title}</p>
@@ -580,14 +580,14 @@ export function EventForm({
                 type="button"
                 onClick={() => setCoverStyle(theme.id)}
                 className={cn(
-                  "relative min-h-32 overflow-hidden rounded-lg border bg-white p-4 text-left transition hover:-translate-y-0.5",
+                  "relative min-h-32 overflow-hidden rounded-lg border bg-cream p-4 text-left transition hover:border-olive/30",
                   coverStyle === theme.id
-                    ? `${theme.accentBorder} shadow-soft ring-2 ring-ink/10`
+                    ? `${theme.accentBorder} shadow-subtle ring-2 ring-olive/15`
                     : "border-ink/10 hover:border-ink/20"
                 )}
               >
                 <span className={cn("absolute inset-x-0 top-0 h-3", theme.swatch)} />
-                <span className={cn("mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold", theme.chip)}>
+                <span className={cn("mt-2 inline-flex rounded-md px-2.5 py-1 text-xs font-semibold", theme.chip)}>
                   {coverStyle === theme.id ? "Selected" : "Theme"}
                 </span>
                 <span className="mt-4 block font-semibold">{theme.label}</span>
@@ -604,12 +604,12 @@ export function EventForm({
       </Card>
 
       {error ? (
-        <div className="rounded-lg bg-wine/10 p-3 text-sm font-semibold text-wine">
+        <div className="rounded-lg bg-terracotta/10 p-3 text-sm font-semibold text-terracotta">
           {error}
         </div>
       ) : null}
 
-      <Button type="submit" className="w-full sm:w-auto" variant="clay">
+      <Button type="submit" className="w-full sm:w-auto" variant="default">
         {submitLabel}
       </Button>
     </form>

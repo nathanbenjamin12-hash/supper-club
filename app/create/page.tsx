@@ -24,11 +24,11 @@ export default function CreateEventPage() {
         Home
       </Link>
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-clay">Create</p>
-        <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">Make a party board</h1>
+        <p className="eyebrow">Create</p>
+        <h1 className="mt-2 text-5xl font-semibold leading-tight sm:text-6xl">Plan a gathering</h1>
         <p className="mt-3 max-w-2xl text-ink/65">
-          Add the basics, choose a starter checklist, and you&apos;ll get a shareable
-          invite link for guests.
+          Add the essentials, choose a starter checklist, and prepare a shareable
+          invite that feels ready for guests.
         </p>
       </div>
       <EventForm submitLabel="Create invite" onSubmit={handleCreate} />

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PartyPopper } from "lucide-react";
+import { Leaf } from "lucide-react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SupperClub",
-  description: "Beautiful invites, RSVPs, and shared party checklists."
+  title: "Supper Club",
+  description: "Elegant invites, RSVPs, and contribution planning for thoughtful hosting."
 };
 
 export default function RootLayout({
@@ -16,24 +16,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="sticky top-0 z-30 border-b border-black/5 bg-cream/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-ink text-cream">
-                <PartyPopper className="h-5 w-5" aria-hidden="true" />
+        <header className="sticky top-0 z-30 border-b border-ink/8 bg-cream/90 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+            <Link href="/" className="flex items-center gap-3 font-semibold">
+              <span className="grid h-9 w-9 place-items-center rounded-md border border-olive/20 bg-stone text-olive">
+                <Leaf className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span>SupperClub</span>
+              <span className="font-display text-xl leading-none">Supper Club</span>
             </Link>
             <nav className="flex items-center gap-2 text-sm font-medium">
               <Link
                 href="/event/sample-dinner-party"
-                className="hidden rounded-full px-3 py-2 text-ink/70 transition hover:bg-white hover:text-ink sm:inline-flex"
+                className="hidden rounded-md px-3 py-2 text-ink/65 transition hover:bg-stone hover:text-ink sm:inline-flex"
               >
                 Sample invite
               </Link>
               <Link
                 href="/create"
-                className="inline-flex items-center rounded-full bg-ink px-4 py-2 text-sm font-semibold text-cream shadow-soft transition hover:-translate-y-0.5"
+                className="inline-flex items-center rounded-md bg-olive px-4 py-2 text-sm font-semibold text-cream shadow-subtle transition hover:bg-[#556149]"
               >
                 Create invite
               </Link>

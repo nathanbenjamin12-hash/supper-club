@@ -25,15 +25,15 @@ export function ShareInviteCard({ eventId }: { eventId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <LinkIcon className="h-5 w-5 text-clay" aria-hidden="true" />
+          <LinkIcon className="h-5 w-5 text-olive" aria-hidden="true" />
           Share invite
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-oat/50 p-3 text-sm font-medium text-ink/70 break-all">
+        <div className="break-all rounded-lg bg-stone/70 p-3 text-sm font-medium text-ink/70">
           {invitePath}
         </div>
-        <Button type="button" onClick={copyInvite} className="mt-3 w-full" variant="clay">
+        <Button type="button" onClick={copyInvite} className="mt-3 w-full" variant="default">
           {message ? (
             <Check className="h-4 w-4" aria-hidden="true" />
           ) : (
@@ -41,7 +41,7 @@ export function ShareInviteCard({ eventId }: { eventId: string }) {
           )}
           Copy invite link
         </Button>
-        {message ? <p className="mt-2 text-sm font-semibold text-sage">{message}</p> : null}
+        {message ? <p className="mt-2 text-sm font-semibold text-olive">{message}</p> : null}
       </CardContent>
     </Card>
   );

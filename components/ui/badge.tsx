@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 type BadgeTone = "neutral" | "yes" | "maybe" | "no" | "open" | "claimed";
 
 const tones: Record<BadgeTone, string> = {
-  neutral: "bg-white text-ink ring-1 ring-ink/10",
-  yes: "bg-sage/15 text-sage ring-1 ring-sage/20",
-  maybe: "bg-marigold/18 text-[#865f16] ring-1 ring-marigold/20",
-  no: "bg-wine/12 text-wine ring-1 ring-wine/15",
-  open: "bg-clay/12 text-clay ring-1 ring-clay/20",
-  claimed: "bg-sage/15 text-sage ring-1 ring-sage/20"
+  neutral: "bg-stone text-ink ring-1 ring-ink/8",
+  yes: "bg-sage/18 text-olive ring-1 ring-olive/15",
+  maybe: "bg-honey/18 text-[#735b2e] ring-1 ring-honey/20",
+  no: "bg-terracotta/12 text-terracotta ring-1 ring-terracotta/15",
+  open: "bg-clay/70 text-ink ring-1 ring-ink/8",
+  claimed: "bg-sage/18 text-olive ring-1 ring-olive/15"
 };
 
 export function Badge({
@@ -20,7 +20,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold",
+        "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold",
         tones[tone],
         className
       )}
