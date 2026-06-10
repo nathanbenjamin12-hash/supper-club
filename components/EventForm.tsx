@@ -51,6 +51,24 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function formatDisplayDate(value: string) {
+  if (!value) {
+    return "Choose a date";
+  }
+
+  const parsed = new Date(`${value}T12:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Choose a date";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(parsed);
+}
+
 export function EventForm({
   event,
   submitLabel,
@@ -255,16 +273,20 @@ export function EventForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold">
               Date
-              <span className="relative">
+              <span className="relative block h-11 overflow-hidden rounded-lg">
                 <CalendarDays
-                  className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
+                  className="pointer-events-none absolute left-3 top-3 z-10 h-5 w-5 text-ink/35"
                   aria-hidden="true"
                 />
+                <span className="pointer-events-none flex h-11 w-full items-center rounded-lg border border-ink/10 bg-white px-3 pl-10 text-left text-sm font-semibold text-ink shadow-sm">
+                  {formatDisplayDate(date)}
+                </span>
                 <Input
                   value={date}
                   onChange={(event) => setDate(event.target.value)}
                   type="date"
-                  className="pl-10"
+                  className="absolute inset-0 h-11 cursor-pointer opacity-0"
+                  aria-label="Date"
                   required
                 />
               </span>
