@@ -18,6 +18,15 @@ export type ChecklistCategory =
   | "games"
   | "other";
 
+export type ChecklistItemType = "bring" | "money";
+
+export interface MoneyContributionClaim {
+  guestId: string;
+  guestName: string;
+  note?: string;
+  createdAt: string;
+}
+
 export interface DinnerEvent {
   id: string;
   title: string;
@@ -30,6 +39,8 @@ export interface DinnerEvent {
   coverStyle?: string;
   pitchInEnabled?: boolean;
   recommendedContributionAmount?: number;
+  venmoHandle?: string;
+  /** Legacy localStorage field. New events store venmoHandle and derive the URL in UI. */
   venmoUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -54,9 +65,13 @@ export interface ChecklistItem {
   eventId: string;
   category: ChecklistCategory;
   title: string;
+  itemType?: ChecklistItemType;
   description?: string;
   quantity?: number;
   isRequired: boolean;
+  amountPerPerson?: number;
+  totalSpots?: number;
+  moneyClaims?: MoneyContributionClaim[];
   claimedByGuestId?: string;
   claimedByName?: string;
   claimNote?: string;
@@ -76,5 +91,12 @@ export type GuestDraft = Omit<Guest, "id" | "eventId" | "createdAt" | "updatedAt
 
 export type ChecklistItemDraft = Omit<
   ChecklistItem,
-  "id" | "eventId" | "claimedByGuestId" | "claimedByName" | "claimNote" | "createdAt" | "updatedAt"
+  | "id"
+  | "eventId"
+  | "claimedByGuestId"
+  | "claimedByName"
+  | "claimNote"
+  | "moneyClaims"
+  | "createdAt"
+  | "updatedAt"
 >;

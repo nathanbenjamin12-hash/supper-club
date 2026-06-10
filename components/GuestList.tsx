@@ -18,7 +18,11 @@ export function GuestList({
   return (
     <div className="space-y-3">
       {guests.map((guest) => {
-        const contributions = checklistItems.filter((item) => item.claimedByGuestId === guest.id);
+        const contributions = checklistItems.filter(
+          (item) =>
+            item.claimedByGuestId === guest.id ||
+            item.moneyClaims?.some((claim) => claim.guestId === guest.id)
+        );
 
         return (
           <div
@@ -33,16 +37,19 @@ export function GuestList({
                 </p>
                 {contributions.length > 0 ? (
                   <p className="mt-1 text-sm text-ink/60">
-                    Bringing {contributions.map((item) => item.title).join(", ")}
+                    Contributing {contributions.map((item) => item.title).join(", ")}
                   </p>
                 ) : null}
               </div>
               <Badge tone={guest.rsvpStatus}>{rsvpLabels[guest.rsvpStatus]}</Badge>
             </div>
-            {guest.dietaryRestrictions || guest.allergies ? (
-              <p className="mt-3 text-sm text-ink/65">
-                {[guest.dietaryRestrictions, guest.allergies].filter(Boolean).join(" | ")}
+            {guest.dietaryRestrictions ? (
+              <p className="mt-3 text-sm font-medium text-ink/70">
+                Dietary restriction: {guest.dietaryRestrictions}
               </p>
+            ) : null}
+            {guest.allergies ? (
+              <p className="mt-1 text-sm text-ink/65">Allergy: {guest.allergies}</p>
             ) : null}
           </div>
         );

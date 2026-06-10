@@ -1,4 +1,4 @@
-import type { ChecklistItem, Guest } from "@/types/events";
+import type { ChecklistItem, DinnerEvent, Guest } from "@/types/events";
 import { categoryLabels } from "@/lib/utils";
 import { EmptyState } from "@/components/EmptyState";
 import { ChecklistItemCard } from "@/components/ChecklistItemCard";
@@ -6,6 +6,7 @@ import { ChecklistItemCard } from "@/components/ChecklistItemCard";
 export function ChecklistSection({
   category,
   items,
+  event,
   currentGuest,
   hostControls,
   onClaim,
@@ -15,6 +16,7 @@ export function ChecklistSection({
 }: {
   category: keyof typeof categoryLabels;
   items: ChecklistItem[];
+  event?: DinnerEvent;
   currentGuest?: Guest;
   hostControls?: boolean;
   onClaim?: Parameters<typeof ChecklistItemCard>[0]["onClaim"];
@@ -36,6 +38,7 @@ export function ChecklistSection({
             <ChecklistItemCard
               key={item.id}
               item={item}
+              event={event}
               currentGuest={currentGuest}
               hostControls={hostControls}
               onClaim={onClaim}

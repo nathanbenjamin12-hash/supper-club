@@ -10,7 +10,7 @@ import type {
   Guest,
   GuestDraft
 } from "@/types/events";
-import { makeId } from "@/lib/utils";
+import { makeId, normalizeVenmoHandle } from "@/lib/utils";
 
 const STORAGE_KEY = "supperclub.events.v1";
 const LEGACY_STORAGE_KEY = "bringboard.events.v1";
@@ -24,11 +24,22 @@ function browserAvailable() {
 }
 
 function cloneBundles(bundles: EventBundle[]) {
-  return bundles.map((bundle) => ({
-    event: { ...bundle.event },
+  return bundles.map(migrateBundle);
+}
+
+function migrateBundle(bundle: EventBundle): EventBundle {
+  return {
+    event: {
+      ...bundle.event,
+      venmoHandle: bundle.event.venmoHandle ?? normalizeVenmoHandle(bundle.event.venmoUrl)
+    },
     guests: bundle.guests.map((guest) => ({ ...guest })),
-    checklistItems: bundle.checklistItems.map((item) => ({ ...item }))
-  }));
+    checklistItems: bundle.checklistItems.map((item) => ({
+      ...item,
+      itemType: item.itemType ?? "bring",
+      moneyClaims: item.moneyClaims?.map((claim) => ({ ...claim }))
+    }))
+  };
 }
 
 function readBundles(): EventBundle[] {
@@ -42,8 +53,8 @@ function readBundles(): EventBundle[] {
   if (!stored) {
     if (legacyStored) {
       try {
-        const migrated = JSON.parse(legacyStored) as EventBundle[];
-        window.localStorage.setItem(STORAGE_KEY, legacyStored);
+        const migrated = (JSON.parse(legacyStored) as EventBundle[]).map(migrateBundle);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
         return migrated;
       } catch {
         window.localStorage.removeItem(LEGACY_STORAGE_KEY);
@@ -56,7 +67,7 @@ function readBundles(): EventBundle[] {
   }
 
   try {
-    return JSON.parse(stored) as EventBundle[];
+    return (JSON.parse(stored) as EventBundle[]).map(migrateBundle);
   } catch {
     const seeded = cloneBundles(mockBundles);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
@@ -112,7 +123,7 @@ export function createEvent(data: EventDraft, starterItems: ChecklistItemDraft[]
   const checklistItems =
     data.eventType === "custom"
       ? createChecklistFromDrafts(event.id, starterItems)
-      : createChecklistFromTemplate(event.id, data.eventType);
+      : [...createChecklistFromTemplate(event.id, data.eventType), ...createChecklistFromDrafts(event.id, starterItems)];
   const bundles = readBundles();
   bundles.unshift({
     event,
@@ -166,6 +177,46 @@ export function claimChecklistItem(itemId: string, guestId: string, note?: strin
 
     if (!guest || !item) {
       return bundle;
+    }
+
+    if (item.itemType === "money") {
+      const existingClaims = item.moneyClaims ?? [];
+      const existingGuestClaim = existingClaims.find((claim) => claim.guestId === guest.id);
+      const totalSpots = item.totalSpots ?? 1;
+
+      if (existingGuestClaim || existingClaims.length >= totalSpots) {
+        updatedItem = item;
+        return bundle;
+      }
+
+      const timestamp = now();
+      const checklistItems = bundle.checklistItems.map((candidate) => {
+        if (candidate.id !== itemId) {
+          return candidate;
+        }
+
+        updatedItem = {
+          ...candidate,
+          moneyClaims: [
+            ...(candidate.moneyClaims ?? []),
+            {
+              guestId: guest.id,
+              guestName: guest.name,
+              note: note?.trim() || undefined,
+              createdAt: timestamp
+            }
+          ],
+          updatedAt: timestamp
+        };
+
+        return updatedItem;
+      });
+
+      return {
+        ...bundle,
+        checklistItems,
+        event: { ...bundle.event, updatedAt: timestamp }
+      };
     }
 
     if (item.claimedByGuestId && item.claimedByGuestId !== guestId) {
@@ -231,11 +282,28 @@ export function updateChecklistItem(itemId: string, data: ChecklistItemDraft) {
         return item;
       }
 
-      updatedItem = {
+      const nextItem: ChecklistItem = {
         ...item,
         ...data,
         updatedAt: timestamp
       };
+
+      updatedItem =
+        data.itemType === "money"
+          ? {
+              ...nextItem,
+              claimedByGuestId: undefined,
+              claimedByName: undefined,
+              claimNote: undefined,
+              quantity: undefined,
+              moneyClaims: nextItem.moneyClaims ?? item.moneyClaims ?? []
+            }
+          : {
+              ...nextItem,
+              amountPerPerson: undefined,
+              totalSpots: undefined,
+              moneyClaims: undefined
+            };
 
       return updatedItem;
     });
@@ -294,6 +362,7 @@ export function createChecklistFromTemplate(eventId: string, eventType: EventTyp
         eventId,
         category: category as ChecklistCategory,
         title,
+        itemType: "bring",
         isRequired: true,
         createdAt: timestamp,
         updatedAt: timestamp
@@ -309,6 +378,7 @@ function createChecklistFromDrafts(eventId: string, drafts: ChecklistItemDraft[]
 
   return drafts.map((draft) => ({
     ...draft,
+    itemType: draft.itemType ?? "bring",
     id: makeId("item"),
     eventId,
     createdAt: timestamp,

@@ -2,32 +2,16 @@ import { DollarSign, ExternalLink } from "lucide-react";
 import type { DinnerEvent } from "@/types/events";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, normalizeVenmoHandle, venmoProfileUrl } from "@/lib/utils";
 import { getEventTheme } from "@/lib/themes";
-
-function safePaymentUrl(url?: string) {
-  if (!url) {
-    return undefined;
-  }
-
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
-      return parsed.toString();
-    }
-  } catch {
-    return undefined;
-  }
-
-  return undefined;
-}
 
 export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; hostView?: boolean }) {
   if (!event.pitchInEnabled) {
     return null;
   }
 
-  const paymentUrl = safePaymentUrl(event.venmoUrl);
+  const venmoHandle = normalizeVenmoHandle(event.venmoHandle ?? event.venmoUrl);
+  const paymentUrl = venmoProfileUrl(venmoHandle);
   const theme = getEventTheme(event.coverStyle);
 
   return (
@@ -43,6 +27,11 @@ export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; h
         <p className="text-sm leading-6 text-ink/65">
           Help cover groceries, drinks, delivery, or party supplies.
         </p>
+        {venmoHandle ? (
+          <p className={cn("mt-3 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
+            Venmo: @{venmoHandle}
+          </p>
+        ) : null}
         {event.recommendedContributionAmount !== undefined ? (
           <div className={cn("mt-3 rounded-lg p-4", theme.softPanel)}>
             <p className={cn("text-sm font-semibold", theme.accentText)}>Recommended amount</p>
@@ -64,8 +53,8 @@ export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; h
         ) : (
           <p className="mt-3 rounded-lg bg-oat/50 p-3 text-sm text-ink/60">
             {hostView
-              ? "Add a Venmo URL on the edit page if you want guests to tap straight through."
-              : "The host did not add a Venmo link yet."}
+              ? "Add a Venmo handle on the edit page if you want guests to tap straight through."
+              : "The host did not add a Venmo handle yet."}
           </p>
         )}
       </CardContent>

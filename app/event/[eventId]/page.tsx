@@ -50,12 +50,27 @@ export default function PublicEventPage() {
       return;
     }
 
+    const previousMoneyClaimCount = item.moneyClaims?.length ?? 0;
     const updated = claimChecklistItem(item.id, currentGuest.id, note);
-    setMessage(
-      updated?.claimedByGuestId === currentGuest.id
-        ? "Perfect. The board is updated."
-        : "Looks like someone claimed that first."
-    );
+
+    if ((item.itemType ?? "bring") === "money") {
+      const nextMoneyClaimCount = updated?.moneyClaims?.length ?? previousMoneyClaimCount;
+      const alreadyClaimed = item.moneyClaims?.some((claim) => claim.guestId === currentGuest.id);
+
+      if (nextMoneyClaimCount > previousMoneyClaimCount) {
+        setMessage("Spot claimed. The board is updated.");
+      } else if (alreadyClaimed) {
+        setMessage("You already claimed a spot for that.");
+      } else {
+        setMessage("All pitch-in spots are claimed.");
+      }
+    } else {
+      setMessage(
+        updated?.claimedByGuestId === currentGuest.id
+          ? "Perfect. The board is updated."
+          : "Looks like someone claimed that first."
+      );
+    }
     reload();
   }
 
@@ -125,6 +140,7 @@ export default function PublicEventPage() {
                 ) : null}
                 <ChecklistBoard
                   items={bundle.checklistItems}
+                  event={bundle.event}
                   currentGuest={currentGuest}
                   onClaim={handleClaim}
                   onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}

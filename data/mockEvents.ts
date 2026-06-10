@@ -74,6 +74,8 @@ export const sampleEvent: DinnerEvent = {
   description: "Casual pasta night. Bring wine, dessert, or a game if you want.",
   eventType: "dinner_party",
   coverStyle: "tomato tablecloth",
+  pitchInEnabled: true,
+  venmoHandle: "nathanbenjamin",
   createdAt: now,
   updatedAt: now
 };
@@ -124,6 +126,7 @@ export const sampleChecklistItems: ChecklistItem[] = [
     eventId: sampleEvent.id,
     category: "drinks",
     title: "Red wine",
+    itemType: "bring",
     isRequired: true,
     claimedByGuestId: "guest-sarah",
     claimedByName: "Sarah",
@@ -136,6 +139,7 @@ export const sampleChecklistItems: ChecklistItem[] = [
     eventId: sampleEvent.id,
     category: "desserts",
     title: "Dessert",
+    itemType: "bring",
     isRequired: true,
     createdAt: now,
     updatedAt: now
@@ -145,6 +149,7 @@ export const sampleChecklistItems: ChecklistItem[] = [
     eventId: sampleEvent.id,
     category: "sides",
     title: "Caesar salad",
+    itemType: "bring",
     isRequired: true,
     claimedByGuestId: "guest-emma",
     claimedByName: "Emma",
@@ -157,6 +162,7 @@ export const sampleChecklistItems: ChecklistItem[] = [
     eventId: sampleEvent.id,
     category: "games",
     title: "Board game",
+    itemType: "bring",
     isRequired: true,
     createdAt: now,
     updatedAt: now
@@ -166,7 +172,33 @@ export const sampleChecklistItems: ChecklistItem[] = [
     eventId: sampleEvent.id,
     category: "supplies",
     title: "Ice",
+    itemType: "bring",
     isRequired: true,
+    createdAt: now,
+    updatedAt: now
+  },
+  {
+    id: "item-pitch-in-dinner",
+    eventId: sampleEvent.id,
+    category: "other",
+    title: "Pitch in for dinner",
+    itemType: "money",
+    isRequired: true,
+    amountPerPerson: 15,
+    totalSpots: 5,
+    description: "Nathan is picking up pasta and sauce. A few people can pitch in.",
+    moneyClaims: [
+      {
+        guestId: "guest-sarah",
+        guestName: "Sarah",
+        createdAt: now
+      },
+      {
+        guestId: "guest-emma",
+        guestName: "Emma",
+        createdAt: now
+      }
+    ],
     createdAt: now,
     updatedAt: now
   }

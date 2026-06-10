@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   CalendarClock,
   ClipboardList,
+  DollarSign,
   ListPlus,
   Salad,
   UsersRound
@@ -24,7 +25,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { ChecklistCategory, ChecklistItem, ChecklistItemDraft, EventBundle } from "@/types/events";
+import type {
+  ChecklistCategory,
+  ChecklistItem,
+  ChecklistItemDraft,
+  ChecklistItemType,
+  EventBundle
+} from "@/types/events";
 import {
   addChecklistItem,
   deleteChecklistItem,
@@ -39,9 +46,12 @@ export default function HostDashboardPage() {
   const eventId = params.eventId;
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [loaded, setLoaded] = useState(false);
+  const [itemType, setItemType] = useState<ChecklistItemType>("bring");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<ChecklistCategory>("other");
   const [quantity, setQuantity] = useState("");
+  const [amountPerPerson, setAmountPerPerson] = useState("");
+  const [totalSpots, setTotalSpots] = useState("");
   const [description, setDescription] = useState("");
   const [formMessage, setFormMessage] = useState("");
 
@@ -67,27 +77,71 @@ export default function HostDashboardPage() {
     };
   }, [bundle]);
 
-  const missingItems = bundle?.checklistItems.filter((item) => item.isRequired && !item.claimedByGuestId) ?? [];
+  const missingItems =
+    bundle?.checklistItems.filter((item) => {
+      if (!item.isRequired) {
+        return false;
+      }
+
+      if ((item.itemType ?? "bring") === "money") {
+        return (item.moneyClaims?.length ?? 0) < (item.totalSpots ?? 1);
+      }
+
+      return !item.claimedByGuestId;
+    }) ?? [];
 
   function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!title.trim()) {
-      setFormMessage("Add a title before adding the item.");
+      setFormMessage(
+        itemType === "money"
+          ? "Add a title for the pitch-in contribution."
+          : "Add a title before adding the item."
+      );
       return;
     }
 
-    addChecklistItem(eventId, {
-      title: title.trim(),
-      category,
-      quantity: quantity ? Number(quantity) : undefined,
-      description: description.trim() || undefined,
-      isRequired: true
-    });
+    if (itemType === "money") {
+      const amount = Number(amountPerPerson);
+      const spots = Number(totalSpots);
+
+      if (!amountPerPerson || Number.isNaN(amount) || amount <= 0) {
+        setFormMessage("Add an amount per person greater than $0.");
+        return;
+      }
+
+      if (!totalSpots || Number.isNaN(spots) || spots < 1 || !Number.isInteger(spots)) {
+        setFormMessage("Add the number of available pitch-in spots.");
+        return;
+      }
+
+      addChecklistItem(eventId, {
+        title: title.trim(),
+        category: "other",
+        itemType: "money",
+        amountPerPerson: amount,
+        totalSpots: spots,
+        description: description.trim() || undefined,
+        isRequired: true
+      });
+    } else {
+      addChecklistItem(eventId, {
+        title: title.trim(),
+        category,
+        itemType: "bring",
+        quantity: quantity ? Number(quantity) : undefined,
+        description: description.trim() || undefined,
+        isRequired: true
+      });
+    }
+
     setTitle("");
     setQuantity("");
+    setAmountPerPerson("");
+    setTotalSpots("");
     setDescription("");
-    setFormMessage("Added to the board.");
+    setFormMessage(itemType === "money" ? "Pitch-in contribution added." : "Added to the board.");
     reload();
   }
 
@@ -170,29 +224,82 @@ export default function HostDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-5">
               <form onSubmit={handleAdd} className={cn("rounded-lg p-4", theme.softPanel)}>
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setItemType("bring")}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-sm font-semibold transition",
+                      itemType === "bring" ? theme.cta : "bg-white text-ink ring-1 ring-ink/10"
+                    )}
+                  >
+                    Bring item
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setItemType("money")}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-sm font-semibold transition",
+                      itemType === "money" ? theme.cta : "bg-white text-ink ring-1 ring-ink/10"
+                    )}
+                  >
+                    Pitch-in money
+                  </button>
+                </div>
+
                 <div className="grid gap-3 sm:grid-cols-[1fr_170px_100px]">
                   <Input
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Vegetarian side"
+                    placeholder={itemType === "money" ? "Pitch in for dinner" : "Vegetarian side"}
                   />
-                  <Select
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value as ChecklistCategory)}
-                  >
-                    {categoryOrder.map((candidate) => (
-                      <option key={candidate} value={candidate}>
-                        {categoryLabels[candidate]}
-                      </option>
-                    ))}
-                  </Select>
-                  <Input
-                    value={quantity}
-                    onChange={(event) => setQuantity(event.target.value)}
-                    type="number"
-                    min="1"
-                    placeholder="Qty"
-                  />
+                  {itemType === "bring" ? (
+                    <>
+                      <Select
+                        value={category}
+                        onChange={(event) => setCategory(event.target.value as ChecklistCategory)}
+                      >
+                        {categoryOrder.map((candidate) => (
+                          <option key={candidate} value={candidate}>
+                            {categoryLabels[candidate]}
+                          </option>
+                        ))}
+                      </Select>
+                      <Input
+                        value={quantity}
+                        onChange={(event) => setQuantity(event.target.value)}
+                        type="number"
+                        min="1"
+                        placeholder="Qty"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <span className="relative">
+                        <DollarSign
+                          className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
+                          aria-hidden="true"
+                        />
+                        <Input
+                          value={amountPerPerson}
+                          onChange={(event) => setAmountPerPerson(event.target.value)}
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="Amount"
+                          className="pl-10"
+                        />
+                      </span>
+                      <Input
+                        value={totalSpots}
+                        onChange={(event) => setTotalSpots(event.target.value)}
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="Spots"
+                      />
+                    </>
+                  )}
                 </div>
                 <Textarea
                   value={description}
@@ -211,6 +318,7 @@ export default function HostDashboardPage() {
 
               <ChecklistBoard
                 items={bundle.checklistItems}
+                event={bundle.event}
                 hostControls
                 onDelete={handleDelete}
                 onEdit={handleEdit}
@@ -233,7 +341,11 @@ export default function HostDashboardPage() {
                   {missingItems.map((item) => (
                     <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
                       <p className="font-semibold">{item.title}</p>
-                      <p className="text-ink/55">{categoryLabels[item.category]}</p>
+                      <p className="text-ink/55">
+                        {(item.itemType ?? "bring") === "money"
+                          ? `${Math.max((item.totalSpots ?? 1) - (item.moneyClaims?.length ?? 0), 0)} spots left`
+                          : categoryLabels[item.category]}
+                      </p>
                     </div>
                   ))}
                 </div>

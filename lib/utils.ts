@@ -74,3 +74,31 @@ export function cleanOptional(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 }
+
+export function normalizeVenmoHandle(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const handleFromUrl = segments.at(-1);
+    return normalizeVenmoHandle(handleFromUrl);
+  } catch {
+    const withoutAt = trimmed.replace(/^@+/, "");
+    const withoutProfilePrefix = withoutAt.replace(/^u\//i, "");
+    const normalized = withoutProfilePrefix.replace(/\s+/g, "");
+    return normalized || undefined;
+  }
+}
+
+export function venmoProfileUrl(handle?: string) {
+  const normalized = normalizeVenmoHandle(handle);
+  return normalized ? `https://venmo.com/u/${encodeURIComponent(normalized)}` : undefined;
+}
