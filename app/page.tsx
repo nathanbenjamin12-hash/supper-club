@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1800&q=85";
+  "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1800&q=85";
 
 const features = [
   {
@@ -46,7 +46,7 @@ export default function LandingPage() {
       <section className="relative isolate overflow-hidden">
         <Image
           src={heroImage}
-          alt="A candlelit table set for a warm dinner gathering"
+          alt="Friends gathered around a casual dinner table at home"
           fill
           priority
           sizes="100vw"
@@ -134,8 +134,8 @@ export default function LandingPage() {
         <Card className="overflow-hidden bg-cream">
           <div className="relative h-56 sm:h-72">
             <Image
-              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80"
-              alt="A softly lit restaurant table prepared for dinner"
+              src="https://images.unsplash.com/photo-1772724317488-b901d235d419?auto=format&fit=crop&w=1200&q=80"
+              alt="Friends making pizza together in a home kitchen"
               fill
               sizes="(min-width: 1024px) 560px, 100vw"
               className="object-cover"

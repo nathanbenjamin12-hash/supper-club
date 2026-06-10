@@ -43,3 +43,19 @@ Core feeling: "Let's host people well."
 - Badges: small rounded rectangles, quiet fills.
 - Empty states: calm botanical cue, no celebratory sparkle treatment.
 - Event imagery: warm, real hospitality photography with a charcoal overlay for legible editorial type.
+
+## Photography
+
+Prioritize images that feel like a cozy dinner with friends in a beautiful apartment:
+
+- Groups of 4-12 friends.
+- Apartment dining tables, brownstones, lofts, and cozy homes.
+- Shared meals, homemade food, pasta, wine, potluck spreads, and game-night tables.
+- Candles, string lights, wine bottles, flowers, lived-in kitchens, and real conversation.
+- Casual elegance: warm, personal, and intimate.
+
+Avoid imagery that makes Supper Club feel like a wedding site, luxury hospitality brand, event venue, or fine dining reservation platform:
+
+- Wedding receptions, wedding dresses, galas, banquet halls, hotels, or formal venues.
+- Fine dining, white tablecloth service, professional catering, and plated restaurant imagery.
+- Corporate events, event halls, or photography where the space matters more than the friends at the table.

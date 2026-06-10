@@ -34,8 +34,8 @@ export const eventThemes: EventTheme[] = [
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-honey/25",
     imageUrl:
-      "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "A candlelit dinner table set for guests"
+      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Friends gathered around a casual dinner table at home"
   },
   {
     id: "sage garden",
@@ -54,8 +54,8 @@ export const eventThemes: EventTheme[] = [
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-sage/25",
     imageUrl:
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "A quiet restaurant table with dinner service"
+      "https://images.unsplash.com/photo-1661006117166-6227bfc9c8b0?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Friends talking and eating around a cozy table"
   },
   {
     id: "wine night",
@@ -74,8 +74,8 @@ export const eventThemes: EventTheme[] = [
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-terracotta/20",
     imageUrl:
-      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Wine glasses arranged for an evening gathering"
+      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Friends sharing wine and dinner in a warm home setting"
   },
   {
     id: "sunny brunch",
@@ -94,8 +94,8 @@ export const eventThemes: EventTheme[] = [
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-honey/25",
     imageUrl:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "A warmly lit dining room ready for service"
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Homemade food shared across a casual table"
   },
   {
     id: "game table",
@@ -114,8 +114,8 @@ export const eventThemes: EventTheme[] = [
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-olive/20",
     imageUrl:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Shared dishes on a table ready for guests"
+      "https://images.unsplash.com/photo-1772724317488-b901d235d419?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Friends making pizza together in a home kitchen"
   }
 ];
 
