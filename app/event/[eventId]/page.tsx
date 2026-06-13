@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft, ClipboardList, MessageCircleHeart, Utensils, UsersRound } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestList } from "@/components/GuestList";
+import { HostFlowNav } from "@/components/HostFlowNav";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 
 export default function PublicEventPage() {
   const params = useParams<{ eventId: string }>();
+  const searchParams = useSearchParams();
   const eventId = params.eventId;
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [currentGuest, setCurrentGuest] = useState<Guest | undefined>();
@@ -96,14 +98,30 @@ export default function PublicEventPage() {
 
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
   const theme = getEventTheme(bundle.event.coverStyle);
+  const isHostPreview = searchParams.get("preview") === "host";
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-        <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-5 bg-cream/65 backdrop-blur")}>
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Supper Club
-        </Link>
+        {isHostPreview ? (
+          <HostFlowNav
+            eventId={eventId}
+            currentStep="preview"
+            backHref={`/event/${eventId}/host`}
+            backLabel="Back to Setup & Share"
+          />
+        ) : (
+          <Link
+            href="/"
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "mb-5 bg-cream/65 backdrop-blur"
+            )}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Supper Club
+          </Link>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <div className="space-y-6">

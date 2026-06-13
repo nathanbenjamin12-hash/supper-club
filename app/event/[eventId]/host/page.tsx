@@ -19,6 +19,7 @@ import { DietarySummary } from "@/components/DietarySummary";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestList } from "@/components/GuestList";
+import { HostFlowNav } from "@/components/HostFlowNav";
 import { PitchInCard } from "@/components/PitchInCard";
 import { StatCard } from "@/components/StatCard";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -222,14 +223,12 @@ export default function HostDashboardPage() {
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-        <div className="mb-5 flex justify-end">
-          <Link
-            href={`/event/${eventId}/edit`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            Edit event
-          </Link>
-        </div>
+        <HostFlowNav
+          eventId={eventId}
+          currentStep="share"
+          backHref={`/event/${eventId}/edit`}
+          backLabel="Back to Event Setup"
+        />
 
         <section aria-labelledby="setup-share-heading" className="space-y-6">
           <Card className={cn("overflow-hidden border", theme.accentBorder)}>
@@ -249,7 +248,7 @@ export default function HostDashboardPage() {
                 </div>
                 <div className="flex flex-col gap-2 sm:min-w-56">
                   <Link
-                    href={`/event/${eventId}`}
+                    href={`/event/${eventId}?preview=host`}
                     className={cn(buttonVariants({ variant: "default" }), theme.cta, "w-full")}
                   >
                     <Eye className="h-4 w-4" aria-hidden="true" />
