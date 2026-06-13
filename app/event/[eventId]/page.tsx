@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, ClipboardList, MessageCircleHeart, Utensils, UsersRound } from "lucide-react";
+import { ArrowLeft, ClipboardList, MessageCircleHeart, Send, Utensils, UsersRound } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
@@ -12,7 +12,7 @@ import { HostFlowNav } from "@/components/HostFlowNav";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { ChecklistItem, EventBundle, Guest, GuestDraft } from "@/types/events";
 import { claimChecklistItem, createGuest, getEventBundle } from "@/lib/events";
 import { getEventTheme } from "@/lib/themes";
@@ -25,6 +25,7 @@ export default function PublicEventPage() {
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [currentGuest, setCurrentGuest] = useState<Guest | undefined>();
   const [showContributions, setShowContributions] = useState(false);
+  const [rsvpCompletionMessage, setRsvpCompletionMessage] = useState("");
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
 
@@ -45,8 +46,29 @@ export default function PublicEventPage() {
     const guest = createGuest(eventId, draft);
     setCurrentGuest(guest);
     setShowContributions(false);
+    setRsvpCompletionMessage("");
+    setMessage("");
     reload();
     return guest;
+  }
+
+  function handleContributionChoice(showContributions: boolean) {
+    setShowContributions(showContributions);
+    setMessage("");
+    if (showContributions) {
+      setRsvpCompletionMessage("");
+    }
+  }
+
+  function handleCompleteRsvp(nextMessage: string) {
+    setRsvpCompletionMessage(nextMessage);
+    setShowContributions(false);
+    setMessage("");
+  }
+
+  function handleContributionComplete() {
+    handleCompleteRsvp("You're all set. Thanks for contributing.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleClaim(item: ChecklistItem, note?: string) {
@@ -99,10 +121,17 @@ export default function PublicEventPage() {
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
   const theme = getEventTheme(bundle.event.coverStyle);
   const isHostPreview = searchParams.get("preview") === "host";
+  const contributionFlowIsActive =
+    showContributions && currentGuest?.rsvpStatus === "yes" && !rsvpCompletionMessage;
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+      <div
+        className={cn(
+          "mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10",
+          contributionFlowIsActive && "pb-28 lg:pb-10"
+        )}
+      >
         {isHostPreview ? (
           <HostFlowNav
             eventId={eventId}
@@ -142,7 +171,7 @@ export default function PublicEventPage() {
               </CardContent>
             </Card>
 
-            {showContributions && currentGuest?.rsvpStatus === "yes" ? (
+            {contributionFlowIsActive ? (
               <Card className={cn("border", theme.accentBorder)}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -153,7 +182,7 @@ export default function PublicEventPage() {
                     Claim an open item or chip in for a shared cost.
                   </p>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pb-28 lg:pb-5">
                   {message ? (
                     <p className={cn("mb-4 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
                       {message}
@@ -166,6 +195,12 @@ export default function PublicEventPage() {
                     onClaim={handleClaim}
                     onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
                   />
+                  <div className="mt-5 hidden justify-end border-t border-ink/8 pt-4 lg:flex">
+                    <Button type="button" className={cn(theme.cta)} onClick={handleContributionComplete}>
+                      <Send className="h-4 w-4" aria-hidden="true" />
+                      Send RSVP
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ) : null}
@@ -175,9 +210,11 @@ export default function PublicEventPage() {
             <RSVPCard
               event={bundle.event}
               onSubmit={handleRsvp}
-              onContributionChoice={setShowContributions}
+              onContributionChoice={handleContributionChoice}
+              completionMessage={rsvpCompletionMessage}
+              onComplete={handleCompleteRsvp}
             />
-            {showContributions && currentGuest?.rsvpStatus === "yes" ? (
+            {contributionFlowIsActive ? (
               <PitchInCard event={bundle.event} />
             ) : null}
             <Card className={cn("border", theme.accentBorder)}>
@@ -210,6 +247,16 @@ export default function PublicEventPage() {
           </aside>
         </div>
       </div>
+      {contributionFlowIsActive ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 p-3 shadow-soft backdrop-blur lg:hidden">
+          <div className="mx-auto max-w-6xl">
+            <Button type="button" className={cn("w-full", theme.cta)} onClick={handleContributionComplete}>
+              <Send className="h-4 w-4" aria-hidden="true" />
+              Send RSVP
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -4,10 +4,18 @@ import { EmptyState } from "@/components/EmptyState";
 
 export function DietarySummary({ guests }: { guests: Guest[] }) {
   const notes = guests
-    .filter((guest) => guest.dietaryRestrictions || guest.allergies || guest.noteToHost)
+    .filter(
+      (guest) =>
+        (guest.rsvpStatus === "yes" && (guest.dietaryRestrictions || guest.allergies)) ||
+        guest.noteToHost
+    )
     .map((guest) => ({
       guest,
-      details: [guest.dietaryRestrictions, guest.allergies, guest.noteToHost].filter(Boolean)
+      details: [
+        guest.rsvpStatus === "yes" ? guest.dietaryRestrictions : undefined,
+        guest.rsvpStatus === "yes" ? guest.allergies : undefined,
+        guest.noteToHost
+      ].filter(Boolean)
     }));
 
   if (notes.length === 0) {
