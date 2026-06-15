@@ -3,12 +3,12 @@ import { ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type HostFlowStep = "setup" | "share" | "preview";
+type HostFlowStep = "setup" | "contributions" | "event";
 
 const steps: { key: HostFlowStep; label: string; href: (eventId: string) => string }[] = [
   { key: "setup", label: "Event Setup", href: (eventId) => `/event/${eventId}/edit` },
-  { key: "share", label: "Setup & Share", href: (eventId) => `/event/${eventId}/host` },
-  { key: "preview", label: "Preview Invite", href: (eventId) => `/event/${eventId}?preview=host` }
+  { key: "contributions", label: "Setup Contributions", href: (eventId) => `/event/${eventId}/setup` },
+  { key: "event", label: "Event Home", href: (eventId) => `/event/${eventId}/host` }
 ];
 
 export function HostFlowNav({

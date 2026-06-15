@@ -37,7 +37,7 @@ export default function EditEventPage() {
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         <EmptyState
           title="Event not found"
-          description="Check the dashboard link before editing."
+          description="Check the event home link before editing."
         />
         <Link href="/" className={cn(buttonVariants({ variant: "default" }), "mt-5")}>
           Go home
@@ -57,7 +57,7 @@ export default function EditEventPage() {
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "mb-5")}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Dashboard
+        Event Home
       </Link>
       <div className="mb-8">
         <p className="eyebrow">Edit</p>

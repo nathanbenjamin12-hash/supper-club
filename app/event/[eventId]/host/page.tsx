@@ -8,13 +8,11 @@ import {
   Check,
   ClipboardList,
   Copy,
-  DollarSign,
   Eye,
-  ListPlus,
   Salad,
+  Share2,
   UsersRound
 } from "lucide-react";
-import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { DietarySummary } from "@/components/DietarySummary";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
@@ -24,42 +22,20 @@ import { PitchInCard } from "@/components/PitchInCard";
 import { StatCard } from "@/components/StatCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import type {
-  ChecklistCategory,
-  ChecklistItem,
-  ChecklistItemDraft,
-  ChecklistItemType,
-  EventBundle
-} from "@/types/events";
-import {
-  addChecklistItem,
-  deleteChecklistItem,
-  getEventBundle,
-  updateChecklistItem
-} from "@/lib/events";
+import type { ChecklistItem, EventBundle } from "@/types/events";
+import { getEventBundle } from "@/lib/events";
 import { getEventTheme } from "@/lib/themes";
-import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
+import { categoryLabels, cn } from "@/lib/utils";
 
 export default function HostDashboardPage() {
   const params = useParams<{ eventId: string }>();
   const eventId = params.eventId;
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [loaded, setLoaded] = useState(false);
-  const [itemType, setItemType] = useState<ChecklistItemType>("bring");
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ChecklistCategory>("other");
-  const [quantity, setQuantity] = useState("");
-  const [amountPerPerson, setAmountPerPerson] = useState("");
-  const [totalSpots, setTotalSpots] = useState("");
-  const [description, setDescription] = useState("");
-  const [formMessage, setFormMessage] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
 
-  function reload() {
-    setBundle(getEventBundle(eventId));
+  function getInviteUrl() {
+    return `${window.location.origin}/event/${eventId}`;
   }
 
   function copyInviteLinkWithFallback(inviteUrl: string) {
@@ -77,31 +53,46 @@ export default function HostDashboardPage() {
     return copied;
   }
 
-  async function handleCopyInviteLink() {
-    const inviteUrl = `${window.location.origin}/event/${eventId}`;
-
-    try {
-      if (copyInviteLinkWithFallback(inviteUrl)) {
-        setCopyMessage("Invite link copied.");
-        return;
-      }
-
-      if (!navigator.clipboard?.writeText) {
-        throw new Error("Copy failed");
-      }
-
+  async function copyInviteUrl(inviteUrl: string) {
+    if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(inviteUrl);
+        return true;
       } catch {
-        if (!copyInviteLinkWithFallback(inviteUrl)) {
-          throw new Error("Copy failed");
+        return copyInviteLinkWithFallback(inviteUrl);
+      }
+    }
+
+    return copyInviteLinkWithFallback(inviteUrl);
+  }
+
+  async function handleCopyInviteLink() {
+    const copied = await copyInviteUrl(getInviteUrl());
+    setCopyMessage(copied ? "Invite link copied." : "Copy failed. Preview the invite and copy the URL.");
+  }
+
+  async function handleInvitePeople() {
+    const inviteUrl = getInviteUrl();
+    const shareText = `You're invited to ${bundle?.event.title ?? "Supper Club"}. RSVP and see what to bring here: ${inviteUrl}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: bundle?.event.title ?? "Supper Club",
+          text: shareText,
+          url: inviteUrl
+        });
+        setCopyMessage("Invite shared.");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
         }
       }
-
-      setCopyMessage("Invite link copied.");
-    } catch {
-      setCopyMessage("Copy failed. Preview the invite and copy the URL.");
     }
+
+    const copied = await copyInviteUrl(inviteUrl);
+    setCopyMessage(copied ? "Invite link copied." : "Copy failed. Preview the invite and copy the URL.");
   }
 
   useEffect(() => {
@@ -122,82 +113,48 @@ export default function HostDashboardPage() {
     };
   }, [bundle]);
 
-  const missingItems =
-    bundle?.checklistItems.filter((item) => {
-      if (!item.isRequired) {
-        return false;
-      }
+  const requiredItems = useMemo(
+    () => bundle?.checklistItems.filter((item) => item.isRequired) ?? [],
+    [bundle]
+  );
 
+  const missingItems = requiredItems.filter((item) => {
+    if ((item.itemType ?? "bring") === "money") {
+      return (item.moneyClaims?.length ?? 0) < (item.totalSpots ?? 1);
+    }
+
+    return !item.claimedByGuestId;
+  });
+
+  const checklistSummary = requiredItems.reduce(
+    (summary, item) => {
       if ((item.itemType ?? "bring") === "money") {
-        return (item.moneyClaims?.length ?? 0) < (item.totalSpots ?? 1);
+        const totalSpots = item.totalSpots ?? 1;
+        const claimedSpots = item.moneyClaims?.length ?? 0;
+
+        return {
+          totalSlots: summary.totalSlots + totalSpots,
+          claimedSlots: summary.claimedSlots + claimedSpots,
+          pitchInTotal: summary.pitchInTotal + totalSpots,
+          pitchInClaimed: summary.pitchInClaimed + claimedSpots
+        };
       }
 
-      return !item.claimedByGuestId;
-    }) ?? [];
+      return {
+        ...summary,
+        totalSlots: summary.totalSlots + 1,
+        claimedSlots: summary.claimedSlots + (item.claimedByGuestId ? 1 : 0)
+      };
+    },
+    { totalSlots: 0, claimedSlots: 0, pitchInTotal: 0, pitchInClaimed: 0 }
+  );
 
-  function handleAdd(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!title.trim()) {
-      setFormMessage(
-        itemType === "money"
-          ? "Add a title for the pitch-in contribution."
-          : "Add a title before adding the item."
-      );
-      return;
+  function getMissingItemDetail(item: ChecklistItem) {
+    if ((item.itemType ?? "bring") === "money") {
+      return `${Math.max((item.totalSpots ?? 1) - (item.moneyClaims?.length ?? 0), 0)} spots left`;
     }
 
-    if (itemType === "money") {
-      const amount = Number(amountPerPerson);
-      const spots = Number(totalSpots);
-
-      if (!amountPerPerson || Number.isNaN(amount) || amount <= 0) {
-        setFormMessage("Add an amount per person greater than $0.");
-        return;
-      }
-
-      if (!totalSpots || Number.isNaN(spots) || spots < 1 || !Number.isInteger(spots)) {
-        setFormMessage("Add the number of available pitch-in spots.");
-        return;
-      }
-
-      addChecklistItem(eventId, {
-        title: title.trim(),
-        category: "other",
-        itemType: "money",
-        amountPerPerson: amount,
-        totalSpots: spots,
-        description: description.trim() || undefined,
-        isRequired: true
-      });
-    } else {
-      addChecklistItem(eventId, {
-        title: title.trim(),
-        category,
-        itemType: "bring",
-        quantity: quantity ? Number(quantity) : undefined,
-        description: description.trim() || undefined,
-        isRequired: true
-      });
-    }
-
-    setTitle("");
-    setQuantity("");
-    setAmountPerPerson("");
-    setTotalSpots("");
-    setDescription("");
-    setFormMessage(itemType === "money" ? "Pitch-in contribution added." : "Added to the board.");
-    reload();
-  }
-
-  function handleDelete(item: ChecklistItem) {
-    deleteChecklistItem(item.id);
-    reload();
-  }
-
-  function handleEdit(item: ChecklistItem, draft: ChecklistItemDraft) {
-    updateChecklistItem(item.id, draft);
-    reload();
+    return categoryLabels[item.category];
   }
 
   if (loaded && !bundle) {
@@ -205,7 +162,7 @@ export default function HostDashboardPage() {
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         <EmptyState
           title="Event not found"
-          description="This host dashboard needs a valid event link."
+          description="This event home needs a valid host link."
         />
         <Link href="/" className={cn(buttonVariants({ variant: "default" }), "mt-5")}>
           Go home
@@ -219,41 +176,47 @@ export default function HostDashboardPage() {
   }
 
   const theme = getEventTheme(bundle.event.coverStyle);
+  const pitchInValue =
+    checklistSummary.pitchInTotal > 0
+      ? `${checklistSummary.pitchInClaimed}/${checklistSummary.pitchInTotal}`
+      : "0";
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         <HostFlowNav
           eventId={eventId}
-          currentStep="share"
-          backHref={`/event/${eventId}/edit`}
-          backLabel="Back to Event Setup"
+          currentStep="event"
+          backHref={`/event/${eventId}/setup`}
+          backLabel="Back to Setup Contributions"
         />
 
-        <section aria-labelledby="setup-share-heading" className="space-y-6">
+        <section aria-labelledby="event-home-heading" className="space-y-6">
           <Card className={cn("overflow-hidden border", theme.accentBorder)}>
             <div className={cn("h-2", theme.swatch)} />
             <CardHeader className="space-y-4">
               <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
-                Setup &amp; Share
+                Event Home
               </p>
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <CardTitle id="setup-share-heading" className="text-3xl sm:text-4xl">
-                    Your invite is ready
+                  <CardTitle id="event-home-heading" className="text-3xl sm:text-4xl">
+                    {bundle.event.title}
                   </CardTitle>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/65">
-                    Preview the guest experience, make final checklist edits, then share your invite.
+                    Keep the invite link, checklist, pitch-in spots, and guest responses in one place.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 sm:min-w-56">
-                  <Link
-                    href={`/event/${eventId}?preview=host`}
-                    className={cn(buttonVariants({ variant: "default" }), theme.cta, "w-full")}
+                  <Button
+                    type="button"
+                    variant="default"
+                    className={cn(theme.cta, "w-full")}
+                    onClick={handleInvitePeople}
                   >
-                    <Eye className="h-4 w-4" aria-hidden="true" />
-                    Preview Invite
-                  </Link>
+                    <Share2 className="h-4 w-4" aria-hidden="true" />
+                    Invite People
+                  </Button>
                   <Button type="button" variant="secondary" onClick={handleCopyInviteLink}>
                     {copyMessage ? (
                       <Check className="h-4 w-4" aria-hidden="true" />
@@ -262,6 +225,13 @@ export default function HostDashboardPage() {
                     )}
                     Copy Invite Link
                   </Button>
+                  <Link
+                    href={`/event/${eventId}?preview=host`}
+                    className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                  >
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                    Preview Invite
+                  </Link>
                 </div>
               </div>
               {copyMessage ? (
@@ -278,115 +248,30 @@ export default function HostDashboardPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                    Checklist before sharing
+                    Checklist &amp; contributions
                   </CardTitle>
                   <p className="text-sm text-ink/60">
-                    Add, edit, delete, and track what is still needed.
+                    A quick read on what is open, claimed, and ready for guests.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-5">
-                  <form onSubmit={handleAdd} className={cn("rounded-lg p-4", theme.softPanel)}>
-                    <div className="mb-3 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setItemType("bring")}
-                        className={cn(
-                          "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "bring" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
-                        )}
-                      >
-                        Bring item
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setItemType("money")}
-                        className={cn(
-                          "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "money" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
-                        )}
-                      >
-                        Pitch-in money
-                      </button>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-[1fr_170px_100px]">
-                      <Input
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                        placeholder={itemType === "money" ? "Pitch in for dinner" : "Vegetarian side"}
-                      />
-                      {itemType === "bring" ? (
-                        <>
-                          <Select
-                            value={category}
-                            onChange={(event) => setCategory(event.target.value as ChecklistCategory)}
-                          >
-                            {categoryOrder.map((candidate) => (
-                              <option key={candidate} value={candidate}>
-                                {categoryLabels[candidate]}
-                              </option>
-                            ))}
-                          </Select>
-                          <Input
-                            value={quantity}
-                            onChange={(event) => setQuantity(event.target.value)}
-                            type="number"
-                            min="1"
-                            placeholder="Qty"
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <span className="relative">
-                            <DollarSign
-                              className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
-                              aria-hidden="true"
-                            />
-                            <Input
-                              value={amountPerPerson}
-                              onChange={(event) => setAmountPerPerson(event.target.value)}
-                              type="number"
-                              min="1"
-                              step="1"
-                              placeholder="Amount"
-                              className="pl-10"
-                            />
-                          </span>
-                          <Input
-                            value={totalSpots}
-                            onChange={(event) => setTotalSpots(event.target.value)}
-                            type="number"
-                            min="1"
-                            step="1"
-                            placeholder="Spots"
-                          />
-                        </>
-                      )}
-                    </div>
-                    <Textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Optional description"
-                      className="mt-3 min-h-20"
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <StatCard
+                      label="Open needs"
+                      value={Math.max(checklistSummary.totalSlots - checklistSummary.claimedSlots, 0)}
                     />
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <Button type="submit" variant="default" className={cn(theme.cta)}>
-                        <ListPlus className="h-4 w-4" aria-hidden="true" />
-                        Add item
-                      </Button>
-                      {formMessage ? (
-                        <p className={cn("text-sm font-semibold", theme.accentText)}>{formMessage}</p>
-                      ) : null}
-                    </div>
-                  </form>
-
-                  <ChecklistBoard
-                    items={bundle.checklistItems}
-                    event={bundle.event}
-                    hostControls
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
-                  />
+                    <StatCard
+                      label="Claimed"
+                      value={`${checklistSummary.claimedSlots}/${checklistSummary.totalSlots}`}
+                    />
+                    <StatCard label="Pitch-in spots" value={pitchInValue} />
+                  </div>
+                  <Link
+                    href={`/event/${eventId}/setup`}
+                    className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-auto")}
+                  >
+                    Edit checklist
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -404,11 +289,7 @@ export default function HostDashboardPage() {
                       {missingItems.map((item) => (
                         <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
                           <p className="font-semibold">{item.title}</p>
-                          <p className="text-ink/55">
-                            {(item.itemType ?? "bring") === "money"
-                              ? `${Math.max((item.totalSpots ?? 1) - (item.moneyClaims?.length ?? 0), 0)} spots left`
-                              : categoryLabels[item.category]}
-                          </p>
+                          <p className="text-ink/55">{getMissingItemDetail(item)}</p>
                         </div>
                       ))}
                     </div>
@@ -421,18 +302,18 @@ export default function HostDashboardPage() {
           </div>
         </section>
 
-        <section aria-labelledby="guest-activity-heading" className="mt-8 space-y-5">
+        <section aria-labelledby="guest-responses-heading" className="mt-8 space-y-5">
           <div>
             <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
-              Guest Activity / Event Management
+              Guest Responses
             </p>
-            <h2 id="guest-activity-heading" className="mt-2 text-3xl font-semibold">
-              Guest Activity
+            <h2 id="guest-responses-heading" className="mt-2 text-3xl font-semibold">
+              Guest responses
             </h2>
           </div>
 
           {bundle.guests.length === 0 ? (
-            <EmptyState title="No RSVPs yet. Once guests respond, you'll see who's coming and what they're bringing." />
+            <EmptyState title="Guest responses will appear here once people start replying." />
           ) : (
             <>
               <div className="grid gap-3 sm:grid-cols-3">
