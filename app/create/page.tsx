@@ -14,7 +14,7 @@ export default function CreateEventPage() {
 
   function handleCreate(draft: EventDraft, starterItems?: ChecklistItemDraft[]) {
     const event = createEvent(draft, starterItems);
-    router.push(`/event/${event.id}/host`);
+    router.push(`/event/${event.id}/setup`);
   }
 
   return (

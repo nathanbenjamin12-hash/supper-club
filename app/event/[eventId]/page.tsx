@@ -8,7 +8,6 @@ import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestList } from "@/components/GuestList";
-import { HostFlowNav } from "@/components/HostFlowNav";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -133,12 +132,16 @@ export default function PublicEventPage() {
         )}
       >
         {isHostPreview ? (
-          <HostFlowNav
-            eventId={eventId}
-            currentStep="preview"
-            backHref={`/event/${eventId}/host`}
-            backLabel="Back to Setup & Share"
-          />
+          <Link
+            href={`/event/${eventId}/host`}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "mb-5 bg-cream/65 backdrop-blur"
+            )}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to Event Home
+          </Link>
         ) : (
           <Link
             href="/"
