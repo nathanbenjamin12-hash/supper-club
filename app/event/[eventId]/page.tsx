@@ -13,7 +13,8 @@ import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { ChecklistItem, EventBundle, Guest, GuestDraft } from "@/types/events";
-import { claimChecklistItem, createGuest, getEventBundle } from "@/lib/events";
+import { claimChecklistItem, createGuest, getEventBundle, importEventBundle } from "@/lib/events";
+import { decodeInviteBundle } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ export default function PublicEventPage() {
   const [rsvpCompletionMessage, setRsvpCompletionMessage] = useState("");
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const inviteParam = searchParams.get("invite");
 
   function reload() {
     setBundle(getEventBundle(eventId));
@@ -34,12 +36,13 @@ export default function PublicEventPage() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setBundle(getEventBundle(eventId));
+      const inviteBundle = decodeInviteBundle(inviteParam, eventId);
+      setBundle(inviteBundle ? importEventBundle(inviteBundle) : getEventBundle(eventId));
       setLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [eventId]);
+  }, [eventId, inviteParam]);
 
   function handleRsvp(draft: GuestDraft) {
     const guest = createGuest(eventId, draft);
