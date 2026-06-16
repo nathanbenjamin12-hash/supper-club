@@ -26,6 +26,7 @@ import {
   getEventBundle,
   updateChecklistItem
 } from "@/lib/events";
+import { createInviteUrl } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
 
@@ -49,7 +50,7 @@ export default function EventSetupPage() {
   }
 
   function getInviteUrl() {
-    return `${window.location.origin}/event/${eventId}`;
+    return bundle ? createInviteUrl(window.location.origin, bundle) : `${window.location.origin}/event/${eventId}`;
   }
 
   function copyInviteLinkWithFallback(inviteUrl: string) {

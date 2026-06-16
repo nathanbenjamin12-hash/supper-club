@@ -111,6 +111,20 @@ export function getEventBundle(eventId: string) {
   return readBundles().find((bundle) => bundle.event.id === eventId);
 }
 
+export function importEventBundle(bundle: EventBundle) {
+  const migrated = migrateBundle(bundle);
+  const bundles = readBundles();
+  const existing = bundles.find((candidate) => candidate.event.id === migrated.event.id);
+
+  if (existing) {
+    return existing;
+  }
+
+  writeBundles([migrated, ...bundles]);
+
+  return migrated;
+}
+
 export function createEvent(data: EventDraft, starterItems: ChecklistItemDraft[] = []) {
   const timestamp = now();
   const event: DinnerEvent = {

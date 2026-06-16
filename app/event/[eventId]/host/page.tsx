@@ -24,6 +24,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ChecklistItem, EventBundle } from "@/types/events";
 import { getEventBundle } from "@/lib/events";
+import { createInviteUrl } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, cn } from "@/lib/utils";
 
@@ -35,7 +36,7 @@ export default function HostDashboardPage() {
   const [copyMessage, setCopyMessage] = useState("");
 
   function getInviteUrl() {
-    return `${window.location.origin}/event/${eventId}`;
+    return bundle ? createInviteUrl(window.location.origin, bundle) : `${window.location.origin}/event/${eventId}`;
   }
 
   function copyInviteLinkWithFallback(inviteUrl: string) {
