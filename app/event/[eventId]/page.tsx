@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, ClipboardList, MessageCircleHeart, Send, Utensils, UsersRound } from "lucide-react";
+import { ArrowLeft, ClipboardList, Send, UsersRound } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
@@ -223,33 +223,6 @@ export default function PublicEventPage() {
             {contributionFlowIsActive ? (
               <PitchInCard event={bundle.event} />
             ) : null}
-            <Card className={cn("border", theme.accentBorder)}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                  Dietary note
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-6 text-ink/65">
-                  Share restrictions, allergies, or a note when you RSVP so {bundle.event.hostName}
-                  can plan with everyone in mind.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className={cn("border", theme.accentBorder)}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircleHeart className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                  Host note
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm leading-6 text-ink/65">
-                  Public invite links are open to anyone with the link for this MVP.
-                </p>
-              </CardContent>
-            </Card>
           </aside>
         </div>
       </div>
