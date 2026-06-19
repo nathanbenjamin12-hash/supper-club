@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Check, ClipboardList, Copy, DollarSign, Eye, Home, ListPlus } from "lucide-react";
+import { ClipboardList, DollarSign, Home, ListPlus } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { HostFlowNav } from "@/components/HostFlowNav";
@@ -26,7 +26,6 @@ import {
   getEventBundle,
   updateChecklistItem
 } from "@/lib/events";
-import { createInviteUrl } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
 
@@ -43,47 +42,9 @@ export default function EventSetupPage() {
   const [totalSpots, setTotalSpots] = useState("");
   const [description, setDescription] = useState("");
   const [formMessage, setFormMessage] = useState("");
-  const [copyMessage, setCopyMessage] = useState("");
 
   function reload() {
     setBundle(getEventBundle(eventId));
-  }
-
-  function getInviteUrl() {
-    return bundle ? createInviteUrl(window.location.origin, bundle) : `${window.location.origin}/event/${eventId}`;
-  }
-
-  function copyInviteLinkWithFallback(inviteUrl: string) {
-    const textarea = document.createElement("textarea");
-    textarea.value = inviteUrl;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
-    const copied = document.execCommand("copy");
-    document.body.removeChild(textarea);
-    return copied;
-  }
-
-  async function copyInviteUrl(inviteUrl: string) {
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(inviteUrl);
-        return true;
-      } catch {
-        return copyInviteLinkWithFallback(inviteUrl);
-      }
-    }
-
-    return copyInviteLinkWithFallback(inviteUrl);
-  }
-
-  async function handleCopyInviteLink() {
-    const copied = await copyInviteUrl(getInviteUrl());
-    setCopyMessage(copied ? "Invite link copied." : "Copy failed. Preview the invite and copy the URL.");
   }
 
   useEffect(() => {
@@ -227,26 +188,8 @@ export default function EventSetupPage() {
                     <Home className="h-4 w-4" aria-hidden="true" />
                     Go to Event
                   </Link>
-                  <Link
-                    href={`/event/${eventId}?preview=host`}
-                    className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-                  >
-                    <Eye className="h-4 w-4" aria-hidden="true" />
-                    Preview Invite
-                  </Link>
-                  <Button type="button" variant="secondary" onClick={handleCopyInviteLink}>
-                    {copyMessage ? (
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <Copy className="h-4 w-4" aria-hidden="true" />
-                    )}
-                    Copy Invite Link
-                  </Button>
                 </div>
               </div>
-              {copyMessage ? (
-                <p className={cn("text-sm font-semibold", theme.accentText)}>{copyMessage}</p>
-              ) : null}
             </CardHeader>
           </Card>
 
