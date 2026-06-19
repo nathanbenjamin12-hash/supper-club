@@ -278,7 +278,7 @@ export function EventForm({
                   className="pointer-events-none absolute left-3 top-3 z-10 h-5 w-5 text-ink/35"
                   aria-hidden="true"
                 />
-                <span className="pointer-events-none flex h-11 w-full items-center rounded-md border border-ink/10 bg-cream px-3 pl-10 text-left text-sm font-semibold text-ink shadow-sm">
+                <span className="pointer-events-none flex h-11 w-full items-center rounded-md border border-ink/10 bg-cream px-3 pl-10 text-left text-base font-semibold text-ink shadow-sm sm:text-sm">
                   {formatDisplayDate(date)}
                 </span>
                 <Input
@@ -457,7 +457,7 @@ export function EventForm({
               type="checkbox"
               checked={pitchInEnabled}
               onChange={(event) => setPitchInEnabled(event.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-ink/20"
+              className="mt-0.5 h-4 w-4 rounded border-ink/20 text-base sm:text-sm"
             />
             <span>
               Show a pitch-in section on the invite
