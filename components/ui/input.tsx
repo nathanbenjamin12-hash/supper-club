@@ -8,7 +8,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     <input
       ref={ref}
       className={cn(
-        "h-11 w-full rounded-md border border-ink/10 bg-cream px-3 text-sm text-ink shadow-sm outline-none transition placeholder:text-ink/40 focus:border-olive focus:ring-2 focus:ring-olive/15",
+        "h-11 w-full rounded-md border border-ink/10 bg-cream px-3 text-base text-ink shadow-sm outline-none transition placeholder:text-ink/40 focus:border-olive focus:ring-2 focus:ring-olive/15 sm:text-sm",
         type === "date" &&
           "min-w-0 max-w-full appearance-none text-left [&::-webkit-date-and-time-value]:block [&::-webkit-date-and-time-value]:min-w-0 [&::-webkit-date-and-time-value]:text-left",
         className
