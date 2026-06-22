@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { EventForm } from "@/components/EventForm";
 import { buttonVariants } from "@/components/ui/button";
 import type { DinnerEvent, EventDraft } from "@/types/events";
-import { getEvent, updateEvent } from "@/lib/events";
+import { getSharedEvent, updateSharedEvent } from "@/lib/eventApi";
 import { cn } from "@/lib/utils";
 
 export default function EditEventPage() {
@@ -19,16 +19,28 @@ export default function EditEventPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setEvent(getEvent(eventId));
-      setLoaded(true);
-    }, 0);
+    let active = true;
 
-    return () => window.clearTimeout(timer);
+    async function loadEvent() {
+      const nextEvent = await getSharedEvent(eventId);
+
+      if (!active) {
+        return;
+      }
+
+      setEvent(nextEvent);
+      setLoaded(true);
+    }
+
+    void loadEvent();
+
+    return () => {
+      active = false;
+    };
   }, [eventId]);
 
-  function handleUpdate(draft: EventDraft) {
-    updateEvent(eventId, draft);
+  async function handleUpdate(draft: EventDraft) {
+    await updateSharedEvent(eventId, draft);
     router.push(`/event/${eventId}/host`);
   }
 

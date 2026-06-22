@@ -4,6 +4,7 @@ out
 .env
 .env.local
 .vercel
+.data
 tsconfig.tsbuildinfo
 .DS_Store
 npm-debug.log*

@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { createEvent } from "@/lib/events";
+import { useState } from "react";
+import { createSharedEvent } from "@/lib/eventApi";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChecklistItemDraft, EventDraft } from "@/types/events";
@@ -16,10 +17,15 @@ const EventForm = dynamic(
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const [error, setError] = useState("");
 
-  function handleCreate(draft: EventDraft, starterItems?: ChecklistItemDraft[]) {
-    const event = createEvent(draft, starterItems);
-    router.push(`/event/${event.id}/setup`);
+  async function handleCreate(draft: EventDraft, starterItems?: ChecklistItemDraft[]) {
+    try {
+      const event = await createSharedEvent(draft, starterItems);
+      router.push(`/event/${event.id}/setup`);
+    } catch {
+      setError("Something went wrong creating the invite. Try again.");
+    }
   }
 
   return (
@@ -37,6 +43,7 @@ export default function CreateEventPage() {
         </p>
       </div>
       <EventForm submitLabel="Create invite" onSubmit={handleCreate} />
+      {error ? <p className="mt-4 text-sm font-semibold text-terracotta">{error}</p> : null}
     </main>
   );
 }
