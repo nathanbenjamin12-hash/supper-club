@@ -1,13 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { EventForm } from "@/components/EventForm";
 import { createEvent } from "@/lib/events";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChecklistItemDraft, EventDraft } from "@/types/events";
+
+const EventForm = dynamic(
+  () => import("@/components/EventForm").then((module) => module.EventForm),
+  { ssr: false }
+);
 
 export default function CreateEventPage() {
   const router = useRouter();
