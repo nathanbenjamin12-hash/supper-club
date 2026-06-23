@@ -363,6 +363,85 @@ export async function claimStoredChecklistItem(eventId: string, itemId: string, 
   });
 }
 
+export async function releaseStoredChecklistItemClaim(eventId: string, itemId: string, guestId: string) {
+  return withBundles((bundles) => {
+    let updatedItem: ChecklistItem | undefined;
+
+    const nextBundles = bundles.map((bundle) => {
+      if (bundle.event.id !== eventId) {
+        return bundle;
+      }
+
+      const item = bundle.checklistItems.find((candidate) => candidate.id === itemId);
+
+      if (!item) {
+        return bundle;
+      }
+
+      if ((item.itemType ?? "bring") === "money") {
+        const existingClaims = item.moneyClaims ?? [];
+        const guestClaimExists = existingClaims.some((claim) => claim.guestId === guestId);
+
+        if (!guestClaimExists) {
+          updatedItem = item;
+          return bundle;
+        }
+
+        const timestamp = now();
+        const checklistItems = bundle.checklistItems.map((candidate) => {
+          if (candidate.id !== itemId) {
+            return candidate;
+          }
+
+          updatedItem = {
+            ...candidate,
+            moneyClaims: (candidate.moneyClaims ?? []).filter((claim) => claim.guestId !== guestId),
+            updatedAt: timestamp
+          };
+
+          return updatedItem;
+        });
+
+        return {
+          ...bundle,
+          checklistItems,
+          event: { ...bundle.event, updatedAt: timestamp }
+        };
+      }
+
+      if (item.claimedByGuestId !== guestId) {
+        updatedItem = item;
+        return bundle;
+      }
+
+      const timestamp = now();
+      const checklistItems = bundle.checklistItems.map((candidate) => {
+        if (candidate.id !== itemId) {
+          return candidate;
+        }
+
+        updatedItem = {
+          ...candidate,
+          claimedByGuestId: undefined,
+          claimedByName: undefined,
+          claimNote: undefined,
+          updatedAt: timestamp
+        };
+
+        return updatedItem;
+      });
+
+      return {
+        ...bundle,
+        checklistItems,
+        event: { ...bundle.event, updatedAt: timestamp }
+      };
+    });
+
+    return { bundles: nextBundles, result: updatedItem };
+  });
+}
+
 export async function addStoredChecklistItem(eventId: string, data: ChecklistItemDraft) {
   const timestamp = now();
   const item: ChecklistItem = {

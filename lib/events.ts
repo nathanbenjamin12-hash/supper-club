@@ -266,6 +266,81 @@ export function claimChecklistItem(itemId: string, guestId: string, note?: strin
   return updatedItem;
 }
 
+export function releaseChecklistItemClaim(itemId: string, guestId: string) {
+  const bundles = readBundles();
+  let updatedItem: ChecklistItem | undefined;
+
+  const nextBundles = bundles.map((bundle) => {
+    const item = bundle.checklistItems.find((candidate) => candidate.id === itemId);
+
+    if (!item) {
+      return bundle;
+    }
+
+    if ((item.itemType ?? "bring") === "money") {
+      const existingClaims = item.moneyClaims ?? [];
+      const guestClaimExists = existingClaims.some((claim) => claim.guestId === guestId);
+
+      if (!guestClaimExists) {
+        updatedItem = item;
+        return bundle;
+      }
+
+      const timestamp = now();
+      const checklistItems = bundle.checklistItems.map((candidate) => {
+        if (candidate.id !== itemId) {
+          return candidate;
+        }
+
+        updatedItem = {
+          ...candidate,
+          moneyClaims: (candidate.moneyClaims ?? []).filter((claim) => claim.guestId !== guestId),
+          updatedAt: timestamp
+        };
+
+        return updatedItem;
+      });
+
+      return {
+        ...bundle,
+        checklistItems,
+        event: { ...bundle.event, updatedAt: timestamp }
+      };
+    }
+
+    if (item.claimedByGuestId !== guestId) {
+      updatedItem = item;
+      return bundle;
+    }
+
+    const timestamp = now();
+    const checklistItems = bundle.checklistItems.map((candidate) => {
+      if (candidate.id !== itemId) {
+        return candidate;
+      }
+
+      updatedItem = {
+        ...candidate,
+        claimedByGuestId: undefined,
+        claimedByName: undefined,
+        claimNote: undefined,
+        updatedAt: timestamp
+      };
+
+      return updatedItem;
+    });
+
+    return {
+      ...bundle,
+      checklistItems,
+      event: { ...bundle.event, updatedAt: timestamp }
+    };
+  });
+
+  writeBundles(nextBundles);
+  return updatedItem;
+}
+
 export function addChecklistItem(eventId: string, data: ChecklistItemDraft) {
   const timestamp = now();
   const item: ChecklistItem = {

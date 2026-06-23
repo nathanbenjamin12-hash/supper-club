@@ -16,6 +16,7 @@ import {
   getEvent as getLocalEvent,
   getEventBundle as getLocalEventBundle,
   importEventBundle as importLocalEventBundle,
+  releaseChecklistItemClaim as releaseLocalChecklistItemClaim,
   updateChecklistItem as updateLocalChecklistItem,
   updateEvent as updateLocalEvent
 } from "@/lib/events";
@@ -159,6 +160,26 @@ export async function claimSharedChecklistItem(eventId: string, itemId: string, 
   }
 
   const item = claimLocalChecklistItem(itemId, guestId, note);
+  const bundle = getLocalEventBundle(eventId);
+
+  return item && bundle ? { item, bundle } : undefined;
+}
+
+export async function releaseSharedChecklistItemClaim(eventId: string, itemId: string, guestId: string) {
+  try {
+    const response = await requestJson<ChecklistItemResponse>(`/api/events/${eventId}/claims`, {
+      method: "DELETE",
+      body: JSON.stringify({ itemId, guestId })
+    });
+
+    if (response) {
+      return response;
+    }
+  } catch {
+    // Fall through to local fallback.
+  }
+
+  const item = releaseLocalChecklistItemClaim(itemId, guestId);
   const bundle = getLocalEventBundle(eventId);
 
   return item && bundle ? { item, bundle } : undefined;
