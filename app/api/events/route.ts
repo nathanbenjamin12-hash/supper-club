@@ -1,15 +1,8 @@
-import { NextResponse } from "next/server";
 import { createStoredEvent } from "@/lib/serverEventStore";
+import { eventStoreErrorResponse, json } from "@/lib/serverApiResponses";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function json(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" }
-  });
-}
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +10,13 @@ export async function POST(request: Request) {
     const bundle = await createStoredEvent(data, starterItems ?? []);
 
     return json({ event: bundle.event, bundle }, 201);
-  } catch {
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
     return json({ error: "Unable to create event." }, 400);
   }
 }

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { getStoredEventBundle, updateStoredEvent } from "@/lib/serverEventStore";
+import { eventStoreErrorResponse, json } from "@/lib/serverApiResponses";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,22 +8,25 @@ type RouteContext = {
   params: Promise<{ eventId: string }>;
 };
 
-function json(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" }
-  });
-}
-
 export async function GET(_request: Request, context: RouteContext) {
-  const { eventId } = await context.params;
-  const bundle = await getStoredEventBundle(eventId);
+  try {
+    const { eventId } = await context.params;
+    const bundle = await getStoredEventBundle(eventId);
 
-  if (!bundle) {
-    return json({ error: "Event not found." }, 404);
+    if (!bundle) {
+      return json({ error: "Event not found." }, 404);
+    }
+
+    return json({ bundle });
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
+    return json({ error: "Unable to load event." }, 500);
   }
-
-  return json({ bundle });
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
@@ -37,7 +40,13 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     return json({ event });
-  } catch {
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
     return json({ error: "Unable to update event." }, 400);
   }
 }
