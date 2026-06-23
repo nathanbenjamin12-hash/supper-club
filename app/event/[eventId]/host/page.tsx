@@ -23,7 +23,7 @@ import { StatCard } from "@/components/StatCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ChecklistItem, EventBundle } from "@/types/events";
-import { getEventBundle } from "@/lib/events";
+import { getSharedEventBundle } from "@/lib/eventApi";
 import { createInviteUrl } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, cn } from "@/lib/utils";
@@ -97,12 +97,24 @@ export default function HostDashboardPage() {
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setBundle(getEventBundle(eventId));
-      setLoaded(true);
-    }, 0);
+    let active = true;
 
-    return () => window.clearTimeout(timer);
+    async function loadBundle() {
+      const nextBundle = await getSharedEventBundle(eventId);
+
+      if (!active) {
+        return;
+      }
+
+      setBundle(nextBundle);
+      setLoaded(true);
+    }
+
+    void loadBundle();
+
+    return () => {
+      active = false;
+    };
   }, [eventId]);
 
   const stats = useMemo(() => {

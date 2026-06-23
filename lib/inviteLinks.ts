@@ -1,18 +1,9 @@
 import type { EventBundle } from "@/types/events";
 
-const INVITE_PARAM = "invite";
-
 type InvitePayload = {
   version: 1;
   bundle: EventBundle;
 };
-
-function base64UrlEncode(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
-
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
 
 function base64UrlDecode(value: string) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -50,12 +41,6 @@ function createPortableInviteBundle(bundle: EventBundle): EventBundle {
 
 export function createInviteUrl(origin: string, bundle: EventBundle) {
   const url = new URL(`/event/${bundle.event.id}`, origin);
-  const payload: InvitePayload = {
-    version: 1,
-    bundle: createPortableInviteBundle(bundle)
-  };
-
-  url.searchParams.set(INVITE_PARAM, base64UrlEncode(JSON.stringify(payload)));
 
   return url.toString();
 }

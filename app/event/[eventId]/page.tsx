@@ -13,7 +13,12 @@ import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { ChecklistItem, EventBundle, Guest, GuestDraft } from "@/types/events";
-import { claimChecklistItem, createGuest, getEventBundle, importEventBundle } from "@/lib/events";
+import {
+  claimSharedChecklistItem,
+  createSharedGuest,
+  getSharedEventBundle,
+  importSharedEventBundle
+} from "@/lib/eventApi";
 import { decodeInviteBundle } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
@@ -30,28 +35,49 @@ export default function PublicEventPage() {
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
 
-  function reload() {
-    setBundle(getEventBundle(eventId));
+  async function reload() {
+    setBundle(await getSharedEventBundle(eventId));
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const inviteBundle = decodeInviteBundle(inviteParam, eventId);
-      setBundle(inviteBundle ? importEventBundle(inviteBundle) : getEventBundle(eventId));
-      setLoaded(true);
-    }, 0);
+    let active = true;
 
-    return () => window.clearTimeout(timer);
+    async function loadBundle() {
+      let nextBundle = await getSharedEventBundle(eventId);
+      const inviteBundle = decodeInviteBundle(inviteParam, eventId);
+
+      if (!nextBundle && inviteBundle) {
+        nextBundle = await importSharedEventBundle(inviteBundle);
+      }
+
+      if (!active) {
+        return;
+      }
+
+      setBundle(nextBundle);
+      setLoaded(true);
+    }
+
+    void loadBundle();
+
+    return () => {
+      active = false;
+    };
   }, [eventId, inviteParam]);
 
-  function handleRsvp(draft: GuestDraft) {
-    const guest = createGuest(eventId, draft);
-    setCurrentGuest(guest);
+  async function handleRsvp(draft: GuestDraft) {
+    const response = await createSharedGuest(eventId, draft);
+
+    if (!response) {
+      return undefined;
+    }
+
+    setCurrentGuest(response.guest);
+    setBundle(response.bundle);
     setShowContributions(false);
     setRsvpCompletionMessage("");
     setMessage("");
-    reload();
-    return guest;
+    return response.guest;
   }
 
   function handleContributionChoice(showContributions: boolean) {
@@ -73,13 +99,14 @@ export default function PublicEventPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function handleClaim(item: ChecklistItem, note?: string) {
+  async function handleClaim(item: ChecklistItem, note?: string) {
     if (!currentGuest) {
       return;
     }
 
     const previousMoneyClaimCount = item.moneyClaims?.length ?? 0;
-    const updated = claimChecklistItem(item.id, currentGuest.id, note);
+    const response = await claimSharedChecklistItem(eventId, item.id, currentGuest.id, note);
+    const updated = response?.item;
 
     if ((item.itemType ?? "bring") === "money") {
       const nextMoneyClaimCount = updated?.moneyClaims?.length ?? previousMoneyClaimCount;
@@ -99,7 +126,11 @@ export default function PublicEventPage() {
           : "Looks like someone claimed that first."
       );
     }
-    reload();
+    if (response?.bundle) {
+      setBundle(response.bundle);
+    } else {
+      await reload();
+    }
   }
 
   if (loaded && !bundle) {

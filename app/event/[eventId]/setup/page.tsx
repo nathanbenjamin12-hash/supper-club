@@ -21,11 +21,11 @@ import type {
   EventBundle
 } from "@/types/events";
 import {
-  addChecklistItem,
-  deleteChecklistItem,
-  getEventBundle,
-  updateChecklistItem
-} from "@/lib/events";
+  addSharedChecklistItem,
+  deleteSharedChecklistItem,
+  getSharedEventBundle,
+  updateSharedChecklistItem
+} from "@/lib/eventApi";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
 
@@ -43,17 +43,29 @@ export default function EventSetupPage() {
   const [description, setDescription] = useState("");
   const [formMessage, setFormMessage] = useState("");
 
-  function reload() {
-    setBundle(getEventBundle(eventId));
+  async function reload() {
+    setBundle(await getSharedEventBundle(eventId));
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setBundle(getEventBundle(eventId));
-      setLoaded(true);
-    }, 0);
+    let active = true;
 
-    return () => window.clearTimeout(timer);
+    async function loadBundle() {
+      const nextBundle = await getSharedEventBundle(eventId);
+
+      if (!active) {
+        return;
+      }
+
+      setBundle(nextBundle);
+      setLoaded(true);
+    }
+
+    void loadBundle();
+
+    return () => {
+      active = false;
+    };
   }, [eventId]);
 
   const missingItems =
@@ -69,7 +81,7 @@ export default function EventSetupPage() {
       return !item.claimedByGuestId;
     }) ?? [];
 
-  function handleAdd(event: React.FormEvent<HTMLFormElement>) {
+  async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!title.trim()) {
@@ -95,7 +107,7 @@ export default function EventSetupPage() {
         return;
       }
 
-      addChecklistItem(eventId, {
+      await addSharedChecklistItem(eventId, {
         title: title.trim(),
         category: "other",
         itemType: "money",
@@ -105,7 +117,7 @@ export default function EventSetupPage() {
         isRequired: true
       });
     } else {
-      addChecklistItem(eventId, {
+      await addSharedChecklistItem(eventId, {
         title: title.trim(),
         category,
         itemType: "bring",
@@ -121,17 +133,17 @@ export default function EventSetupPage() {
     setTotalSpots("");
     setDescription("");
     setFormMessage(itemType === "money" ? "Pitch-in contribution added." : "Added to the board.");
-    reload();
+    await reload();
   }
 
-  function handleDelete(item: ChecklistItem) {
-    deleteChecklistItem(item.id);
-    reload();
+  async function handleDelete(item: ChecklistItem) {
+    await deleteSharedChecklistItem(eventId, item.id);
+    await reload();
   }
 
-  function handleEdit(item: ChecklistItem, draft: ChecklistItemDraft) {
-    updateChecklistItem(item.id, draft);
-    reload();
+  async function handleEdit(item: ChecklistItem, draft: ChecklistItemDraft) {
+    await updateSharedChecklistItem(eventId, item.id, draft);
+    await reload();
   }
 
   if (loaded && !bundle) {

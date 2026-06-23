@@ -21,7 +21,7 @@ export function RSVPCard({
   onComplete
 }: {
   event?: DinnerEvent;
-  onSubmit: (guest: GuestDraft) => Guest | undefined;
+  onSubmit: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
   onContributionChoice?: (showContributions: boolean) => void;
   completionMessage?: string;
   onComplete?: (message: string) => void;
@@ -52,7 +52,7 @@ export function RSVPCard({
     onComplete?.(nextMessage);
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!name.trim()) {
@@ -60,7 +60,7 @@ export function RSVPCard({
       return;
     }
 
-    const created = onSubmit({
+    const created = await onSubmit({
       name: name.trim(),
       rsvpStatus: status,
       email: contact.includes("@") ? cleanOptional(contact) : undefined,
