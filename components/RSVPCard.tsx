@@ -148,7 +148,7 @@ export function RSVPCard({
             </p>
             {contributionChoice === "bring" ? (
               <p className="mt-2 text-xs font-medium text-ink/60">
-                Claim one or more open items below. Your RSVP is already saved.
+                Claim an open item below. Your RSVP is already saved.
               </p>
             ) : (
               <div className="mt-3 grid gap-2 sm:grid-cols-2">

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, ClipboardList, Send, UsersRound } from "lucide-react";
-import { ChecklistBoard } from "@/components/ChecklistBoard";
+import { ArrowLeft, Send, UsersRound } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
+import { GuestContributionCard } from "@/components/GuestContributionCard";
 import { GuestList } from "@/components/GuestList";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
@@ -17,11 +17,26 @@ import {
   claimSharedChecklistItem,
   createSharedGuest,
   getSharedEventBundle,
-  importSharedEventBundle
+  importSharedEventBundle,
+  releaseSharedChecklistItemClaim
 } from "@/lib/eventApi";
 import { decodeInviteBundle } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
+
+function currentGuestStorageKey(eventId: string) {
+  return `supperclub.currentGuest.${eventId}`;
+}
+
+function guestOwnsItem(item: ChecklistItem, guest?: Guest) {
+  if (!guest) {
+    return false;
+  }
+
+  return (item.itemType ?? "bring") === "money"
+    ? item.moneyClaims?.some((claim) => claim.guestId === guest.id) ?? false
+    : item.claimedByGuestId === guest.id;
+}
 
 export default function PublicEventPage() {
   const params = useParams<{ eventId: string }>();
@@ -55,6 +70,16 @@ export default function PublicEventPage() {
       }
 
       setBundle(nextBundle);
+      if (nextBundle) {
+        const storedGuestId = window.localStorage.getItem(currentGuestStorageKey(eventId));
+        const storedGuest = nextBundle.guests.find((guest) => guest.id === storedGuestId);
+
+        if (storedGuest) {
+          setCurrentGuest(storedGuest);
+        } else if (storedGuestId) {
+          window.localStorage.removeItem(currentGuestStorageKey(eventId));
+        }
+      }
       setLoaded(true);
     }
 
@@ -73,6 +98,7 @@ export default function PublicEventPage() {
     }
 
     setCurrentGuest(response.guest);
+    window.localStorage.setItem(currentGuestStorageKey(eventId), response.guest.id);
     setBundle(response.bundle);
     setShowContributions(false);
     setRsvpCompletionMessage("");
@@ -104,9 +130,20 @@ export default function PublicEventPage() {
       return;
     }
 
+    const existingClaim = bundle?.checklistItems.find((candidate) => guestOwnsItem(candidate, currentGuest));
+
     const previousMoneyClaimCount = item.moneyClaims?.length ?? 0;
     const response = await claimSharedChecklistItem(eventId, item.id, currentGuest.id, note);
     const updated = response?.item;
+    let nextBundle = response?.bundle;
+    const claimedByCurrentGuest = (updated?.itemType ?? "bring") === "money"
+      ? updated?.moneyClaims?.some((claim) => claim.guestId === currentGuest.id) ?? false
+      : updated?.claimedByGuestId === currentGuest.id;
+
+    if (existingClaim && existingClaim.id !== item.id && claimedByCurrentGuest) {
+      const releaseResponse = await releaseSharedChecklistItemClaim(eventId, existingClaim.id, currentGuest.id);
+      nextBundle = releaseResponse?.bundle ?? nextBundle;
+    }
 
     if ((item.itemType ?? "bring") === "money") {
       const nextMoneyClaimCount = updated?.moneyClaims?.length ?? previousMoneyClaimCount;
@@ -126,6 +163,21 @@ export default function PublicEventPage() {
           : "Looks like someone claimed that first."
       );
     }
+    if (nextBundle) {
+      setBundle(nextBundle);
+    } else {
+      await reload();
+    }
+  }
+
+  async function handleRemoveClaim(item: ChecklistItem) {
+    if (!currentGuest) {
+      return;
+    }
+
+    const response = await releaseSharedChecklistItemClaim(eventId, item.id, currentGuest.id);
+
+    setMessage("Your claim was removed.");
     if (response?.bundle) {
       setBundle(response.bundle);
     } else {
@@ -208,39 +260,16 @@ export default function PublicEventPage() {
               </CardContent>
             </Card>
 
-            {contributionFlowIsActive ? (
-              <Card className={cn("border", theme.accentBorder)}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                    Pick a contribution
-                  </CardTitle>
-                  <p className="text-sm text-ink/60">
-                    Claim an open item or chip in for a shared cost.
-                  </p>
-                </CardHeader>
-                <CardContent className="pb-28 lg:pb-5">
-                  {message ? (
-                    <p className={cn("mb-4 rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
-                      {message}
-                    </p>
-                  ) : null}
-                  <ChecklistBoard
-                    items={bundle.checklistItems}
-                    event={bundle.event}
-                    currentGuest={currentGuest}
-                    onClaim={handleClaim}
-                    onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
-                  />
-                  <div className="mt-5 hidden justify-end border-t border-ink/8 pt-4 lg:flex">
-                    <Button type="button" className={cn(theme.cta)} onClick={handleContributionComplete}>
-                      <Send className="h-4 w-4" aria-hidden="true" />
-                      Send RSVP
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
+            <GuestContributionCard
+              event={bundle.event}
+              items={bundle.checklistItems}
+              currentGuest={currentGuest}
+              message={message}
+              onClaim={handleClaim}
+              onRemoveClaim={handleRemoveClaim}
+              onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
+              onComplete={currentGuest?.rsvpStatus === "yes" ? handleContributionComplete : undefined}
+            />
           </div>
 
           <aside className="space-y-5">

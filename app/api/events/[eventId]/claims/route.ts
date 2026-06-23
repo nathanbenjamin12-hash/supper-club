@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { claimStoredChecklistItem, getStoredEventBundle } from "@/lib/serverEventStore";
+import {
+  claimStoredChecklistItem,
+  getStoredEventBundle,
+  releaseStoredChecklistItemClaim
+} from "@/lib/serverEventStore";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -29,5 +33,22 @@ export async function POST(request: Request, context: RouteContext) {
     return json({ item, bundle });
   } catch {
     return json({ error: "Unable to claim item." }, 400);
+  }
+}
+
+export async function DELETE(request: Request, context: RouteContext) {
+  try {
+    const { eventId } = await context.params;
+    const { itemId, guestId } = await request.json();
+    const item = await releaseStoredChecklistItemClaim(eventId, itemId, guestId);
+    const bundle = await getStoredEventBundle(eventId);
+
+    if (!item || !bundle) {
+      return json({ error: "Claim not found." }, 404);
+    }
+
+    return json({ item, bundle });
+  } catch {
+    return json({ error: "Unable to remove claim." }, 400);
   }
 }
