@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getStoredEventBundle, updateStoredEvent } from "@/lib/serverEventStore";
+import { getEventStoreLogContext, getStoredEventBundle, updateStoredEvent } from "@/lib/serverEventStore";
+import { eventStoreErrorResponse, json } from "@/lib/serverApiResponses";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,22 +8,43 @@ type RouteContext = {
   params: Promise<{ eventId: string }>;
 };
 
-function json(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" }
-  });
-}
-
 export async function GET(_request: Request, context: RouteContext) {
-  const { eventId } = await context.params;
-  const bundle = await getStoredEventBundle(eventId);
+  let eventId = "";
 
-  if (!bundle) {
-    return json({ error: "Event not found." }, 404);
+  try {
+    ({ eventId } = await context.params);
+    const bundle = await getStoredEventBundle(eventId);
+
+    if (!bundle) {
+      console.warn("[supper-club:event-store] read miss", {
+        eventId,
+        ...getEventStoreLogContext()
+      });
+
+      return json({ error: "Event not found." }, 404);
+    }
+
+    console.info("[supper-club:event-store] read hit", {
+      eventId,
+      ...getEventStoreLogContext()
+    });
+
+    return json({ bundle });
+  } catch (error) {
+    console.error("[supper-club:event-store] read failure", {
+      eventId,
+      ...getEventStoreLogContext(),
+      error
+    });
+
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
+    return json({ error: "Unable to load event." }, 500);
   }
-
-  return json({ bundle });
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
@@ -37,7 +58,13 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     return json({ event });
-  } catch {
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
     return json({ error: "Unable to update event." }, 400);
   }
 }

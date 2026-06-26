@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { randomUUID } from "crypto";
-import { tmpdir } from "os";
 import { dirname, join } from "path";
 import { mockBundles, starterChecklistTemplates } from "@/data/mockEvents";
 import type {
@@ -16,12 +15,12 @@ import type {
 } from "@/types/events";
 import { normalizeVenmoHandle } from "@/lib/utils";
 
-const STORE_KEY = "supperclub.events.v1";
+export const EVENT_STORE_KEY = "supperclub.events.v1";
 const FILE_STORE_PATH =
   process.env.SUPPER_CLUB_EVENT_STORE_PATH ??
-  (process.env.VERCEL
-    ? join(tmpdir(), "supper-club-events.json")
-    : join(process.cwd(), ".data", "events.json"));
+  join(/*turbopackIgnore: true*/ process.cwd(), ".data", "events.json");
+export const EVENT_STORE_PERSISTENCE_ERROR_MESSAGE =
+  "Supper Club event persistence requires KV_REST_API_URL and KV_REST_API_TOKEN, or UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN, in production.";
 
 type StoreGlobal = typeof globalThis & {
   __supperClubEventBundles?: EventBundle[];
@@ -34,6 +33,17 @@ type MutationResult<T> = {
 };
 
 const storeGlobal = globalThis as StoreGlobal;
+
+export class EventStorePersistenceError extends Error {
+  constructor(message = EVENT_STORE_PERSISTENCE_ERROR_MESSAGE) {
+    super(message);
+    this.name = "EventStorePersistenceError";
+  }
+}
+
+export function isEventStorePersistenceError(error: unknown) {
+  return error instanceof EventStorePersistenceError;
+}
 
 function now() {
   return new Date().toISOString();
@@ -74,12 +84,43 @@ function getKvToken() {
   return process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 }
 
+export function getEventStoreLogContext() {
+  const urlEnv = process.env.KV_REST_API_URL
+    ? "KV_REST_API_URL"
+    : process.env.UPSTASH_REDIS_REST_URL
+      ? "UPSTASH_REDIS_REST_URL"
+      : "missing";
+  const tokenEnv = process.env.KV_REST_API_TOKEN
+    ? "KV_REST_API_TOKEN"
+    : process.env.UPSTASH_REDIS_REST_TOKEN
+      ? "UPSTASH_REDIS_REST_TOKEN"
+      : "missing";
+
+  return {
+    storeKey: EVENT_STORE_KEY,
+    backend: hasKvStore() ? "redis" : "local-file",
+    urlEnv,
+    tokenEnv,
+    fileStorePath: hasKvStore() ? undefined : FILE_STORE_PATH
+  };
+}
+
+function requiresDurableStore() {
+  return process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+}
+
+function assertProductionStoreConfigured() {
+  if (requiresDurableStore() && !hasKvStore()) {
+    throw new EventStorePersistenceError();
+  }
+}
+
 async function kvCommand<T>(command: unknown[]) {
   const url = getKvUrl();
   const token = getKvToken();
 
   if (!url || !token) {
-    return undefined;
+    throw new EventStorePersistenceError();
   }
 
   const response = await fetch(url, {
@@ -93,15 +134,17 @@ async function kvCommand<T>(command: unknown[]) {
   });
 
   if (!response.ok) {
-    throw new Error(`KV command failed with ${response.status}`);
+    throw new EventStorePersistenceError(`KV event persistence command failed with ${response.status}.`);
   }
 
   return (await response.json()) as { result: T };
 }
 
 async function readPersistedBundles() {
+  assertProductionStoreConfigured();
+
   if (hasKvStore()) {
-    const response = await kvCommand<string | null>(["GET", STORE_KEY]);
+    const response = await kvCommand<string | null>(["GET", EVENT_STORE_KEY]);
     return response?.result ? (JSON.parse(response.result) as EventBundle[]) : undefined;
   }
 
@@ -114,9 +157,10 @@ async function readPersistedBundles() {
 
 async function writePersistedBundles(bundles: EventBundle[]) {
   const serialized = JSON.stringify(bundles);
+  assertProductionStoreConfigured();
 
   if (hasKvStore()) {
-    await kvCommand(["SET", STORE_KEY, serialized]);
+    await kvCommand(["SET", EVENT_STORE_KEY, serialized]);
     return;
   }
 
@@ -125,6 +169,8 @@ async function writePersistedBundles(bundles: EventBundle[]) {
 }
 
 async function readBundles() {
+  assertProductionStoreConfigured();
+
   if (hasKvStore()) {
     const stored = await readPersistedBundles();
     const bundles = stored ? cloneBundles(stored) : cloneBundles(mockBundles);

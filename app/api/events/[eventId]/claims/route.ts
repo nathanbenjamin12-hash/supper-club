@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import {
   claimStoredChecklistItem,
   getStoredEventBundle,
   releaseStoredChecklistItemClaim
 } from "@/lib/serverEventStore";
+import { eventStoreErrorResponse, json } from "@/lib/serverApiResponses";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,13 +11,6 @@ export const runtime = "nodejs";
 type RouteContext = {
   params: Promise<{ eventId: string }>;
 };
-
-function json(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" }
-  });
-}
 
 export async function POST(request: Request, context: RouteContext) {
   try {
@@ -31,7 +24,13 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     return json({ item, bundle });
-  } catch {
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
     return json({ error: "Unable to claim item." }, 400);
   }
 }
@@ -48,7 +47,13 @@ export async function DELETE(request: Request, context: RouteContext) {
     }
 
     return json({ item, bundle });
-  } catch {
+  } catch (error) {
+    const persistenceError = eventStoreErrorResponse(error);
+
+    if (persistenceError) {
+      return persistenceError;
+    }
+
     return json({ error: "Unable to remove claim." }, 400);
   }
 }
