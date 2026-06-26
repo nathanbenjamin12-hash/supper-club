@@ -44,6 +44,12 @@ type EventResponse = {
   event: DinnerEvent;
 };
 
+const EVENT_FETCH_RETRY_DELAYS_MS = [150, 300, 600, 900];
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function requestJson<T>(path: string, init?: RequestInit) {
   const response = await fetch(path, {
     ...init,
@@ -79,8 +85,21 @@ function optionalLocalFallback<T>(fallback: () => T) {
 
 export async function getSharedEventBundle(eventId: string) {
   try {
-    const response = await requestJson<BundleResponse>(`/api/events/${eventId}`);
-    return response?.bundle ?? optionalLocalFallback(() => getLocalEventBundle(eventId));
+    for (let attempt = 0; attempt <= EVENT_FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+      const response = await requestJson<BundleResponse>(`/api/events/${eventId}`);
+
+      if (response?.bundle) {
+        return response.bundle;
+      }
+
+      const nextDelay = EVENT_FETCH_RETRY_DELAYS_MS[attempt];
+
+      if (nextDelay) {
+        await wait(nextDelay);
+      }
+    }
+
+    return optionalLocalFallback(() => getLocalEventBundle(eventId));
   } catch (error) {
     if (canUseLocalEventStoreFallback()) {
       return getLocalEventBundle(eventId);

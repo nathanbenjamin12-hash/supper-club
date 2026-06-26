@@ -15,7 +15,7 @@ import type {
 } from "@/types/events";
 import { normalizeVenmoHandle } from "@/lib/utils";
 
-const STORE_KEY = "supperclub.events.v1";
+export const EVENT_STORE_KEY = "supperclub.events.v1";
 const FILE_STORE_PATH =
   process.env.SUPPER_CLUB_EVENT_STORE_PATH ??
   join(/*turbopackIgnore: true*/ process.cwd(), ".data", "events.json");
@@ -84,6 +84,27 @@ function getKvToken() {
   return process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 }
 
+export function getEventStoreLogContext() {
+  const urlEnv = process.env.KV_REST_API_URL
+    ? "KV_REST_API_URL"
+    : process.env.UPSTASH_REDIS_REST_URL
+      ? "UPSTASH_REDIS_REST_URL"
+      : "missing";
+  const tokenEnv = process.env.KV_REST_API_TOKEN
+    ? "KV_REST_API_TOKEN"
+    : process.env.UPSTASH_REDIS_REST_TOKEN
+      ? "UPSTASH_REDIS_REST_TOKEN"
+      : "missing";
+
+  return {
+    storeKey: EVENT_STORE_KEY,
+    backend: hasKvStore() ? "redis" : "local-file",
+    urlEnv,
+    tokenEnv,
+    fileStorePath: hasKvStore() ? undefined : FILE_STORE_PATH
+  };
+}
+
 function requiresDurableStore() {
   return process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
 }
@@ -123,7 +144,7 @@ async function readPersistedBundles() {
   assertProductionStoreConfigured();
 
   if (hasKvStore()) {
-    const response = await kvCommand<string | null>(["GET", STORE_KEY]);
+    const response = await kvCommand<string | null>(["GET", EVENT_STORE_KEY]);
     return response?.result ? (JSON.parse(response.result) as EventBundle[]) : undefined;
   }
 
@@ -139,7 +160,7 @@ async function writePersistedBundles(bundles: EventBundle[]) {
   assertProductionStoreConfigured();
 
   if (hasKvStore()) {
-    await kvCommand(["SET", STORE_KEY, serialized]);
+    await kvCommand(["SET", EVENT_STORE_KEY, serialized]);
     return;
   }
 
