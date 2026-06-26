@@ -18,6 +18,7 @@ export function RSVPCard({
   claimedItems = [],
   selectedItems = [],
   onSubmit,
+  onStartNewRsvp,
   onContributionChoice,
   onClearContributionSelection
 }: {
@@ -26,6 +27,7 @@ export function RSVPCard({
   claimedItems?: ChecklistItem[];
   selectedItems?: ChecklistItem[];
   onSubmit: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
+  onStartNewRsvp?: () => void;
   onContributionChoice?: (showContributions: boolean) => void;
   onClearContributionSelection?: () => void;
 }) {
@@ -101,6 +103,21 @@ export function RSVPCard({
     onContributionChoice?.(true);
   }
 
+  function handleStartNewRsvp() {
+    setName("");
+    setStatus(undefined);
+    setContact("");
+    setDietaryRestrictions("");
+    setNoteToHost("");
+    setMessage("");
+    setError("");
+    setSubmittedStatus(undefined);
+    setContributionChoice(undefined);
+    onContributionChoice?.(false);
+    onClearContributionSelection?.();
+    onStartNewRsvp?.();
+  }
+
   if (savedStatus) {
     return (
       <Card className={cn("overflow-hidden border", theme.accentBorder)}>
@@ -124,6 +141,11 @@ export function RSVPCard({
                 ))}
               </ul>
             </div>
+          ) : null}
+          {onStartNewRsvp ? (
+            <Button type="button" variant="secondary" className="w-full" onClick={handleStartNewRsvp}>
+              Not you? Start a new RSVP
+            </Button>
           ) : null}
         </CardContent>
       </Card>

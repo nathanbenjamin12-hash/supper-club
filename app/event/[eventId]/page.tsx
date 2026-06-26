@@ -150,6 +150,14 @@ export default function PublicEventPage() {
     );
   }
 
+  function handleStartNewRsvp() {
+    window.localStorage.removeItem(currentGuestStorageKey(eventId));
+    setCurrentGuest(undefined);
+    setShowContributions(false);
+    setSelectedContributionIds([]);
+    setMessage("");
+  }
+
   async function handleClaim(item: ChecklistItem, note?: string) {
     if (!currentGuest) {
       return;
@@ -279,6 +287,7 @@ export default function PublicEventPage() {
               claimedItems={claimedItems}
               selectedItems={selectedItems}
               onSubmit={handleRsvp}
+              onStartNewRsvp={handleStartNewRsvp}
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
             />
