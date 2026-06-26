@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, Send, UsersRound } from "lucide-react";
+import { ArrowLeft, UsersRound } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestContributionCard } from "@/components/GuestContributionCard";
@@ -11,7 +11,7 @@ import { GuestList } from "@/components/GuestList";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import type { ChecklistItem, EventBundle, Guest, GuestDraft } from "@/types/events";
 import {
   claimSharedChecklistItem,
@@ -45,7 +45,7 @@ export default function PublicEventPage() {
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [currentGuest, setCurrentGuest] = useState<Guest | undefined>();
   const [showContributions, setShowContributions] = useState(false);
-  const [rsvpCompletionMessage, setRsvpCompletionMessage] = useState("");
+  const [selectedContributionIds, setSelectedContributionIds] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
@@ -97,32 +97,57 @@ export default function PublicEventPage() {
       return undefined;
     }
 
-    setCurrentGuest(response.guest);
+    let nextBundle = response.bundle;
+    let claimedCount = 0;
+
+    if (draft.rsvpStatus === "yes" && selectedContributionIds.length > 0) {
+      for (const itemId of selectedContributionIds) {
+        const claimResponse = await claimSharedChecklistItem(eventId, itemId, response.guest.id);
+
+        if (claimResponse?.bundle) {
+          nextBundle = claimResponse.bundle;
+          const claimedItem = claimResponse.item;
+          const guestClaimedItem =
+            (claimedItem.itemType ?? "bring") === "money"
+              ? claimedItem.moneyClaims?.some((claim) => claim.guestId === response.guest.id) ?? false
+              : claimedItem.claimedByGuestId === response.guest.id;
+
+          if (guestClaimedItem) {
+            claimedCount += 1;
+          }
+        }
+      }
+    }
+
+    const savedGuest = nextBundle.guests.find((guest) => guest.id === response.guest.id) ?? response.guest;
+
+    setCurrentGuest(savedGuest);
     window.localStorage.setItem(currentGuestStorageKey(eventId), response.guest.id);
-    setBundle(response.bundle);
-    setShowContributions(false);
-    setRsvpCompletionMessage("");
-    setMessage("");
-    return response.guest;
+    setBundle(nextBundle);
+    setShowContributions(draft.rsvpStatus === "yes");
+    setSelectedContributionIds([]);
+    setMessage(
+      selectedContributionIds.length > 0 && claimedCount < selectedContributionIds.length
+        ? "Some selected items were claimed before your RSVP was sent."
+        : ""
+    );
+    return savedGuest;
   }
 
   function handleContributionChoice(showContributions: boolean) {
     setShowContributions(showContributions);
     setMessage("");
-    if (showContributions) {
-      setRsvpCompletionMessage("");
+    if (!showContributions) {
+      setSelectedContributionIds([]);
     }
   }
 
-  function handleCompleteRsvp(nextMessage: string) {
-    setRsvpCompletionMessage(nextMessage);
-    setShowContributions(false);
-    setMessage("");
-  }
-
-  function handleContributionComplete() {
-    handleCompleteRsvp("You're all set. Thanks for contributing.");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  function handleToggleContributionSelection(item: ChecklistItem) {
+    setSelectedContributionIds((currentIds) =>
+      currentIds.includes(item.id)
+        ? currentIds.filter((itemId) => itemId !== item.id)
+        : [...currentIds, item.id]
+    );
   }
 
   async function handleClaim(item: ChecklistItem, note?: string) {
@@ -130,20 +155,10 @@ export default function PublicEventPage() {
       return;
     }
 
-    const existingClaim = bundle?.checklistItems.find((candidate) => guestOwnsItem(candidate, currentGuest));
-
     const previousMoneyClaimCount = item.moneyClaims?.length ?? 0;
     const response = await claimSharedChecklistItem(eventId, item.id, currentGuest.id, note);
     const updated = response?.item;
-    let nextBundle = response?.bundle;
-    const claimedByCurrentGuest = (updated?.itemType ?? "bring") === "money"
-      ? updated?.moneyClaims?.some((claim) => claim.guestId === currentGuest.id) ?? false
-      : updated?.claimedByGuestId === currentGuest.id;
-
-    if (existingClaim && existingClaim.id !== item.id && claimedByCurrentGuest) {
-      const releaseResponse = await releaseSharedChecklistItemClaim(eventId, existingClaim.id, currentGuest.id);
-      nextBundle = releaseResponse?.bundle ?? nextBundle;
-    }
+    const nextBundle = response?.bundle;
 
     if ((item.itemType ?? "bring") === "money") {
       const nextMoneyClaimCount = updated?.moneyClaims?.length ?? previousMoneyClaimCount;
@@ -206,17 +221,15 @@ export default function PublicEventPage() {
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
   const theme = getEventTheme(bundle.event.coverStyle);
   const isHostPreview = searchParams.get("preview") === "host";
-  const contributionFlowIsActive =
-    showContributions && currentGuest?.rsvpStatus === "yes" && !rsvpCompletionMessage;
+  const claimedItems = currentGuest
+    ? bundle.checklistItems.filter((item) => guestOwnsItem(item, currentGuest))
+    : [];
+  const selectedItems = bundle.checklistItems.filter((item) => selectedContributionIds.includes(item.id));
+  const shouldShowContributionOptions = showContributions || currentGuest?.rsvpStatus === "yes";
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
-      <div
-        className={cn(
-          "mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10",
-          contributionFlowIsActive && "pb-28 lg:pb-10"
-        )}
-      >
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         {isHostPreview ? (
           <Link
             href={`/event/${eventId}/host`}
@@ -241,7 +254,7 @@ export default function PublicEventPage() {
           </Link>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-6">
             <EventHero event={bundle.event} />
 
@@ -260,42 +273,39 @@ export default function PublicEventPage() {
               </CardContent>
             </Card>
 
-            <GuestContributionCard
+            <RSVPCard
               event={bundle.event}
-              items={bundle.checklistItems}
               currentGuest={currentGuest}
-              message={message}
-              onClaim={handleClaim}
-              onRemoveClaim={handleRemoveClaim}
-              onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
-              onComplete={currentGuest?.rsvpStatus === "yes" ? handleContributionComplete : undefined}
+              claimedItems={claimedItems}
+              selectedItems={selectedItems}
+              onSubmit={handleRsvp}
+              onContributionChoice={handleContributionChoice}
+              onClearContributionSelection={() => setSelectedContributionIds([])}
             />
+
+            {shouldShowContributionOptions ? (
+              <GuestContributionCard
+                event={bundle.event}
+                items={bundle.checklistItems}
+                currentGuest={currentGuest}
+                selectionMode={!currentGuest}
+                selectedItemIds={selectedContributionIds}
+                message={message}
+                onToggleSelection={handleToggleContributionSelection}
+                onClaim={handleClaim}
+                onRemoveClaim={handleRemoveClaim}
+                onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
+              />
+            ) : null}
           </div>
 
           <aside className="space-y-5">
-            <RSVPCard
-              event={bundle.event}
-              onSubmit={handleRsvp}
-              onContributionChoice={handleContributionChoice}
-              completionMessage={rsvpCompletionMessage}
-              onComplete={handleCompleteRsvp}
-            />
-            {contributionFlowIsActive ? (
+            {shouldShowContributionOptions ? (
               <PitchInCard event={bundle.event} />
             ) : null}
           </aside>
         </div>
       </div>
-      {contributionFlowIsActive ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 p-3 shadow-soft backdrop-blur lg:hidden">
-          <div className="mx-auto max-w-6xl">
-            <Button type="button" className={cn("w-full", theme.cta)} onClick={handleContributionComplete}>
-              <Send className="h-4 w-4" aria-hidden="true" />
-              Send RSVP
-            </Button>
-          </div>
-        </div>
-      ) : null}
     </main>
   );
 }
