@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { CheckCircle2, Heart, Send, Utensils } from "lucide-react";
-import type { DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
+import type { ChecklistItem, DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,20 +14,24 @@ const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
 
 export function RSVPCard({
   event,
+  currentGuest,
+  claimedItems = [],
+  selectedItems = [],
   onSubmit,
   onContributionChoice,
-  completionMessage,
-  onComplete
+  onClearContributionSelection
 }: {
   event?: DinnerEvent;
+  currentGuest?: Guest;
+  claimedItems?: ChecklistItem[];
+  selectedItems?: ChecklistItem[];
   onSubmit: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
   onContributionChoice?: (showContributions: boolean) => void;
-  completionMessage?: string;
-  onComplete?: (message: string) => void;
+  onClearContributionSelection?: () => void;
 }) {
   const theme = getEventTheme(event?.coverStyle);
   const [name, setName] = useState("");
-  const [status, setStatus] = useState<RSVPStatus>("yes");
+  const [status, setStatus] = useState<RSVPStatus | undefined>();
   const [contact, setContact] = useState("");
   const [dietaryRestrictions, setDietaryRestrictions] = useState("");
   const [noteToHost, setNoteToHost] = useState("");
@@ -36,24 +39,30 @@ export function RSVPCard({
   const [error, setError] = useState("");
   const [submittedStatus, setSubmittedStatus] = useState<RSVPStatus | undefined>();
   const [contributionChoice, setContributionChoice] = useState<"bring" | "later" | undefined>();
-  const [localCompletionMessage, setLocalCompletionMessage] = useState("");
-  const finalMessage = completionMessage || localCompletionMessage;
 
-  const submitLabels: Record<RSVPStatus, string> = {
-    yes: "Confirm I'm in",
-    maybe: "Send maybe",
-    no: "Send regrets"
+  const savedStatus = currentGuest?.rsvpStatus ?? submittedStatus;
+  const savedMessage: Record<RSVPStatus, string> = {
+    yes: "You're in!",
+    maybe: "Thanks — we let the host know you're a maybe.",
+    no: "Thanks — we let the host know you can't make it."
   };
 
-  function completeFlow(nextMessage: string) {
-    setLocalCompletionMessage(nextMessage);
-    setMessage("");
+  function updateStatus(nextStatus: RSVPStatus) {
+    setStatus(nextStatus);
+    setError("");
+    setMessage(nextStatus === "yes" ? "You're in! Want to contribute?" : "");
+    setContributionChoice(undefined);
     onContributionChoice?.(false);
-    onComplete?.(nextMessage);
+    onClearContributionSelection?.();
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!status) {
+      setError("Choose whether you can make it.");
+      return;
+    }
 
     if (!name.trim()) {
       setError("Add your name so the host knows who is coming.");
@@ -79,100 +88,50 @@ export function RSVPCard({
     setSubmittedStatus(status);
     setContributionChoice(undefined);
     onContributionChoice?.(false);
-    if (status === "yes") {
-      setMessage("You're in! Want to contribute?");
-      return;
-    }
-
-    completeFlow(
-      status === "maybe"
-        ? "Thanks — we let the host know you're a maybe."
-        : "Thanks — we let the host know you can't make it."
-    );
+    onClearContributionSelection?.();
   }
 
   function chooseContribution(showContributions: boolean) {
-    if (!showContributions) {
-      setContributionChoice("later");
-      completeFlow("You're all set.");
-      return;
-    }
-
-    setContributionChoice("bring");
-    setMessage("Pick anything you'd like to bring, then send your RSVP.");
-    onContributionChoice?.(showContributions);
+    setContributionChoice(showContributions ? "bring" : "later");
+    setMessage(
+      showContributions
+        ? "Pick anything you'd like to bring, then send your RSVP."
+        : "No pressure. You can still send your RSVP now or pick something if you want."
+    );
+    onContributionChoice?.(true);
   }
 
-  if (finalMessage) {
+  if (savedStatus) {
     return (
-      <Card className={cn("sticky top-20 overflow-hidden border", theme.accentBorder)}>
+      <Card className={cn("overflow-hidden border", theme.accentBorder)}>
         <div className={cn("h-2", theme.swatch)} />
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-            RSVP saved
+            {savedStatus === "yes" ? "You're in!" : "RSVP saved"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
-            {finalMessage}
+            {savedMessage[savedStatus]}
           </p>
-          {event ? (
-            <Link
-              href={`/event/${event.id}`}
-              className={cn(buttonVariants({ variant: "default" }), "w-full", theme.cta)}
-            >
-              Back to invite
-            </Link>
+          {savedStatus === "yes" && claimedItems.length > 0 ? (
+            <div className="rounded-lg border border-ink/8 bg-cream p-3">
+              <p className="text-sm font-semibold">You&apos;re bringing:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
+                {claimedItems.map((item) => (
+                  <li key={item.id}>{item.title}</li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </CardContent>
       </Card>
     );
   }
 
-  if (submittedStatus === "yes") {
-    return (
-      <Card className={cn("sticky top-20 overflow-hidden border", theme.accentBorder)}>
-        <div className={cn("h-2", theme.swatch)} />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-            You&apos;re in
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
-            <p className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              {message}
-            </p>
-            {contributionChoice === "bring" ? (
-              <p className="mt-2 text-xs font-medium text-ink/60">
-                Claim an open item below. Your RSVP is already saved.
-              </p>
-            ) : (
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <Button
-                  type="button"
-                  variant="default"
-                  className={cn(theme.cta)}
-                  onClick={() => chooseContribution(true)}
-                >
-                  I&apos;ll bring something
-                </Button>
-                <Button type="button" variant="secondary" onClick={() => chooseContribution(false)}>
-                  Maybe later
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className={cn("sticky top-20 overflow-hidden border", theme.accentBorder)}>
+    <Card className={cn("overflow-hidden border", theme.accentBorder)}>
       <div className={cn("h-2", theme.swatch)} />
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -188,8 +147,7 @@ export function RSVPCard({
                 key={candidate}
                 type="button"
                 onClick={() => {
-                  setStatus(candidate);
-                  setError("");
+                  updateStatus(candidate);
                 }}
                 className={cn(
                   "min-h-12 rounded-lg px-2 text-sm font-semibold transition",
@@ -202,6 +160,30 @@ export function RSVPCard({
               </button>
             ))}
           </div>
+
+          {status === "yes" ? (
+            <div className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
+              <p className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                {message || "You're in! Want to contribute?"}
+              </p>
+              {!contributionChoice ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    className={cn(theme.cta)}
+                    onClick={() => chooseContribution(true)}
+                  >
+                    I&apos;ll bring something
+                  </Button>
+                  <Button type="button" variant="secondary" onClick={() => chooseContribution(false)}>
+                    Maybe later
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <label className="grid gap-2 text-sm font-semibold">
             Your name
@@ -238,10 +220,21 @@ export function RSVPCard({
             </div>
           </div>
 
+          {selectedItems.length > 0 ? (
+            <div className="rounded-lg border border-ink/8 bg-cream p-3">
+              <p className="text-sm font-semibold">Selected to bring:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
+                {selectedItems.map((item) => (
+                  <li key={item.id}>{item.title}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
           <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
             <Send className="h-4 w-4" aria-hidden="true" />
-            {submitLabels[status]}
+            Send RSVP
           </Button>
         </form>
       </CardContent>

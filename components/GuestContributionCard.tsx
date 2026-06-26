@@ -71,41 +71,50 @@ export function GuestContributionCard({
   event,
   items,
   currentGuest,
+  selectionMode = false,
+  selectedItemIds = [],
   message,
   onClaim,
   onRemoveClaim,
-  onBlockedClaim,
-  onComplete
+  onToggleSelection,
+  onBlockedClaim
 }: {
   event?: DinnerEvent;
   items: ChecklistItem[];
   currentGuest?: Guest;
+  selectionMode?: boolean;
+  selectedItemIds?: string[];
   message?: string;
-  onClaim: (item: ChecklistItem) => void;
-  onRemoveClaim: (item: ChecklistItem) => void;
-  onBlockedClaim: () => void;
-  onComplete?: () => void;
+  onClaim?: (item: ChecklistItem) => void;
+  onRemoveClaim?: (item: ChecklistItem) => void;
+  onToggleSelection?: (item: ChecklistItem) => void;
+  onBlockedClaim?: () => void;
 }) {
   const theme = getEventTheme(event?.coverStyle);
   const [isChangingClaim, setIsChangingClaim] = useState(false);
-  const ownClaim = items.find((item) => guestOwnsItem(item, currentGuest));
+  const ownClaims = items.filter((item) => guestOwnsItem(item, currentGuest));
+  const selectedItems = items.filter((item) => selectedItemIds.includes(item.id));
   const availableItems = items.filter((item) => itemIsAvailable(item, currentGuest));
   const claimedItems = items.filter((item) => itemIsClaimedBySomeoneElse(item, currentGuest));
   const canClaim = currentGuest?.rsvpStatus === "yes";
 
   function handleClaim(item: ChecklistItem) {
     if (!canClaim) {
-      onBlockedClaim();
+      onBlockedClaim?.();
       return;
     }
 
     setIsChangingClaim(false);
-    onClaim(item);
+    onClaim?.(item);
   }
 
   function handleRemoveClaim(item: ChecklistItem) {
     setIsChangingClaim(false);
-    onRemoveClaim(item);
+    onRemoveClaim?.(item);
+  }
+
+  function itemIsSelected(item: ChecklistItem) {
+    return selectedItemIds.includes(item.id);
   }
 
   return (
@@ -116,7 +125,9 @@ export function GuestContributionCard({
           What can you bring?
         </CardTitle>
         <p className="text-sm text-ink/60">
-          See what is still open, then claim one item once your RSVP is in.
+          {selectionMode
+            ? "Choose anything you'd like to bring before sending your RSVP."
+            : "See what is still open, then manage the items you're bringing."}
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -126,55 +137,93 @@ export function GuestContributionCard({
           </p>
         ) : null}
 
-        {ownClaim ? (
+        {selectedItems.length > 0 ? (
           <div className={cn("rounded-lg p-4", theme.softPanel)}>
             <p className="flex items-center gap-2 text-sm font-semibold text-olive">
               <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              You&apos;re bringing: {ownClaim.title}
+              Selected to bring:
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => setIsChangingClaim((value) => !value)}>
-                <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                Change
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveClaim(ownClaim)}>
-                <X className="h-4 w-4" aria-hidden="true" />
-                Remove claim
-              </Button>
-            </div>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
+              {selectedItems.map((item) => (
+                <li key={item.id}>{item.title}</li>
+              ))}
+            </ul>
           </div>
         ) : null}
 
-        {availableItems.length > 0 && (!ownClaim || isChangingClaim) ? (
+        {ownClaims.length > 0 ? (
+          <div className={cn("rounded-lg p-4", theme.softPanel)}>
+            <p className="flex items-center gap-2 text-sm font-semibold text-olive">
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              You&apos;re bringing:
+            </p>
+            <div className="mt-3 space-y-2">
+              {ownClaims.map((item) => (
+                <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-cream p-3">
+                  <span className="text-sm font-semibold">{item.title}</span>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveClaim(item)}>
+                    <X className="h-4 w-4" aria-hidden="true" />
+                    Remove claim
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {availableItems.length > 0 ? (
+              <div className="mt-3">
+                <Button type="button" variant="secondary" size="sm" onClick={() => setIsChangingClaim((value) => !value)}>
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  {isChangingClaim ? "Hide open items" : "Add or change items"}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {availableItems.length > 0 && (selectionMode || ownClaims.length === 0 || isChangingClaim) ? (
           <section className="space-y-3" aria-labelledby="available-contributions-heading">
             <h3 id="available-contributions-heading" className="text-lg font-semibold">
               Available to claim
             </h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              {availableItems.map((item) => (
-                <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold">{item.title}</p>
-                      <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
+              {availableItems.map((item) => {
+                const selected = itemIsSelected(item);
+
+                return (
+                  <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold">{item.title}</p>
+                        <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
+                      </div>
+                      <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
                     </div>
-                    <Badge tone="open">Open</Badge>
+                    {selectionMode ? (
+                      <Button
+                        type="button"
+                        variant={selected ? "secondary" : "default"}
+                        className={cn("mt-3 w-full", !selected && theme.cta)}
+                        onClick={() => onToggleSelection?.(item)}
+                      >
+                        {selected ? "Remove from RSVP" : "Select this"}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant={canClaim ? "default" : "secondary"}
+                        className={cn("mt-3 w-full", canClaim && theme.cta)}
+                        onClick={() => handleClaim(item)}
+                      >
+                        {canClaim ? "Claim this" : "RSVP to claim"}
+                      </Button>
+                    )}
                   </div>
-                  <Button
-                    type="button"
-                    variant={canClaim ? "default" : "secondary"}
-                    className={cn("mt-3 w-full", canClaim && theme.cta)}
-                    onClick={() => handleClaim(item)}
-                  >
-                    {canClaim ? "Claim this" : "RSVP to claim"}
-                  </Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         ) : null}
 
-        {availableItems.length === 0 && !ownClaim ? (
+        {availableItems.length === 0 && ownClaims.length === 0 && selectedItems.length === 0 ? (
           <EmptyState title="Everything is claimed" description="The board is full for now." />
         ) : null}
 
@@ -197,14 +246,6 @@ export function GuestContributionCard({
               ))}
             </div>
           </section>
-        ) : null}
-
-        {ownClaim && !isChangingClaim && onComplete ? (
-          <div className="flex justify-end border-t border-ink/8 pt-4">
-            <Button type="button" className={cn(theme.cta)} onClick={onComplete}>
-              Done
-            </Button>
-          </div>
         ) : null}
       </CardContent>
     </Card>
