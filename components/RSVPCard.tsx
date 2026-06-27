@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
+type ContributionChoice = "bring" | "later";
 
 export function RSVPCard({
   event,
@@ -38,7 +39,7 @@ export function RSVPCard({
     options?: { saveContributionSelection?: boolean }
   ) => Guest | undefined | Promise<Guest | undefined>;
   onUpdateModeChange?: (isUpdating: boolean) => void;
-  onContributionChoice?: (showContributions: boolean) => void;
+  onContributionChoice?: (showContributions: boolean, choice?: ContributionChoice) => void;
   onClearContributionSelection?: () => void;
   onEditContributions?: () => void;
   onBackToTop?: () => void;
@@ -55,7 +56,7 @@ export function RSVPCard({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submittedStatus, setSubmittedStatus] = useState<RSVPStatus | undefined>();
-  const [contributionChoice, setContributionChoice] = useState<"bring" | "later" | undefined>();
+  const [contributionChoice, setContributionChoice] = useState<ContributionChoice | undefined>();
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateRsvpStatus, setUpdateRsvpStatus] = useState<RSVPStatus | undefined>();
   const [updateContact, setUpdateContact] = useState("");
@@ -113,14 +114,16 @@ export function RSVPCard({
     onClearContributionSelection?.();
   }
 
-  function chooseContribution(showContributions: boolean) {
-    setContributionChoice(showContributions ? "bring" : "later");
+  function chooseContribution(choice: ContributionChoice) {
+    const wantsToBring = choice === "bring";
+
+    setContributionChoice(choice);
     setMessage(
-      showContributions
+      wantsToBring
         ? "Pick anything you'd like to bring, then send your RSVP."
         : "No pressure. You can still send your RSVP now or pick something if you want."
     );
-    onContributionChoice?.(true);
+    onContributionChoice?.(true, choice);
   }
 
   function startUpdate() {
@@ -227,7 +230,7 @@ export function RSVPCard({
                     variant={contributionChoice === "bring" ? "default" : "secondary"}
                     className={cn(contributionChoice === "bring" && theme.cta)}
                     aria-pressed={contributionChoice === "bring"}
-                    onClick={() => chooseContribution(true)}
+                    onClick={() => chooseContribution("bring")}
                   >
                     I&apos;ll bring something
                   </Button>
@@ -236,7 +239,7 @@ export function RSVPCard({
                     variant={contributionChoice === "later" ? "default" : "secondary"}
                     className={cn(contributionChoice === "later" && theme.cta)}
                     aria-pressed={contributionChoice === "later"}
-                    onClick={() => chooseContribution(false)}
+                    onClick={() => chooseContribution("later")}
                   >
                     Maybe later
                   </Button>
@@ -399,7 +402,7 @@ export function RSVPCard({
                   variant={contributionChoice === "bring" ? "default" : "secondary"}
                   className={cn(contributionChoice === "bring" && theme.cta)}
                   aria-pressed={contributionChoice === "bring"}
-                  onClick={() => chooseContribution(true)}
+                  onClick={() => chooseContribution("bring")}
                 >
                   I&apos;ll bring something
                 </Button>
@@ -408,7 +411,7 @@ export function RSVPCard({
                   variant={contributionChoice === "later" ? "default" : "secondary"}
                   className={cn(contributionChoice === "later" && theme.cta)}
                   aria-pressed={contributionChoice === "later"}
-                  onClick={() => chooseContribution(false)}
+                  onClick={() => chooseContribution("later")}
                 >
                   Maybe later
                 </Button>

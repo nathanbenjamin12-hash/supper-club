@@ -39,6 +39,8 @@ function guestOwnsItem(item: ChecklistItem, guest?: Guest) {
     : item.claimedByGuestId === guest.id;
 }
 
+type ContributionChoice = "bring" | "later";
+
 export default function PublicEventPage() {
   const params = useParams<{ eventId: string }>();
   const searchParams = useSearchParams();
@@ -49,6 +51,7 @@ export default function PublicEventPage() {
   const [selectedContributionIds, setSelectedContributionIds] = useState<string[]>([]);
   const [isUpdatingResponse, setIsUpdatingResponse] = useState(false);
   const [isEditingContributions, setIsEditingContributions] = useState(false);
+  const [deferContributionSubmit, setDeferContributionSubmit] = useState(false);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
@@ -160,6 +163,7 @@ export default function PublicEventPage() {
     setBundle(nextBundle);
     setShowContributions(false);
     setIsEditingContributions(false);
+    setDeferContributionSubmit(false);
     setSelectedContributionIds([]);
     setMessage(
       selectedContributionIds.length > 0 && claimedCount < selectedContributionIds.length
@@ -202,6 +206,7 @@ export default function PublicEventPage() {
     setBundle(nextBundle);
     setShowContributions(false);
     setIsEditingContributions(false);
+    setDeferContributionSubmit(false);
     setIsUpdatingResponse(false);
     setSelectedContributionIds([]);
     setMessage(
@@ -213,9 +218,10 @@ export default function PublicEventPage() {
     return savedGuest;
   }
 
-  function handleContributionChoice(showContributions: boolean) {
+  function handleContributionChoice(showContributions: boolean, choice?: ContributionChoice) {
     setShowContributions(showContributions);
     setIsEditingContributions(false);
+    setDeferContributionSubmit(showContributions && choice === "bring");
     setMessage("");
     if (!showContributions) {
       setSelectedContributionIds([]);
@@ -231,6 +237,7 @@ export default function PublicEventPage() {
     setIsUpdatingResponse(isUpdating);
     setShowContributions(false);
     setIsEditingContributions(false);
+    setDeferContributionSubmit(false);
     setSelectedContributionIds([]);
     setMessage("");
   }
@@ -239,6 +246,7 @@ export default function PublicEventPage() {
     setIsEditingContributions(true);
     setShowContributions(false);
     setIsUpdatingResponse(false);
+    setDeferContributionSubmit(false);
     setSelectedContributionIds([]);
     setMessage("");
   }
@@ -309,6 +317,7 @@ export default function PublicEventPage() {
   const shouldShowContributionEditor =
     Boolean(currentGuest && !isUpdatingResponse && isEditingContributions && currentGuest.rsvpStatus === "yes");
   const shouldShowContributionOptions = shouldShowContributionSelection || shouldShowContributionEditor;
+  const shouldDeferContributionSubmit = shouldShowContributionSelection && deferContributionSubmit;
   const rsvpFormId = "guest-rsvp-form";
 
   return (
@@ -359,7 +368,7 @@ export default function PublicEventPage() {
               onEditContributions={currentGuest?.rsvpStatus === "yes" ? handleEditContributions : undefined}
               onBackToTop={handleBackToTop}
               statusMessage={message}
-              deferSubmitButton={shouldShowContributionSelection}
+              deferSubmitButton={shouldDeferContributionSubmit}
               formId={rsvpFormId}
             />
 
@@ -377,7 +386,7 @@ export default function PublicEventPage() {
               />
             ) : null}
 
-            {shouldShowContributionSelection ? (
+            {shouldDeferContributionSubmit ? (
               <Button type="submit" form={rsvpFormId} className={cn("w-full", theme.cta)} variant="default">
                 <Send className="h-4 w-4" aria-hidden="true" />
                 {isUpdatingResponse ? "Save changes" : "Send RSVP"}
