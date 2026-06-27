@@ -181,6 +181,41 @@ export function createGuest(eventId: string, data: GuestDraft) {
   return guest;
 }
 
+export function updateGuest(eventId: string, guestId: string, data: GuestDraft) {
+  const timestamp = now();
+  let updatedGuest: Guest | undefined;
+
+  withBundle(eventId, (bundle) => {
+    const guests = bundle.guests.map((guest) => {
+      if (guest.id !== guestId) {
+        return guest;
+      }
+
+      updatedGuest = {
+        ...guest,
+        name: data.name,
+        rsvpStatus: data.rsvpStatus,
+        email: data.email,
+        phone: data.phone,
+        dietaryRestrictions: data.dietaryRestrictions,
+        allergies: data.allergies,
+        noteToHost: data.noteToHost,
+        updatedAt: timestamp
+      };
+
+      return updatedGuest;
+    });
+
+    return {
+      ...bundle,
+      guests,
+      event: updatedGuest ? { ...bundle.event, updatedAt: timestamp } : bundle.event
+    };
+  });
+
+  return updatedGuest;
+}
+
 export function claimChecklistItem(itemId: string, guestId: string, note?: string) {
   const bundles = readBundles();
   let updatedItem: ChecklistItem | undefined;
