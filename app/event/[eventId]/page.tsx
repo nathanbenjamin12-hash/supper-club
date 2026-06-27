@@ -50,10 +50,6 @@ export default function PublicEventPage() {
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
 
-  async function reload() {
-    setBundle(await getSharedEventBundle(eventId));
-  }
-
   useEffect(() => {
     let active = true;
 
@@ -150,54 +146,50 @@ export default function PublicEventPage() {
     );
   }
 
-  async function handleClaim(item: ChecklistItem, note?: string) {
-    if (!currentGuest) {
+  async function handleSaveContributionChanges(nextItemIds: string[]) {
+    if (!currentGuest || !bundle) {
       return;
     }
 
-    const previousMoneyClaimCount = item.moneyClaims?.length ?? 0;
-    const response = await claimSharedChecklistItem(eventId, item.id, currentGuest.id, note);
-    const updated = response?.item;
-    const nextBundle = response?.bundle;
+    const currentClaimIds = bundle.checklistItems
+      .filter((item) => guestOwnsItem(item, currentGuest))
+      .map((item) => item.id);
+    const nextClaimIds = Array.from(new Set(nextItemIds));
+    const releaseIds = currentClaimIds.filter((itemId) => !nextClaimIds.includes(itemId));
+    const claimIds = nextClaimIds.filter((itemId) => !currentClaimIds.includes(itemId));
+    let nextBundle = bundle;
+    let blockedClaimCount = 0;
 
-    if ((item.itemType ?? "bring") === "money") {
-      const nextMoneyClaimCount = updated?.moneyClaims?.length ?? previousMoneyClaimCount;
-      const alreadyClaimed = item.moneyClaims?.some((claim) => claim.guestId === currentGuest.id);
+    for (const itemId of releaseIds) {
+      const response = await releaseSharedChecklistItemClaim(eventId, itemId, currentGuest.id);
 
-      if (nextMoneyClaimCount > previousMoneyClaimCount) {
-        setMessage("Spot claimed. The board is updated.");
-      } else if (alreadyClaimed) {
-        setMessage("You already claimed a spot for that.");
-      } else {
-        setMessage("All pitch-in spots are claimed.");
+      if (response?.bundle) {
+        nextBundle = response.bundle;
       }
-    } else {
-      setMessage(
-        updated?.claimedByGuestId === currentGuest.id
-          ? "Perfect. The board is updated."
-          : "Looks like someone claimed that first."
-      );
     }
-    if (nextBundle) {
-      setBundle(nextBundle);
-    } else {
-      await reload();
+
+    for (const itemId of claimIds) {
+      const response = await claimSharedChecklistItem(eventId, itemId, currentGuest.id);
+
+      if (response?.bundle) {
+        nextBundle = response.bundle;
+      }
+
+      if (!response?.item || !guestOwnsItem(response.item, currentGuest)) {
+        blockedClaimCount += 1;
+      }
     }
+
+    setBundle(nextBundle);
+    setMessage(
+      blockedClaimCount > 0
+        ? "Some selected items were claimed before your changes were saved."
+        : "Your contribution choices were saved."
+    );
   }
 
-  async function handleRemoveClaim(item: ChecklistItem) {
-    if (!currentGuest) {
-      return;
-    }
-
-    const response = await releaseSharedChecklistItemClaim(eventId, item.id, currentGuest.id);
-
-    setMessage("Your claim was removed.");
-    if (response?.bundle) {
-      setBundle(response.bundle);
-    } else {
-      await reload();
-    }
+  function handleBackToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   if (loaded && !bundle) {
@@ -241,18 +233,7 @@ export default function PublicEventPage() {
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to Event Home
           </Link>
-        ) : (
-          <Link
-            href="/"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "sm" }),
-              "mb-5 bg-cream/65 backdrop-blur"
-            )}
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Supper Club
-          </Link>
-        )}
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-6">
@@ -279,6 +260,7 @@ export default function PublicEventPage() {
               claimedItems={claimedItems}
               selectedItems={selectedItems}
               onSubmit={handleRsvp}
+              onBackToTop={handleBackToTop}
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
             />
@@ -292,9 +274,8 @@ export default function PublicEventPage() {
                 selectedItemIds={selectedContributionIds}
                 message={message}
                 onToggleSelection={handleToggleContributionSelection}
-                onClaim={handleClaim}
-                onRemoveClaim={handleRemoveClaim}
-                onBlockedClaim={() => setMessage("Send your RSVP first, then you can claim an item.")}
+                onSaveClaims={handleSaveContributionChanges}
+                onBackToTop={handleBackToTop}
               />
             ) : null}
           </div>
