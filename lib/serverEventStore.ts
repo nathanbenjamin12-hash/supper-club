@@ -337,7 +337,13 @@ export async function updateStoredGuest(eventId: string, guestId: string, data: 
 
         updatedGuest = {
           ...guest,
-          ...data,
+          name: data.name,
+          rsvpStatus: data.rsvpStatus,
+          email: data.email,
+          phone: data.phone,
+          dietaryRestrictions: data.dietaryRestrictions,
+          allergies: data.allergies,
+          noteToHost: data.noteToHost,
           updatedAt: timestamp
         };
 

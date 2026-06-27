@@ -160,7 +160,7 @@ export function RSVPCard({
         phone: updateContact.includes("@") ? undefined : cleanOptional(updateContact),
         dietaryRestrictions: updateRsvpStatus === "yes" ? cleanOptional(updateDietaryRestrictions) : undefined,
         allergies: undefined,
-        noteToHost: cleanOptional(updateNoteToHost)
+        noteToHost: updateRsvpStatus === "yes" ? cleanOptional(updateNoteToHost) : undefined
       },
       { saveContributionSelection: updateRsvpStatus === "yes" && Boolean(contributionChoice) }
     );

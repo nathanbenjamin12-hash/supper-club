@@ -184,7 +184,11 @@ export default function PublicEventPage() {
     let nextBundle = response.bundle;
     let blockedClaimCount = 0;
 
-    if (options?.saveContributionSelection && draft.rsvpStatus === "yes") {
+    if (draft.rsvpStatus !== "yes") {
+      const result = await saveContributionSelection(response.guest, nextBundle, []);
+      nextBundle = result.bundle;
+      blockedClaimCount = result.blockedClaimCount;
+    } else if (options?.saveContributionSelection) {
       const result = await saveContributionSelection(response.guest, nextBundle, selectedContributionIds);
       nextBundle = result.bundle;
       blockedClaimCount = result.blockedClaimCount;
