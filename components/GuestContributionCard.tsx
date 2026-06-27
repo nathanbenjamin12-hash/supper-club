@@ -97,6 +97,7 @@ export function GuestContributionCard({
   const availableItems = items.filter((item) => itemIsAvailable(item, currentGuest));
   const claimedItems = items.filter((item) => itemIsClaimedBySomeoneElse(item, currentGuest));
   const editableItems = items.filter((item) => guestOwnsItem(item, currentGuest) || itemIsAvailable(item, currentGuest));
+  const selectionItems = selectionMode && currentGuest ? editableItems : availableItems;
   const ownClaimIds = ownClaims.map((item) => item.id);
 
   function itemIsSelected(item: ChecklistItem) {
@@ -172,13 +173,13 @@ export function GuestContributionCard({
               </div>
             ) : null}
 
-            {availableItems.length > 0 ? (
+            {selectionItems.length > 0 ? (
               <section className="space-y-3" aria-labelledby="available-contributions-heading">
                 <h3 id="available-contributions-heading" className="text-lg font-semibold">
-                  Available to claim
+                  {currentGuest ? "Your options" : "Available to claim"}
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {availableItems.map((item) => {
+                  {selectionItems.map((item) => {
                     const selected = itemIsSelected(item);
 
                     return (

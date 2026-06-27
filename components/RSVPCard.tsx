@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
-const updateStatuses: RSVPStatus[] = ["yes", "no"];
 
 export function RSVPCard({
   event,
@@ -20,6 +19,7 @@ export function RSVPCard({
   selectedItems = [],
   onSubmit,
   onUpdate,
+  onUpdateModeChange,
   onContributionChoice,
   onClearContributionSelection
 }: {
@@ -28,7 +28,11 @@ export function RSVPCard({
   claimedItems?: ChecklistItem[];
   selectedItems?: ChecklistItem[];
   onSubmit: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
-  onUpdate?: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
+  onUpdate?: (
+    guest: GuestDraft,
+    options?: { saveContributionSelection?: boolean }
+  ) => Guest | undefined | Promise<Guest | undefined>;
+  onUpdateModeChange?: (isUpdating: boolean) => void;
   onContributionChoice?: (showContributions: boolean) => void;
   onClearContributionSelection?: () => void;
 }) {
@@ -114,12 +118,25 @@ export function RSVPCard({
       return;
     }
 
-    setUpdateRsvpStatus(currentGuest.rsvpStatus === "maybe" ? undefined : currentGuest.rsvpStatus);
+    setUpdateRsvpStatus(currentGuest.rsvpStatus);
     setUpdateContact(currentGuest.email ?? currentGuest.phone ?? "");
     setUpdateDietaryRestrictions(currentGuest.dietaryRestrictions ?? "");
     setUpdateNoteToHost(currentGuest.noteToHost ?? "");
+    setContributionChoice(undefined);
+    onContributionChoice?.(false);
+    onClearContributionSelection?.();
+    onUpdateModeChange?.(true);
     setError("");
     setIsUpdating(true);
+  }
+
+  function updateResponseStatus(nextStatus: RSVPStatus) {
+    setUpdateRsvpStatus(nextStatus);
+    setError("");
+    setMessage(nextStatus === "yes" ? "You're in! Want to contribute?" : "");
+    setContributionChoice(undefined);
+    onContributionChoice?.(false);
+    onClearContributionSelection?.();
   }
 
   async function handleUpdateSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -135,15 +152,18 @@ export function RSVPCard({
       return;
     }
 
-    const updated = await onUpdate({
-      name: currentGuest.name,
-      rsvpStatus: updateRsvpStatus,
-      email: updateContact.includes("@") ? cleanOptional(updateContact) : undefined,
-      phone: updateContact.includes("@") ? undefined : cleanOptional(updateContact),
-      dietaryRestrictions: updateRsvpStatus === "yes" ? cleanOptional(updateDietaryRestrictions) : undefined,
-      allergies: undefined,
-      noteToHost: cleanOptional(updateNoteToHost)
-    });
+    const updated = await onUpdate(
+      {
+        name: currentGuest.name,
+        rsvpStatus: updateRsvpStatus,
+        email: updateContact.includes("@") ? cleanOptional(updateContact) : undefined,
+        phone: updateContact.includes("@") ? undefined : cleanOptional(updateContact),
+        dietaryRestrictions: updateRsvpStatus === "yes" ? cleanOptional(updateDietaryRestrictions) : undefined,
+        allergies: undefined,
+        noteToHost: cleanOptional(updateNoteToHost)
+      },
+      { saveContributionSelection: updateRsvpStatus === "yes" && Boolean(contributionChoice) }
+    );
 
     if (!updated) {
       setError("Something went wrong. Try again.");
@@ -167,15 +187,12 @@ export function RSVPCard({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdateSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-2">
-              {updateStatuses.map((candidate) => (
+            <div className="grid grid-cols-3 gap-2">
+              {statuses.map((candidate) => (
                 <button
                   key={candidate}
                   type="button"
-                  onClick={() => {
-                    setUpdateRsvpStatus(candidate);
-                    setError("");
-                  }}
+                  onClick={() => updateResponseStatus(candidate)}
                   className={cn(
                     "min-h-12 rounded-lg px-2 text-sm font-semibold transition",
                     updateRsvpStatus === candidate
@@ -187,6 +204,35 @@ export function RSVPCard({
                 </button>
               ))}
             </div>
+
+            {updateRsvpStatus === "yes" ? (
+              <div className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
+                <p className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                  {message || "You're in! Want to contribute?"}
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant={contributionChoice === "bring" ? "default" : "secondary"}
+                    className={cn(contributionChoice === "bring" && theme.cta)}
+                    aria-pressed={contributionChoice === "bring"}
+                    onClick={() => chooseContribution(true)}
+                  >
+                    I&apos;ll bring something
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={contributionChoice === "later" ? "default" : "secondary"}
+                    className={cn(contributionChoice === "later" && theme.cta)}
+                    aria-pressed={contributionChoice === "later"}
+                    onClick={() => chooseContribution(false)}
+                  >
+                    Maybe later
+                  </Button>
+                </div>
+              </div>
+            ) : null}
 
             <label className="grid gap-2 text-sm font-semibold">
               Email or phone
@@ -218,6 +264,17 @@ export function RSVPCard({
                 />
               </div>
             </div>
+
+            {selectedItems.length > 0 ? (
+              <div className="rounded-lg border border-ink/8 bg-cream p-3">
+                <p className="text-sm font-semibold">Selected to bring:</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
+                  {selectedItems.map((item) => (
+                    <li key={item.id}>{item.title}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
             {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
             <Button type="submit" className={cn("w-full", theme.cta)} variant="default">

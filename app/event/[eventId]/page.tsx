@@ -47,6 +47,7 @@ export default function PublicEventPage() {
   const [currentGuest, setCurrentGuest] = useState<Guest | undefined>();
   const [showContributions, setShowContributions] = useState(false);
   const [selectedContributionIds, setSelectedContributionIds] = useState<string[]>([]);
+  const [isUpdatingResponse, setIsUpdatingResponse] = useState(false);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
@@ -86,6 +87,41 @@ export default function PublicEventPage() {
       active = false;
     };
   }, [eventId, inviteParam]);
+
+  function guestClaimIds(checklistItems: ChecklistItem[], guest: Guest) {
+    return checklistItems.filter((item) => guestOwnsItem(item, guest)).map((item) => item.id);
+  }
+
+  async function saveContributionSelection(guest: Guest, startingBundle: EventBundle, nextItemIds: string[]) {
+    const currentClaimIds = guestClaimIds(startingBundle.checklistItems, guest);
+    const nextClaimIds = Array.from(new Set(nextItemIds));
+    const releaseIds = currentClaimIds.filter((itemId) => !nextClaimIds.includes(itemId));
+    const claimIds = nextClaimIds.filter((itemId) => !currentClaimIds.includes(itemId));
+    let nextBundle = startingBundle;
+    let blockedClaimCount = 0;
+
+    for (const itemId of releaseIds) {
+      const response = await releaseSharedChecklistItemClaim(eventId, itemId, guest.id);
+
+      if (response?.bundle) {
+        nextBundle = response.bundle;
+      }
+    }
+
+    for (const itemId of claimIds) {
+      const response = await claimSharedChecklistItem(eventId, itemId, guest.id);
+
+      if (response?.bundle) {
+        nextBundle = response.bundle;
+      }
+
+      if (!response?.item || !guestOwnsItem(response.item, guest)) {
+        blockedClaimCount += 1;
+      }
+    }
+
+    return { bundle: nextBundle, blockedClaimCount };
+  }
 
   async function handleRsvp(draft: GuestDraft) {
     const response = await createSharedGuest(eventId, draft);
@@ -131,7 +167,10 @@ export default function PublicEventPage() {
     return savedGuest;
   }
 
-  async function handleUpdateRsvp(draft: GuestDraft) {
+  async function handleUpdateRsvp(
+    draft: GuestDraft,
+    options?: { saveContributionSelection?: boolean }
+  ) {
     if (!currentGuest) {
       return undefined;
     }
@@ -142,13 +181,29 @@ export default function PublicEventPage() {
       return undefined;
     }
 
-    setCurrentGuest(response.guest);
-    setBundle(response.bundle);
-    setShowContributions(response.guest.rsvpStatus === "yes");
-    setSelectedContributionIds([]);
-    setMessage("");
+    let nextBundle = response.bundle;
+    let blockedClaimCount = 0;
 
-    return response.guest;
+    if (options?.saveContributionSelection && draft.rsvpStatus === "yes") {
+      const result = await saveContributionSelection(response.guest, nextBundle, selectedContributionIds);
+      nextBundle = result.bundle;
+      blockedClaimCount = result.blockedClaimCount;
+    }
+
+    const savedGuest = nextBundle.guests.find((guest) => guest.id === response.guest.id) ?? response.guest;
+
+    setCurrentGuest(savedGuest);
+    setBundle(nextBundle);
+    setShowContributions(savedGuest.rsvpStatus === "yes");
+    setIsUpdatingResponse(false);
+    setSelectedContributionIds([]);
+    setMessage(
+      blockedClaimCount > 0
+        ? "Some selected items were claimed before your changes were saved."
+        : ""
+    );
+
+    return savedGuest;
   }
 
   function handleContributionChoice(showContributions: boolean) {
@@ -156,7 +211,19 @@ export default function PublicEventPage() {
     setMessage("");
     if (!showContributions) {
       setSelectedContributionIds([]);
+      return;
     }
+
+    if (isUpdatingResponse && currentGuest && bundle) {
+      setSelectedContributionIds(guestClaimIds(bundle.checklistItems, currentGuest));
+    }
+  }
+
+  function handleUpdateModeChange(isUpdating: boolean) {
+    setIsUpdatingResponse(isUpdating);
+    setShowContributions(false);
+    setSelectedContributionIds([]);
+    setMessage("");
   }
 
   function handleToggleContributionSelection(item: ChecklistItem) {
@@ -172,34 +239,11 @@ export default function PublicEventPage() {
       return;
     }
 
-    const currentClaimIds = bundle.checklistItems
-      .filter((item) => guestOwnsItem(item, currentGuest))
-      .map((item) => item.id);
-    const nextClaimIds = Array.from(new Set(nextItemIds));
-    const releaseIds = currentClaimIds.filter((itemId) => !nextClaimIds.includes(itemId));
-    const claimIds = nextClaimIds.filter((itemId) => !currentClaimIds.includes(itemId));
-    let nextBundle = bundle;
-    let blockedClaimCount = 0;
-
-    for (const itemId of releaseIds) {
-      const response = await releaseSharedChecklistItemClaim(eventId, itemId, currentGuest.id);
-
-      if (response?.bundle) {
-        nextBundle = response.bundle;
-      }
-    }
-
-    for (const itemId of claimIds) {
-      const response = await claimSharedChecklistItem(eventId, itemId, currentGuest.id);
-
-      if (response?.bundle) {
-        nextBundle = response.bundle;
-      }
-
-      if (!response?.item || !guestOwnsItem(response.item, currentGuest)) {
-        blockedClaimCount += 1;
-      }
-    }
+    const { bundle: nextBundle, blockedClaimCount } = await saveContributionSelection(
+      currentGuest,
+      bundle,
+      nextItemIds
+    );
 
     setBundle(nextBundle);
     setMessage(
@@ -238,8 +282,9 @@ export default function PublicEventPage() {
     ? bundle.checklistItems.filter((item) => guestOwnsItem(item, currentGuest))
     : [];
   const selectedItems = bundle.checklistItems.filter((item) => selectedContributionIds.includes(item.id));
-  const shouldShowContributionOptions =
-    showContributions || currentGuest?.rsvpStatus === "yes" || claimedItems.length > 0;
+  const shouldShowContributionOptions = isUpdatingResponse
+    ? showContributions
+    : showContributions || currentGuest?.rsvpStatus === "yes" || claimedItems.length > 0;
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
@@ -283,6 +328,7 @@ export default function PublicEventPage() {
               selectedItems={selectedItems}
               onSubmit={handleRsvp}
               onUpdate={handleUpdateRsvp}
+              onUpdateModeChange={handleUpdateModeChange}
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
             />
@@ -292,7 +338,7 @@ export default function PublicEventPage() {
                 event={bundle.event}
                 items={bundle.checklistItems}
                 currentGuest={currentGuest}
-                selectionMode={!currentGuest}
+                selectionMode={!currentGuest || isUpdatingResponse}
                 selectedItemIds={selectedContributionIds}
                 message={message}
                 onToggleSelection={handleToggleContributionSelection}
