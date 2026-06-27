@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUp, CheckCircle2, ClipboardList, RefreshCw } from "lucide-react";
+import { CheckCircle2, ClipboardList } from "lucide-react";
 import type { ChecklistItem, DinnerEvent, Guest } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, cn } from "@/lib/utils";
@@ -76,7 +76,7 @@ export function GuestContributionCard({
   message,
   onToggleSelection,
   onSaveClaims,
-  onBackToTop
+  onCancelEditing
 }: {
   event?: DinnerEvent;
   items: ChecklistItem[];
@@ -86,12 +86,9 @@ export function GuestContributionCard({
   message?: string;
   onToggleSelection?: (item: ChecklistItem) => void;
   onSaveClaims?: (itemIds: string[]) => void | Promise<void>;
-  onBackToTop?: () => void;
+  onCancelEditing?: () => void;
 }) {
   const theme = getEventTheme(event?.coverStyle);
-  const [isEditingClaims, setIsEditingClaims] = useState(false);
-  const [draftItemIds, setDraftItemIds] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
   const ownClaims = items.filter((item) => guestOwnsItem(item, currentGuest));
   const selectedItems = items.filter((item) => selectedItemIds.includes(item.id));
   const availableItems = items.filter((item) => itemIsAvailable(item, currentGuest));
@@ -99,6 +96,8 @@ export function GuestContributionCard({
   const editableItems = items.filter((item) => guestOwnsItem(item, currentGuest) || itemIsAvailable(item, currentGuest));
   const selectionItems = selectionMode && currentGuest ? editableItems : availableItems;
   const ownClaimIds = ownClaims.map((item) => item.id);
+  const [draftItemIds, setDraftItemIds] = useState<string[]>(ownClaimIds);
+  const [isSaving, setIsSaving] = useState(false);
 
   function itemIsSelected(item: ChecklistItem) {
     return selectedItemIds.includes(item.id);
@@ -116,14 +115,9 @@ export function GuestContributionCard({
     );
   }
 
-  function startEditingClaims() {
-    setDraftItemIds(ownClaimIds);
-    setIsEditingClaims(true);
-  }
-
   function cancelEditingClaims() {
     setDraftItemIds(ownClaimIds);
-    setIsEditingClaims(false);
+    onCancelEditing?.();
   }
 
   async function saveClaimChanges() {
@@ -131,7 +125,6 @@ export function GuestContributionCard({
 
     try {
       await onSaveClaims?.(draftItemIds);
-      setIsEditingClaims(false);
     } finally {
       setIsSaving(false);
     }
@@ -142,12 +135,12 @@ export function GuestContributionCard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-          What can you bring?
+          {selectionMode ? "What can you bring?" : "Change what you're bringing"}
         </CardTitle>
         <p className="text-sm text-ink/60">
           {selectionMode
             ? "Choose anything you'd like to bring before sending your RSVP."
-            : "See what is still open, then manage the items you're bringing."}
+            : "Select or unselect anything available, then save once."}
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -211,88 +204,53 @@ export function GuestContributionCard({
           </>
         ) : (
           <>
-            {!isEditingClaims ? (
-              <div className={cn("rounded-lg p-4", theme.softPanel)}>
-                <p className="flex items-center gap-2 text-sm font-semibold text-olive">
-                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                  You&apos;re bringing:
-                </p>
-                {ownClaims.length > 0 ? (
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
-                    {ownClaims.map((item) => (
-                      <li key={item.id}>{item.title}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-2 text-sm text-ink/65">Nothing yet.</p>
-                )}
-                {editableItems.length > 0 ? (
-                  <div className="mt-3">
-                    <Button type="button" variant="secondary" size="sm" onClick={startEditingClaims}>
-                      <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                      Change what I&apos;m bringing
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
-            ) : (
-              <section className="space-y-3" aria-labelledby="edit-contributions-heading">
-                <div>
-                  <h3 id="edit-contributions-heading" className="text-lg font-semibold">
-                    Change what I&apos;m bringing
-                  </h3>
-                  <p className="mt-1 text-sm text-ink/60">
-                    Select or unselect anything available, then save once.
-                  </p>
-                </div>
+            <section className="space-y-3">
+              {editableItems.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {editableItems.map((item) => {
+                    const selected = draftItemIsSelected(item);
 
-                {editableItems.length > 0 ? (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {editableItems.map((item) => {
-                      const selected = draftItemIsSelected(item);
-
-                      return (
-                        <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-semibold">{item.title}</p>
-                              <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
-                            </div>
-                            <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
+                    return (
+                      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-semibold">{item.title}</p>
+                            <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
                           </div>
-                          <Button
-                            type="button"
-                            variant={selected ? "secondary" : "default"}
-                            className={cn("mt-3 w-full", !selected && theme.cta)}
-                            aria-pressed={selected}
-                            onClick={() => toggleDraftItem(item)}
-                          >
-                            {selected ? "Remove from list" : "Select this"}
-                          </Button>
+                          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <EmptyState title="Everything is claimed" description="The board is full for now." />
-                )}
-
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button
-                    type="button"
-                    variant="default"
-                    className={cn(theme.cta)}
-                    onClick={saveClaimChanges}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? "Saving..." : "Save changes"}
-                  </Button>
-                  <Button type="button" variant="secondary" onClick={cancelEditingClaims} disabled={isSaving}>
-                    Cancel
-                  </Button>
+                        <Button
+                          type="button"
+                          variant={selected ? "secondary" : "default"}
+                          className={cn("mt-3 w-full", !selected && theme.cta)}
+                          aria-pressed={selected}
+                          onClick={() => toggleDraftItem(item)}
+                        >
+                          {selected ? "Remove from list" : "Select this"}
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
-              </section>
-            )}
+              ) : (
+                <EmptyState title="Everything is claimed" description="The board is full for now." />
+              )}
+
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="default"
+                  className={cn(theme.cta)}
+                  onClick={saveClaimChanges}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save changes"}
+                </Button>
+                <Button type="button" variant="secondary" onClick={cancelEditingClaims} disabled={isSaving}>
+                  Cancel
+                </Button>
+              </div>
+            </section>
           </>
         )}
 
@@ -317,12 +275,6 @@ export function GuestContributionCard({
           </section>
         ) : null}
 
-        {!selectionMode && !isEditingClaims && onBackToTop ? (
-          <Button type="button" variant="ghost" size="sm" onClick={onBackToTop}>
-            <ArrowUp className="h-4 w-4" aria-hidden="true" />
-            Back to top
-          </Button>
-        ) : null}
       </CardContent>
     </Card>
   );

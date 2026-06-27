@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Heart, Send, Utensils } from "lucide-react";
+import { ArrowUp, CheckCircle2, Heart, RefreshCw, Send, Utensils } from "lucide-react";
 import type { ChecklistItem, DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
@@ -21,7 +21,10 @@ export function RSVPCard({
   onUpdate,
   onUpdateModeChange,
   onContributionChoice,
-  onClearContributionSelection
+  onClearContributionSelection,
+  onEditContributions,
+  onBackToTop,
+  statusMessage
 }: {
   event?: DinnerEvent;
   currentGuest?: Guest;
@@ -35,6 +38,9 @@ export function RSVPCard({
   onUpdateModeChange?: (isUpdating: boolean) => void;
   onContributionChoice?: (showContributions: boolean) => void;
   onClearContributionSelection?: () => void;
+  onEditContributions?: () => void;
+  onBackToTop?: () => void;
+  statusMessage?: string;
 }) {
   const theme = getEventTheme(event?.coverStyle);
   const [name, setName] = useState("");
@@ -301,19 +307,42 @@ export function RSVPCard({
           <p className={cn("rounded-lg p-3 text-sm font-semibold", theme.softPanel, theme.accentText)}>
             {savedMessage[savedStatus]}
           </p>
-          {savedStatus === "yes" && claimedItems.length > 0 ? (
+          {statusMessage ? (
+            <p className="rounded-lg border border-ink/8 bg-cream p-3 text-sm font-semibold text-ink/70">
+              {statusMessage}
+            </p>
+          ) : null}
+          {savedStatus === "yes" ? (
             <div className="rounded-lg border border-ink/8 bg-cream p-3">
               <p className="text-sm font-semibold">You&apos;re bringing:</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
-                {claimedItems.map((item) => (
-                  <li key={item.id}>{item.title}</li>
-                ))}
-              </ul>
+              {claimedItems.length > 0 ? (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
+                  {claimedItems.map((item) => (
+                    <li key={item.id}>{item.title}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-ink/65">Nothing yet.</p>
+              )}
             </div>
           ) : null}
           {currentGuest ? (
-            <Button type="button" variant="secondary" onClick={startUpdate}>
-              Update response
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Button type="button" variant="secondary" onClick={startUpdate}>
+                Update response
+              </Button>
+              {savedStatus === "yes" && onEditContributions ? (
+                <Button type="button" variant="secondary" onClick={onEditContributions}>
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  Change what I&apos;m bringing
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+          {onBackToTop ? (
+            <Button type="button" variant="ghost" size="sm" onClick={onBackToTop}>
+              <ArrowUp className="h-4 w-4" aria-hidden="true" />
+              Back to top
             </Button>
           ) : null}
         </CardContent>

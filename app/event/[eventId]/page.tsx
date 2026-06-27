@@ -48,6 +48,7 @@ export default function PublicEventPage() {
   const [showContributions, setShowContributions] = useState(false);
   const [selectedContributionIds, setSelectedContributionIds] = useState<string[]>([]);
   const [isUpdatingResponse, setIsUpdatingResponse] = useState(false);
+  const [isEditingContributions, setIsEditingContributions] = useState(false);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
@@ -157,7 +158,8 @@ export default function PublicEventPage() {
     setCurrentGuest(savedGuest);
     window.localStorage.setItem(currentGuestStorageKey(eventId), response.guest.id);
     setBundle(nextBundle);
-    setShowContributions(draft.rsvpStatus === "yes");
+    setShowContributions(false);
+    setIsEditingContributions(false);
     setSelectedContributionIds([]);
     setMessage(
       selectedContributionIds.length > 0 && claimedCount < selectedContributionIds.length
@@ -198,7 +200,8 @@ export default function PublicEventPage() {
 
     setCurrentGuest(savedGuest);
     setBundle(nextBundle);
-    setShowContributions(savedGuest.rsvpStatus === "yes");
+    setShowContributions(false);
+    setIsEditingContributions(false);
     setIsUpdatingResponse(false);
     setSelectedContributionIds([]);
     setMessage(
@@ -212,6 +215,7 @@ export default function PublicEventPage() {
 
   function handleContributionChoice(showContributions: boolean) {
     setShowContributions(showContributions);
+    setIsEditingContributions(false);
     setMessage("");
     if (!showContributions) {
       setSelectedContributionIds([]);
@@ -226,7 +230,21 @@ export default function PublicEventPage() {
   function handleUpdateModeChange(isUpdating: boolean) {
     setIsUpdatingResponse(isUpdating);
     setShowContributions(false);
+    setIsEditingContributions(false);
     setSelectedContributionIds([]);
+    setMessage("");
+  }
+
+  function handleEditContributions() {
+    setIsEditingContributions(true);
+    setShowContributions(false);
+    setIsUpdatingResponse(false);
+    setSelectedContributionIds([]);
+    setMessage("");
+  }
+
+  function handleCancelContributionEditing() {
+    setIsEditingContributions(false);
     setMessage("");
   }
 
@@ -250,6 +268,7 @@ export default function PublicEventPage() {
     );
 
     setBundle(nextBundle);
+    setIsEditingContributions(false);
     setMessage(
       blockedClaimCount > 0
         ? "Some selected items were claimed before your changes were saved."
@@ -286,9 +305,10 @@ export default function PublicEventPage() {
     ? bundle.checklistItems.filter((item) => guestOwnsItem(item, currentGuest))
     : [];
   const selectedItems = bundle.checklistItems.filter((item) => selectedContributionIds.includes(item.id));
-  const shouldShowContributionOptions = isUpdatingResponse
-    ? showContributions
-    : showContributions || currentGuest?.rsvpStatus === "yes" || claimedItems.length > 0;
+  const shouldShowContributionSelection = showContributions && (!currentGuest || isUpdatingResponse);
+  const shouldShowContributionEditor =
+    Boolean(currentGuest && !isUpdatingResponse && isEditingContributions && currentGuest.rsvpStatus === "yes");
+  const shouldShowContributionOptions = shouldShowContributionSelection || shouldShowContributionEditor;
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
@@ -335,6 +355,9 @@ export default function PublicEventPage() {
               onUpdateModeChange={handleUpdateModeChange}
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
+              onEditContributions={currentGuest?.rsvpStatus === "yes" ? handleEditContributions : undefined}
+              onBackToTop={handleBackToTop}
+              statusMessage={message}
             />
 
             {shouldShowContributionOptions ? (
@@ -342,12 +365,12 @@ export default function PublicEventPage() {
                 event={bundle.event}
                 items={bundle.checklistItems}
                 currentGuest={currentGuest}
-                selectionMode={!currentGuest || isUpdatingResponse}
+                selectionMode={shouldShowContributionSelection}
                 selectedItemIds={selectedContributionIds}
                 message={message}
                 onToggleSelection={handleToggleContributionSelection}
                 onSaveClaims={handleSaveContributionChanges}
-                onBackToTop={handleBackToTop}
+                onCancelEditing={handleCancelContributionEditing}
               />
             ) : null}
           </div>
