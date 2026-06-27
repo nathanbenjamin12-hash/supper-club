@@ -24,7 +24,9 @@ export function RSVPCard({
   onClearContributionSelection,
   onEditContributions,
   onBackToTop,
-  statusMessage
+  statusMessage,
+  deferSubmitButton = false,
+  formId
 }: {
   event?: DinnerEvent;
   currentGuest?: Guest;
@@ -41,6 +43,8 @@ export function RSVPCard({
   onEditContributions?: () => void;
   onBackToTop?: () => void;
   statusMessage?: string;
+  deferSubmitButton?: boolean;
+  formId?: string;
 }) {
   const theme = getEventTheme(event?.coverStyle);
   const [name, setName] = useState("");
@@ -192,7 +196,7 @@ export function RSVPCard({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+          <form id={formId} onSubmit={handleUpdateSubmit} className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               {statuses.map((candidate) => (
                 <button
@@ -283,10 +287,12 @@ export function RSVPCard({
             ) : null}
 
             {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
-            <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
-              <Send className="h-4 w-4" aria-hidden="true" />
-              Save changes
-            </Button>
+            {!deferSubmitButton ? (
+              <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
+                <Send className="h-4 w-4" aria-hidden="true" />
+                Save changes
+              </Button>
+            ) : null}
           </form>
         </CardContent>
       </Card>
@@ -360,7 +366,7 @@ export function RSVPCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form id={formId} onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-3 gap-2">
             {statuses.map((candidate) => (
               <button
@@ -457,10 +463,12 @@ export function RSVPCard({
           ) : null}
 
           {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
-          <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
-            <Send className="h-4 w-4" aria-hidden="true" />
-            Send RSVP
-          </Button>
+          {!deferSubmitButton ? (
+            <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
+              <Send className="h-4 w-4" aria-hidden="true" />
+              Send RSVP
+            </Button>
+          ) : null}
         </form>
       </CardContent>
     </Card>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, UsersRound } from "lucide-react";
+import { ArrowLeft, Send, UsersRound } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestContributionCard } from "@/components/GuestContributionCard";
@@ -11,7 +11,7 @@ import { GuestList } from "@/components/GuestList";
 import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { ChecklistItem, EventBundle, Guest, GuestDraft } from "@/types/events";
 import {
   claimSharedChecklistItem,
@@ -309,6 +309,7 @@ export default function PublicEventPage() {
   const shouldShowContributionEditor =
     Boolean(currentGuest && !isUpdatingResponse && isEditingContributions && currentGuest.rsvpStatus === "yes");
   const shouldShowContributionOptions = shouldShowContributionSelection || shouldShowContributionEditor;
+  const rsvpFormId = "guest-rsvp-form";
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
@@ -358,6 +359,8 @@ export default function PublicEventPage() {
               onEditContributions={currentGuest?.rsvpStatus === "yes" ? handleEditContributions : undefined}
               onBackToTop={handleBackToTop}
               statusMessage={message}
+              deferSubmitButton={shouldShowContributionSelection}
+              formId={rsvpFormId}
             />
 
             {shouldShowContributionOptions ? (
@@ -372,6 +375,13 @@ export default function PublicEventPage() {
                 onSaveClaims={handleSaveContributionChanges}
                 onCancelEditing={handleCancelContributionEditing}
               />
+            ) : null}
+
+            {shouldShowContributionSelection ? (
+              <Button type="submit" form={rsvpFormId} className={cn("w-full", theme.cta)} variant="default">
+                <Send className="h-4 w-4" aria-hidden="true" />
+                {isUpdatingResponse ? "Save changes" : "Send RSVP"}
+              </Button>
             ) : null}
           </div>
 
