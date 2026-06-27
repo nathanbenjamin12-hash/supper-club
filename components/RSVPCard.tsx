@@ -175,21 +175,26 @@ export function RSVPCard({
                 <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 {message || "You're in! Want to contribute?"}
               </p>
-              {!contributionChoice ? (
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <Button
-                    type="button"
-                    variant="default"
-                    className={cn(theme.cta)}
-                    onClick={() => chooseContribution(true)}
-                  >
-                    I&apos;ll bring something
-                  </Button>
-                  <Button type="button" variant="secondary" onClick={() => chooseContribution(false)}>
-                    Maybe later
-                  </Button>
-                </div>
-              ) : null}
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant={contributionChoice === "bring" ? "default" : "secondary"}
+                  className={cn(contributionChoice === "bring" && theme.cta)}
+                  aria-pressed={contributionChoice === "bring"}
+                  onClick={() => chooseContribution(true)}
+                >
+                  I&apos;ll bring something
+                </Button>
+                <Button
+                  type="button"
+                  variant={contributionChoice === "later" ? "default" : "secondary"}
+                  className={cn(contributionChoice === "later" && theme.cta)}
+                  aria-pressed={contributionChoice === "later"}
+                  onClick={() => chooseContribution(false)}
+                >
+                  Maybe later
+                </Button>
+              </div>
             </div>
           ) : null}
 
