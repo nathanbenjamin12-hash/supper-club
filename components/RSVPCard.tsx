@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUp, CheckCircle2, Heart, Send, Utensils } from "lucide-react";
+import { CheckCircle2, Heart, Send, Utensils } from "lucide-react";
 import type { ChecklistItem, DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
+const updateStatuses: RSVPStatus[] = ["yes", "no"];
 
 export function RSVPCard({
   event,
@@ -18,7 +19,7 @@ export function RSVPCard({
   claimedItems = [],
   selectedItems = [],
   onSubmit,
-  onBackToTop,
+  onUpdate,
   onContributionChoice,
   onClearContributionSelection
 }: {
@@ -27,7 +28,7 @@ export function RSVPCard({
   claimedItems?: ChecklistItem[];
   selectedItems?: ChecklistItem[];
   onSubmit: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
-  onBackToTop?: () => void;
+  onUpdate?: (guest: GuestDraft) => Guest | undefined | Promise<Guest | undefined>;
   onContributionChoice?: (showContributions: boolean) => void;
   onClearContributionSelection?: () => void;
 }) {
@@ -41,6 +42,11 @@ export function RSVPCard({
   const [error, setError] = useState("");
   const [submittedStatus, setSubmittedStatus] = useState<RSVPStatus | undefined>();
   const [contributionChoice, setContributionChoice] = useState<"bring" | "later" | undefined>();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateRsvpStatus, setUpdateRsvpStatus] = useState<RSVPStatus | undefined>();
+  const [updateContact, setUpdateContact] = useState("");
+  const [updateDietaryRestrictions, setUpdateDietaryRestrictions] = useState("");
+  const [updateNoteToHost, setUpdateNoteToHost] = useState("");
 
   const savedStatus = currentGuest?.rsvpStatus ?? submittedStatus;
   const savedMessage: Record<RSVPStatus, string> = {
@@ -103,6 +109,127 @@ export function RSVPCard({
     onContributionChoice?.(true);
   }
 
+  function startUpdate() {
+    if (!currentGuest) {
+      return;
+    }
+
+    setUpdateRsvpStatus(currentGuest.rsvpStatus === "maybe" ? undefined : currentGuest.rsvpStatus);
+    setUpdateContact(currentGuest.email ?? currentGuest.phone ?? "");
+    setUpdateDietaryRestrictions(currentGuest.dietaryRestrictions ?? "");
+    setUpdateNoteToHost(currentGuest.noteToHost ?? "");
+    setError("");
+    setIsUpdating(true);
+  }
+
+  async function handleUpdateSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!currentGuest || !onUpdate) {
+      setError("Something went wrong. Try again.");
+      return;
+    }
+
+    if (!updateRsvpStatus) {
+      setError("Choose whether you can make it.");
+      return;
+    }
+
+    const updated = await onUpdate({
+      name: currentGuest.name,
+      rsvpStatus: updateRsvpStatus,
+      email: updateContact.includes("@") ? cleanOptional(updateContact) : undefined,
+      phone: updateContact.includes("@") ? undefined : cleanOptional(updateContact),
+      dietaryRestrictions: updateRsvpStatus === "yes" ? cleanOptional(updateDietaryRestrictions) : undefined,
+      allergies: undefined,
+      noteToHost: cleanOptional(updateNoteToHost)
+    });
+
+    if (!updated) {
+      setError("Something went wrong. Try again.");
+      return;
+    }
+
+    setError("");
+    setSubmittedStatus(updated.rsvpStatus);
+    setIsUpdating(false);
+  }
+
+  if (currentGuest && isUpdating) {
+    return (
+      <Card className={cn("overflow-hidden border", theme.accentBorder)}>
+        <div className={cn("h-2", theme.swatch)} />
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Heart className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
+            Update response
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              {updateStatuses.map((candidate) => (
+                <button
+                  key={candidate}
+                  type="button"
+                  onClick={() => {
+                    setUpdateRsvpStatus(candidate);
+                    setError("");
+                  }}
+                  className={cn(
+                    "min-h-12 rounded-lg px-2 text-sm font-semibold transition",
+                    updateRsvpStatus === candidate
+                      ? theme.cta
+                      : "bg-stone/70 text-ink hover:bg-cream"
+                  )}
+                >
+                  {rsvpLabels[candidate]}
+                </button>
+              ))}
+            </div>
+
+            <label className="grid gap-2 text-sm font-semibold">
+              Email or phone
+              <Input
+                value={updateContact}
+                onChange={(event) => setUpdateContact(event.target.value)}
+                placeholder="Optional"
+              />
+            </label>
+
+            <div className="rounded-lg bg-stone/70 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
+                Anything the host should know?
+              </p>
+              <div className="mt-3 grid gap-3">
+                {updateRsvpStatus === "yes" ? (
+                  <Input
+                    value={updateDietaryRestrictions}
+                    onChange={(event) => setUpdateDietaryRestrictions(event.target.value)}
+                    placeholder="Dietary restrictions"
+                  />
+                ) : null}
+                <Textarea
+                  value={updateNoteToHost}
+                  onChange={(event) => setUpdateNoteToHost(event.target.value)}
+                  placeholder="Note to host"
+                  className="min-h-20"
+                />
+              </div>
+            </div>
+
+            {error ? <p className="text-sm font-semibold text-terracotta">{error}</p> : null}
+            <Button type="submit" className={cn("w-full", theme.cta)} variant="default">
+              <Send className="h-4 w-4" aria-hidden="true" />
+              Save changes
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (savedStatus) {
     return (
       <Card className={cn("overflow-hidden border", theme.accentBorder)}>
@@ -127,10 +254,9 @@ export function RSVPCard({
               </ul>
             </div>
           ) : null}
-          {savedStatus !== "yes" && onBackToTop ? (
-            <Button type="button" variant="ghost" size="sm" onClick={onBackToTop}>
-              <ArrowUp className="h-4 w-4" aria-hidden="true" />
-              Back to top
+          {currentGuest ? (
+            <Button type="button" variant="secondary" onClick={startUpdate}>
+              Update response
             </Button>
           ) : null}
         </CardContent>

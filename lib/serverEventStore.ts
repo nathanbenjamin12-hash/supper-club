@@ -320,6 +320,41 @@ export async function createStoredGuest(eventId: string, data: GuestDraft) {
   });
 }
 
+export async function updateStoredGuest(eventId: string, guestId: string, data: GuestDraft) {
+  const timestamp = now();
+
+  return withBundles((bundles) => {
+    let updatedGuest: Guest | undefined;
+    const nextBundles = bundles.map((bundle) => {
+      if (bundle.event.id !== eventId) {
+        return bundle;
+      }
+
+      const guests = bundle.guests.map((guest) => {
+        if (guest.id !== guestId) {
+          return guest;
+        }
+
+        updatedGuest = {
+          ...guest,
+          ...data,
+          updatedAt: timestamp
+        };
+
+        return updatedGuest;
+      });
+
+      return {
+        ...bundle,
+        guests,
+        event: updatedGuest ? { ...bundle.event, updatedAt: timestamp } : bundle.event
+      };
+    });
+
+    return { bundles: nextBundles, result: updatedGuest };
+  });
+}
+
 export async function claimStoredChecklistItem(eventId: string, itemId: string, guestId: string, note?: string) {
   return withBundles((bundles) => {
     let updatedItem: ChecklistItem | undefined;

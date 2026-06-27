@@ -18,7 +18,8 @@ import {
   importEventBundle as importLocalEventBundle,
   releaseChecklistItemClaim as releaseLocalChecklistItemClaim,
   updateChecklistItem as updateLocalChecklistItem,
-  updateEvent as updateLocalEvent
+  updateEvent as updateLocalEvent,
+  updateGuest as updateLocalGuest
 } from "@/lib/events";
 
 type CreateEventResponse = {
@@ -197,6 +198,32 @@ export async function createSharedGuest(eventId: string, data: GuestDraft) {
   }
 
   const guest = createLocalGuest(eventId, data);
+  const bundle = getLocalEventBundle(eventId);
+
+  return guest && bundle ? { guest, bundle } : undefined;
+}
+
+export async function updateSharedGuest(eventId: string, guestId: string, data: GuestDraft) {
+  try {
+    const response = await requestJson<GuestResponse>(`/api/events/${eventId}/guests`, {
+      method: "PATCH",
+      body: JSON.stringify({ guestId, data })
+    });
+
+    if (response) {
+      return response;
+    }
+  } catch (error) {
+    if (!canUseLocalEventStoreFallback()) {
+      throw error;
+    }
+  }
+
+  if (!canUseLocalEventStoreFallback()) {
+    return undefined;
+  }
+
+  const guest = updateLocalGuest(eventId, guestId, data);
   const bundle = getLocalEventBundle(eventId);
 
   return guest && bundle ? { guest, bundle } : undefined;

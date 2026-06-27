@@ -18,7 +18,8 @@ import {
   createSharedGuest,
   getSharedEventBundle,
   importSharedEventBundle,
-  releaseSharedChecklistItemClaim
+  releaseSharedChecklistItemClaim,
+  updateSharedGuest
 } from "@/lib/eventApi";
 import { decodeInviteBundle } from "@/lib/inviteLinks";
 import { getEventTheme } from "@/lib/themes";
@@ -130,6 +131,26 @@ export default function PublicEventPage() {
     return savedGuest;
   }
 
+  async function handleUpdateRsvp(draft: GuestDraft) {
+    if (!currentGuest) {
+      return undefined;
+    }
+
+    const response = await updateSharedGuest(eventId, currentGuest.id, draft);
+
+    if (!response) {
+      return undefined;
+    }
+
+    setCurrentGuest(response.guest);
+    setBundle(response.bundle);
+    setShowContributions(response.guest.rsvpStatus === "yes");
+    setSelectedContributionIds([]);
+    setMessage("");
+
+    return response.guest;
+  }
+
   function handleContributionChoice(showContributions: boolean) {
     setShowContributions(showContributions);
     setMessage("");
@@ -217,7 +238,8 @@ export default function PublicEventPage() {
     ? bundle.checklistItems.filter((item) => guestOwnsItem(item, currentGuest))
     : [];
   const selectedItems = bundle.checklistItems.filter((item) => selectedContributionIds.includes(item.id));
-  const shouldShowContributionOptions = showContributions || currentGuest?.rsvpStatus === "yes";
+  const shouldShowContributionOptions =
+    showContributions || currentGuest?.rsvpStatus === "yes" || claimedItems.length > 0;
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
@@ -260,7 +282,7 @@ export default function PublicEventPage() {
               claimedItems={claimedItems}
               selectedItems={selectedItems}
               onSubmit={handleRsvp}
-              onBackToTop={handleBackToTop}
+              onUpdate={handleUpdateRsvp}
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
             />
