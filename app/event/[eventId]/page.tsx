@@ -39,6 +39,18 @@ function guestOwnsItem(item: ChecklistItem, guest?: Guest) {
     : item.claimedByGuestId === guest.id;
 }
 
+function isMoneyItem(item: ChecklistItem) {
+  return (item.itemType ?? "bring") === "money";
+}
+
+function claimedSlotCount(item: ChecklistItem) {
+  return isMoneyItem(item) ? item.moneyClaims?.length ?? 0 : item.claimedByGuestId ? 1 : 0;
+}
+
+function totalSlotCount(item: ChecklistItem) {
+  return isMoneyItem(item) ? item.totalSpots ?? 1 : 1;
+}
+
 type ContributionChoice = "bring" | "later";
 
 export default function PublicEventPage() {
@@ -52,6 +64,7 @@ export default function PublicEventPage() {
   const [isUpdatingResponse, setIsUpdatingResponse] = useState(false);
   const [isEditingContributions, setIsEditingContributions] = useState(false);
   const [deferContributionSubmit, setDeferContributionSubmit] = useState(false);
+  const [guestListExpanded, setGuestListExpanded] = useState(false);
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
   const inviteParam = searchParams.get("invite");
@@ -307,6 +320,13 @@ export default function PublicEventPage() {
   }
 
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
+  const maybeGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "maybe");
+  const bringItems = bundle.checklistItems.filter((item) => !isMoneyItem(item));
+  const moneyItems = bundle.checklistItems.filter(isMoneyItem);
+  const claimedBringItems = bringItems.reduce((total, item) => total + claimedSlotCount(item), 0);
+  const totalBringItems = bringItems.reduce((total, item) => total + totalSlotCount(item), 0);
+  const claimedPitchInSpots = moneyItems.reduce((total, item) => total + claimedSlotCount(item), 0);
+  const totalPitchInSpots = moneyItems.reduce((total, item) => total + totalSlotCount(item), 0);
   const theme = getEventTheme(bundle.event.coverStyle);
   const isHostPreview = searchParams.get("preview") === "host";
   const claimedItems = currentGuest
@@ -346,12 +366,55 @@ export default function PublicEventPage() {
                   <UsersRound className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
                   Who&apos;s coming
                 </CardTitle>
-                <p className="text-sm text-ink/60">
-                  {yesGuests.length} {yesGuests.length === 1 ? "person is" : "people are"} in so far.
-                </p>
               </CardHeader>
-              <CardContent>
-                <GuestList guests={bundle.guests} checklistItems={bundle.checklistItems} />
+              <CardContent className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className={cn("rounded-lg p-3", theme.softPanel)}>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">Going</p>
+                    <p className="mt-1 text-2xl font-semibold">{yesGuests.length}</p>
+                  </div>
+                  {maybeGuests.length > 0 ? (
+                    <div className={cn("rounded-lg p-3", theme.softPanel)}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">Maybe</p>
+                      <p className="mt-1 text-2xl font-semibold">{maybeGuests.length}</p>
+                    </div>
+                  ) : null}
+                  <div className={cn("rounded-lg p-3", theme.softPanel)}>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">
+                      Contributions
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold">
+                      {claimedBringItems}/{totalBringItems}
+                    </p>
+                    <p className="mt-1 text-sm text-ink/60">items claimed</p>
+                  </div>
+                  {bundle.event.pitchInEnabled ? (
+                    <div className={cn("rounded-lg p-3", theme.softPanel)}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">Pitch-in</p>
+                      <p className="mt-1 text-2xl font-semibold">
+                        {claimedPitchInSpots}/{totalPitchInSpots}
+                      </p>
+                      <p className="mt-1 text-sm text-ink/60">spots claimed</p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setGuestListExpanded((expanded) => !expanded)}
+                >
+                  {guestListExpanded ? "Hide guest list" : "View guest list"}
+                </Button>
+
+                {guestListExpanded ? (
+                  <GuestList
+                    guests={bundle.guests}
+                    checklistItems={bundle.checklistItems}
+                    showDietaryDetails={false}
+                  />
+                ) : null}
               </CardContent>
             </Card>
 

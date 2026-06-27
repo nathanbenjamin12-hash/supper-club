@@ -6,10 +6,12 @@ import { EmptyState } from "@/components/EmptyState";
 
 export function GuestList({
   guests,
-  checklistItems = []
+  checklistItems = [],
+  showDietaryDetails = true
 }: {
   guests: Guest[];
   checklistItems?: ChecklistItem[];
+  showDietaryDetails?: boolean;
 }) {
   if (guests.length === 0) {
     return <EmptyState title="No guests yet" description="The list will fill in as people RSVP." />;
@@ -18,7 +20,7 @@ export function GuestList({
   return (
     <div className="space-y-3">
       {guests.map((guest) => {
-        const showDietaryDetails = guest.rsvpStatus === "yes";
+        const shouldShowDietaryDetails = showDietaryDetails && guest.rsvpStatus === "yes";
         const contributions = checklistItems.filter(
           (item) =>
             item.claimedByGuestId === guest.id ||
@@ -44,12 +46,12 @@ export function GuestList({
               </div>
               <Badge tone={guest.rsvpStatus}>{rsvpLabels[guest.rsvpStatus]}</Badge>
             </div>
-            {showDietaryDetails && guest.dietaryRestrictions ? (
+            {shouldShowDietaryDetails && guest.dietaryRestrictions ? (
               <p className="mt-3 text-sm font-medium text-ink/70">
                 Dietary restriction: {guest.dietaryRestrictions}
               </p>
             ) : null}
-            {showDietaryDetails && guest.allergies ? (
+            {shouldShowDietaryDetails && guest.allergies ? (
               <p className="mt-1 text-sm text-ink/65">Allergy: {guest.allergies}</p>
             ) : null}
           </div>
