@@ -321,6 +321,14 @@ export default function PublicEventPage() {
 
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
   const maybeGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "maybe");
+  const guestNotes = bundle.guests
+    .filter((guest) => guest.rsvpStatus === "yes" || guest.rsvpStatus === "maybe")
+    .map((guest) => ({
+      id: guest.id,
+      name: guest.name,
+      note: guest.dietaryRestrictions?.trim() ?? ""
+    }))
+    .filter((guestNote) => guestNote.note.length > 0);
   const bringItems = bundle.checklistItems.filter((item) => !isMoneyItem(item));
   const moneyItems = bundle.checklistItems.filter(isMoneyItem);
   const claimedBringItems = bringItems.reduce((total, item) => total + claimedSlotCount(item), 0);
@@ -434,6 +442,22 @@ export default function PublicEventPage() {
               deferSubmitButton={shouldDeferContributionSubmit}
               formId={rsvpFormId}
             />
+
+            {guestNotes.length > 0 ? (
+              <Card className={cn("border", theme.accentBorder)}>
+                <CardHeader>
+                  <CardTitle>Guest notes</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {guestNotes.map((guestNote) => (
+                    <div key={guestNote.id} className={cn("rounded-lg p-3", theme.softPanel)}>
+                      <p className="font-semibold">{guestNote.name}</p>
+                      <p className="mt-1 text-sm text-ink/70">{guestNote.note}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
 
             {shouldShowContributionOptions ? (
               <GuestContributionCard
