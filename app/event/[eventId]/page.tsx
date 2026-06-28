@@ -322,7 +322,7 @@ export default function PublicEventPage() {
   const yesGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "yes");
   const maybeGuests = bundle.guests.filter((guest) => guest.rsvpStatus === "maybe");
   const guestNotes = bundle.guests
-    .filter((guest) => guest.rsvpStatus === "yes" || guest.rsvpStatus === "maybe")
+    .filter((guest) => guest.rsvpStatus === "yes")
     .map((guest) => ({
       id: guest.id,
       name: guest.name,
@@ -451,7 +451,7 @@ export default function PublicEventPage() {
                   {guestNotes.map((guestNote) => (
                     <div key={guestNote.id} className={cn("rounded-lg p-3", theme.softPanel)}>
                       <p className="font-semibold">{guestNote.name}</p>
-                      <p className="mt-1 text-sm text-ink/70">{guestNote.note}</p>
+                      <p className="mt-1 text-sm text-ink/70">Dietary restriction: {guestNote.note}</p>
                     </div>
                   ))}
                 </CardContent>

@@ -8,7 +8,6 @@ import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 const statuses: RSVPStatus[] = ["yes", "maybe", "no"];
 type ContributionChoice = "bring" | "later";
@@ -50,7 +49,6 @@ export function RSVPCard({
   const [status, setStatus] = useState<RSVPStatus | undefined>();
   const [contact, setContact] = useState("");
   const [dietaryRestrictions, setDietaryRestrictions] = useState("");
-  const [noteToHost, setNoteToHost] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submittedStatus, setSubmittedStatus] = useState<RSVPStatus | undefined>();
@@ -59,7 +57,6 @@ export function RSVPCard({
   const [updateRsvpStatus, setUpdateRsvpStatus] = useState<RSVPStatus | undefined>();
   const [updateContact, setUpdateContact] = useState("");
   const [updateDietaryRestrictions, setUpdateDietaryRestrictions] = useState("");
-  const [updateNoteToHost, setUpdateNoteToHost] = useState("");
 
   const savedStatus = currentGuest?.rsvpStatus ?? submittedStatus;
   const savedMessage: Record<RSVPStatus, string> = {
@@ -97,7 +94,7 @@ export function RSVPCard({
       phone: contact.includes("@") ? undefined : cleanOptional(contact),
       dietaryRestrictions: status === "yes" ? cleanOptional(dietaryRestrictions) : undefined,
       allergies: undefined,
-      noteToHost: cleanOptional(noteToHost)
+      noteToHost: undefined
     });
 
     if (!created) {
@@ -132,7 +129,6 @@ export function RSVPCard({
     setUpdateRsvpStatus(currentGuest.rsvpStatus);
     setUpdateContact(currentGuest.email ?? currentGuest.phone ?? "");
     setUpdateDietaryRestrictions(currentGuest.dietaryRestrictions ?? "");
-    setUpdateNoteToHost(currentGuest.noteToHost ?? "");
     setContributionChoice(undefined);
     onContributionChoice?.(false);
     onClearContributionSelection?.();
@@ -171,7 +167,7 @@ export function RSVPCard({
         phone: updateContact.includes("@") ? undefined : cleanOptional(updateContact),
         dietaryRestrictions: updateRsvpStatus === "yes" ? cleanOptional(updateDietaryRestrictions) : undefined,
         allergies: undefined,
-        noteToHost: updateRsvpStatus === "yes" ? cleanOptional(updateNoteToHost) : undefined
+        noteToHost: undefined
       },
       { saveContributionSelection: updateRsvpStatus === "yes" && Boolean(contributionChoice) }
     );
@@ -254,27 +250,21 @@ export function RSVPCard({
               />
             </label>
 
-            <div className="rounded-lg bg-stone/70 p-4">
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
-                Anything the host should know?
-              </p>
-              <div className="mt-3 grid gap-3">
-                {updateRsvpStatus === "yes" ? (
+            {updateRsvpStatus === "yes" ? (
+              <div className="rounded-lg bg-stone/70 p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
+                  Anything the group should know?
+                </p>
+                <div className="mt-3 grid gap-3">
                   <Input
                     value={updateDietaryRestrictions}
                     onChange={(event) => setUpdateDietaryRestrictions(event.target.value)}
-                    placeholder="Dietary restrictions"
+                    placeholder="Dietary restrictions or allergies"
                   />
-                ) : null}
-                <Textarea
-                  value={updateNoteToHost}
-                  onChange={(event) => setUpdateNoteToHost(event.target.value)}
-                  placeholder="Note to host"
-                  className="min-h-20"
-                />
+                </div>
               </div>
-            </div>
+            ) : null}
 
             {selectedItems.length > 0 ? (
               <div className="rounded-lg border border-ink/8 bg-cream p-3">
@@ -424,27 +414,21 @@ export function RSVPCard({
             />
           </label>
 
-          <div className="rounded-lg bg-stone/70 p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold">
-              <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
-              Anything the host should know?
-            </p>
-            <div className="mt-3 grid gap-3">
-              {status === "yes" ? (
+          {status === "yes" ? (
+            <div className="rounded-lg bg-stone/70 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
+                Anything the group should know?
+              </p>
+              <div className="mt-3 grid gap-3">
                 <Input
                   value={dietaryRestrictions}
                   onChange={(event) => setDietaryRestrictions(event.target.value)}
-                  placeholder="Dietary restrictions"
+                  placeholder="Dietary restrictions or allergies"
                 />
-              ) : null}
-              <Textarea
-                value={noteToHost}
-                onChange={(event) => setNoteToHost(event.target.value)}
-                placeholder="Note to host"
-                className="min-h-20"
-              />
+              </div>
             </div>
-          </div>
+          ) : null}
 
           {selectedItems.length > 0 ? (
             <div className="rounded-lg border border-ink/8 bg-cream p-3">
