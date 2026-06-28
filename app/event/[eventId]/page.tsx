@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, Send, UsersRound } from "lucide-react";
+import { ArrowLeft, ArrowUp, Send, UsersRound } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestContributionCard } from "@/components/GuestContributionCard";
@@ -437,7 +437,6 @@ export default function PublicEventPage() {
               onContributionChoice={handleContributionChoice}
               onClearContributionSelection={() => setSelectedContributionIds([])}
               onEditContributions={currentGuest?.rsvpStatus === "yes" ? handleEditContributions : undefined}
-              onBackToTop={handleBackToTop}
               statusMessage={message}
               deferSubmitButton={shouldDeferContributionSubmit}
               formId={rsvpFormId}
@@ -487,6 +486,15 @@ export default function PublicEventPage() {
             ) : null}
           </aside>
         </div>
+
+        {currentGuest ? (
+          <div className="mt-6 flex justify-center">
+            <Button type="button" variant="ghost" size="sm" onClick={handleBackToTop}>
+              <ArrowUp className="h-4 w-4" aria-hidden="true" />
+              Back to top
+            </Button>
+          </div>
+        ) : null}
       </div>
     </main>
   );

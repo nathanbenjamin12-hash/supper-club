@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUp, CheckCircle2, Heart, RefreshCw, Send, Utensils } from "lucide-react";
+import { CheckCircle2, Heart, RefreshCw, Send, Utensils } from "lucide-react";
 import type { ChecklistItem, DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
 import { cn, cleanOptional, rsvpLabels } from "@/lib/utils";
@@ -24,7 +24,6 @@ export function RSVPCard({
   onContributionChoice,
   onClearContributionSelection,
   onEditContributions,
-  onBackToTop,
   statusMessage,
   deferSubmitButton = false,
   formId
@@ -42,7 +41,6 @@ export function RSVPCard({
   onContributionChoice?: (showContributions: boolean, choice?: ContributionChoice) => void;
   onClearContributionSelection?: () => void;
   onEditContributions?: () => void;
-  onBackToTop?: () => void;
   statusMessage?: string;
   deferSubmitButton?: boolean;
   formId?: string;
@@ -347,12 +345,6 @@ export function RSVPCard({
                 </Button>
               ) : null}
             </div>
-          ) : null}
-          {onBackToTop ? (
-            <Button type="button" variant="ghost" size="sm" onClick={onBackToTop}>
-              <ArrowUp className="h-4 w-4" aria-hidden="true" />
-              Back to top
-            </Button>
           ) : null}
         </CardContent>
       </Card>
