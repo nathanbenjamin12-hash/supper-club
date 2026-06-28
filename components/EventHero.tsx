@@ -5,7 +5,15 @@ import { cn, eventTypeLabels, formatEventDate } from "@/lib/utils";
 import { getEventTheme } from "@/lib/themes";
 import { Badge } from "@/components/ui/badge";
 
-export function EventHero({ event }: { event: DinnerEvent }) {
+export function EventHero({
+  event,
+  showImageLabels = true,
+  showHostEyebrow = true
+}: {
+  event: DinnerEvent;
+  showImageLabels?: boolean;
+  showHostEyebrow?: boolean;
+}) {
   const theme = getEventTheme(event.coverStyle);
 
   return (
@@ -19,17 +27,23 @@ export function EventHero({ event }: { event: DinnerEvent }) {
           className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/82 via-ink/42 to-ink/12" />
-        <div className="absolute right-5 top-5 hidden rounded-md border border-cream/25 bg-cream/12 px-4 py-3 text-sm font-semibold text-cream shadow-subtle backdrop-blur sm:block">
-          {theme.label}
-        </div>
-        <Badge className="bg-cream/90 text-ink ring-cream/30" tone="neutral">
-          {eventTypeLabels[event.eventType]}
-        </Badge>
+        {showImageLabels ? (
+          <>
+            <div className="absolute right-5 top-5 hidden rounded-md border border-cream/25 bg-cream/12 px-4 py-3 text-sm font-semibold text-cream shadow-subtle backdrop-blur sm:block">
+              {theme.label}
+            </div>
+            <Badge className="bg-cream/90 text-ink ring-cream/30" tone="neutral">
+              {eventTypeLabels[event.eventType]}
+            </Badge>
+          </>
+        ) : null}
         <div className="mt-28 max-w-2xl sm:mt-36">
-          <p className="flex items-center gap-2 text-sm font-semibold text-cream/85">
-            <UserRound className="h-4 w-4" aria-hidden="true" />
-            Hosted by {event.hostName}
-          </p>
+          {showHostEyebrow ? (
+            <p className="flex items-center gap-2 text-sm font-semibold text-cream/85">
+              <UserRound className="h-4 w-4" aria-hidden="true" />
+              Hosted by {event.hostName}
+            </p>
+          ) : null}
           <h1 className="mt-3 font-display text-5xl font-semibold leading-[1.02] sm:text-7xl">
             {event.title}
           </h1>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
+  AlertCircle,
   CalendarClock,
   Check,
   ChevronDown,
@@ -16,7 +17,6 @@ import {
   Share2,
   UsersRound
 } from "lucide-react";
-import { DietarySummary } from "@/components/DietarySummary";
 import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestList } from "@/components/GuestList";
@@ -38,6 +38,7 @@ export default function HostDashboardPage() {
   const [loaded, setLoaded] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const [guestResponsesExpanded, setGuestResponsesExpanded] = useState(false);
+  const [guestNotesExpanded, setGuestNotesExpanded] = useState(false);
   const [contributionsExpanded, setContributionsExpanded] = useState(false);
 
   function getInviteUrl() {
@@ -152,6 +153,25 @@ export default function HostDashboardPage() {
   const pitchInItems = requiredItems.filter(isMoneyItem);
   const stillNeededItems = bringItems.filter((item) => !item.claimedByGuestId);
   const claimedItems = bringItems.filter((item) => item.claimedByGuestId);
+  const guestNotes =
+    bundle?.guests
+      .filter(
+        (guest) =>
+          guest.rsvpStatus === "yes" &&
+          Boolean(guest.dietaryRestrictions?.trim() || guest.allergies?.trim())
+      )
+      .map((guest) => ({
+        id: guest.id,
+        name: guest.name,
+        note: [guest.dietaryRestrictions, guest.allergies]
+          .map((detail) => detail?.trim())
+          .filter(Boolean)
+          .join("; ")
+      })) ?? [];
+  const guestNotesSummary =
+    guestNotes.length === 1
+      ? "1 guest has dietary restrictions"
+      : `${guestNotes.length} guests have dietary restrictions`;
 
   const checklistSummary = requiredItems.reduce(
     (summary, item) => {
@@ -224,7 +244,7 @@ export default function HostDashboardPage() {
 
         <div className="space-y-8">
           <section aria-labelledby="event-section-heading" className="space-y-4">
-            <EventHero event={bundle.event} />
+            <EventHero event={bundle.event} showImageLabels={false} showHostEyebrow={false} />
             <div className="flex justify-end">
               <Link
                 href={`/event/${eventId}/edit`}
@@ -324,33 +344,66 @@ export default function HostDashboardPage() {
               bundle.guests.length === 0 ? (
                 <EmptyState title="Guest responses will appear here once people start replying." />
               ) : (
-                <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-                  <Card className={cn("border", theme.accentBorder)}>
-                    <CardHeader>
-                      <CardTitle>Guest list</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <GuestList guests={bundle.guests} checklistItems={bundle.checklistItems} />
-                    </CardContent>
-                  </Card>
-
-                  <aside>
-                    <Card className={cn("border", theme.accentBorder)}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Salad className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                          Dietary restrictions
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <DietarySummary guests={bundle.guests} />
-                      </CardContent>
-                    </Card>
-                  </aside>
-                </div>
+                <Card className={cn("border", theme.accentBorder)}>
+                  <CardHeader>
+                    <CardTitle>Guest list</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <GuestList
+                      guests={bundle.guests}
+                      checklistItems={bundle.checklistItems}
+                      showDietaryDetails={false}
+                    />
+                  </CardContent>
+                </Card>
               )
             ) : null}
           </section>
+
+          {guestNotes.length > 0 ? (
+            <section aria-labelledby="guest-notes-heading" className="space-y-4">
+              <Card className={cn("border", theme.accentBorder)}>
+                <CardHeader>
+                  <CardTitle id="guest-notes-heading" className="flex items-center gap-2">
+                    <Salad className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
+                    Guest notes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm font-semibold text-ink/70">{guestNotesSummary}</p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setGuestNotesExpanded((expanded) => !expanded)}
+                  >
+                    {guestNotesExpanded ? (
+                      <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                    )}
+                    {guestNotesExpanded ? "Hide guest notes" : "View guest notes"}
+                  </Button>
+
+                  {guestNotesExpanded ? (
+                    <div className="grid gap-3">
+                      {guestNotes.map((guestNote) => (
+                        <div key={guestNote.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                          <p className="font-semibold">{guestNote.name}</p>
+                          <p className="mt-2 flex gap-2 text-ink/70">
+                            <AlertCircle
+                              className="mt-0.5 h-4 w-4 shrink-0 text-terracotta"
+                              aria-hidden="true"
+                            />
+                            <span>Dietary restriction: {guestNote.note}</span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </section>
+          ) : null}
 
           <section aria-labelledby="contributions-heading" className="space-y-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
