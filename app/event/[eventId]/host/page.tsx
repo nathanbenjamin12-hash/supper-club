@@ -6,9 +6,12 @@ import { useParams } from "next/navigation";
 import {
   CalendarClock,
   Check,
+  ChevronDown,
+  ChevronUp,
   ClipboardList,
   Copy,
   Eye,
+  Pencil,
   Salad,
   Share2,
   UsersRound
@@ -34,6 +37,8 @@ export default function HostDashboardPage() {
   const [bundle, setBundle] = useState<EventBundle | undefined>();
   const [loaded, setLoaded] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
+  const [guestResponsesExpanded, setGuestResponsesExpanded] = useState(false);
+  const [contributionsExpanded, setContributionsExpanded] = useState(false);
 
   function getInviteUrl() {
     return bundle ? createInviteUrl(window.location.origin, bundle) : `${window.location.origin}/event/${eventId}`;
@@ -131,13 +136,22 @@ export default function HostDashboardPage() {
     [bundle]
   );
 
-  const missingItems = requiredItems.filter((item) => {
-    if ((item.itemType ?? "bring") === "money") {
-      return (item.moneyClaims?.length ?? 0) < (item.totalSpots ?? 1);
-    }
+  function isMoneyItem(item: ChecklistItem) {
+    return (item.itemType ?? "bring") === "money";
+  }
 
-    return !item.claimedByGuestId;
-  });
+  function claimedSlotCount(item: ChecklistItem) {
+    return isMoneyItem(item) ? item.moneyClaims?.length ?? 0 : item.claimedByGuestId ? 1 : 0;
+  }
+
+  function totalSlotCount(item: ChecklistItem) {
+    return isMoneyItem(item) ? item.totalSpots ?? 1 : 1;
+  }
+
+  const bringItems = requiredItems.filter((item) => !isMoneyItem(item));
+  const pitchInItems = requiredItems.filter(isMoneyItem);
+  const stillNeededItems = bringItems.filter((item) => !item.claimedByGuestId);
+  const claimedItems = bringItems.filter((item) => item.claimedByGuestId);
 
   const checklistSummary = requiredItems.reduce(
     (summary, item) => {
@@ -168,6 +182,10 @@ export default function HostDashboardPage() {
     }
 
     return categoryLabels[item.category];
+  }
+
+  function getClaimedItemDetail(item: ChecklistItem) {
+    return item.claimedByName ? `Claimed by ${item.claimedByName}` : categoryLabels[item.category];
   }
 
   if (loaded && !bundle) {
@@ -204,23 +222,31 @@ export default function HostDashboardPage() {
           backLabel="Back to Setup Contributions"
         />
 
-        <section aria-labelledby="event-home-heading" className="space-y-6">
-          <Card className={cn("overflow-hidden border", theme.accentBorder)}>
-            <div className={cn("h-2", theme.swatch)} />
-            <CardHeader className="space-y-4">
-              <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
-                Event Home
-              </p>
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <CardTitle id="event-home-heading" className="text-3xl sm:text-4xl">
-                    {bundle.event.title}
-                  </CardTitle>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/65">
-                    Keep the invite link, checklist, pitch-in spots, and guest responses in one place.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 sm:min-w-56">
+        <div className="space-y-8">
+          <section aria-labelledby="event-section-heading" className="space-y-4">
+            <EventHero event={bundle.event} />
+            <div className="flex justify-end">
+              <Link
+                href={`/event/${eventId}/edit`}
+                className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-auto")}
+              >
+                <Pencil className="h-4 w-4" aria-hidden="true" />
+                Edit details
+              </Link>
+            </div>
+            <h1 id="event-section-heading" className="sr-only">
+              Event
+            </h1>
+          </section>
+
+          <section aria-labelledby="invite-guests-heading">
+            <Card className={cn("overflow-hidden border", theme.accentBorder)}>
+              <div className={cn("h-2", theme.swatch)} />
+              <CardHeader>
+                <CardTitle id="invite-guests-heading">Invite guests</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-3">
                   <Button
                     type="button"
                     variant="default"
@@ -228,7 +254,7 @@ export default function HostDashboardPage() {
                     onClick={handleInvitePeople}
                   >
                     <Share2 className="h-4 w-4" aria-hidden="true" />
-                    Invite People
+                    Invite people
                   </Button>
                   <Button type="button" variant="secondary" onClick={handleCopyInviteLink}>
                     {copyMessage ? (
@@ -236,144 +262,208 @@ export default function HostDashboardPage() {
                     ) : (
                       <Copy className="h-4 w-4" aria-hidden="true" />
                     )}
-                    Copy Invite Link
+                    Copy invite link
                   </Button>
                   <Link
                     href={`/event/${eventId}?preview=host`}
                     className={cn(buttonVariants({ variant: "outline" }), "w-full")}
                   >
                     <Eye className="h-4 w-4" aria-hidden="true" />
-                    Preview Invite
+                    Preview invite
                   </Link>
                 </div>
-              </div>
-              {copyMessage ? (
-                <p className={cn("text-sm font-semibold", theme.accentText)}>{copyMessage}</p>
-              ) : null}
-            </CardHeader>
-          </Card>
+                {copyMessage ? (
+                  <p className={cn("text-sm font-semibold", theme.accentText)}>{copyMessage}</p>
+                ) : null}
+              </CardContent>
+            </Card>
+          </section>
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-            <div className="space-y-6">
-              <EventHero event={bundle.event} />
-
-              <Card className={cn("border", theme.accentBorder)}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                    Checklist &amp; contributions
-                  </CardTitle>
-                  <p className="text-sm text-ink/60">
-                    A quick read on what is open, claimed, and ready for guests.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <StatCard
-                      label="Open needs"
-                      value={Math.max(checklistSummary.totalSlots - checklistSummary.claimedSlots, 0)}
-                    />
-                    <StatCard
-                      label="Claimed"
-                      value={`${checklistSummary.claimedSlots}/${checklistSummary.totalSlots}`}
-                    />
-                    <StatCard label="Pitch-in spots" value={pitchInValue} />
-                  </div>
-                  <Link
-                    href={`/event/${eventId}/setup`}
-                    className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-auto")}
-                  >
-                    Edit checklist
-                  </Link>
-                </CardContent>
-              </Card>
+          <section aria-labelledby="guests-heading" className="space-y-5">
+            <div>
+              <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
+                Guests
+              </p>
+              <h2 id="guests-heading" className="mt-2 text-3xl font-semibold">
+                Guest responses
+              </h2>
             </div>
 
-            <aside className="space-y-5">
-              <PitchInCard event={bundle.event} hostView />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <StatCard
+                label="Going"
+                value={stats.yes}
+                icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
+              />
+              <StatCard
+                label="Maybe"
+                value={stats.maybe}
+                icon={<CalendarClock className="h-5 w-5" aria-hidden="true" />}
+              />
+              <StatCard
+                label="Not attending"
+                value={stats.no}
+                icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
+              />
+            </div>
 
-              <Card className={cn("border", theme.accentBorder)}>
-                <CardHeader>
-                  <CardTitle>Still needed</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {missingItems.length > 0 ? (
-                    <div className="space-y-2">
-                      {missingItems.map((item) => (
-                        <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                          <p className="font-semibold">{item.title}</p>
-                          <p className="text-ink/55">{getMissingItemDetail(item)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <EmptyState title="Everything is claimed" description="A very tidy board." />
-                  )}
-                </CardContent>
-              </Card>
-            </aside>
-          </div>
-        </section>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setGuestResponsesExpanded((expanded) => !expanded)}
+            >
+              {guestResponsesExpanded ? (
+                <ChevronUp className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="h-4 w-4" aria-hidden="true" />
+              )}
+              {guestResponsesExpanded ? "Hide guest responses" : "View guest responses"}
+            </Button>
 
-        <section aria-labelledby="guest-responses-heading" className="mt-8 space-y-5">
-          <div>
-            <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
-              Guest Responses
-            </p>
-            <h2 id="guest-responses-heading" className="mt-2 text-3xl font-semibold">
-              Guest responses
-            </h2>
-          </div>
-
-          {bundle.guests.length === 0 ? (
-            <EmptyState title="Guest responses will appear here once people start replying." />
-          ) : (
-            <>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <StatCard
-                  label="In"
-                  value={stats.yes}
-                  icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
-                />
-                <StatCard
-                  label="Maybe"
-                  value={stats.maybe}
-                  icon={<CalendarClock className="h-5 w-5" aria-hidden="true" />}
-                />
-                <StatCard
-                  label="Can't make it"
-                  value={stats.no}
-                  icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
-                />
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-                <Card className={cn("border", theme.accentBorder)}>
-                  <CardHeader>
-                    <CardTitle>Who&apos;s coming</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <GuestList guests={bundle.guests} checklistItems={bundle.checklistItems} />
-                  </CardContent>
-                </Card>
-
-                <aside>
+            {guestResponsesExpanded ? (
+              bundle.guests.length === 0 ? (
+                <EmptyState title="Guest responses will appear here once people start replying." />
+              ) : (
+                <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
                   <Card className={cn("border", theme.accentBorder)}>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Salad className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                        Dietary restrictions
-                      </CardTitle>
+                      <CardTitle>Guest list</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <DietarySummary guests={bundle.guests} />
+                      <GuestList guests={bundle.guests} checklistItems={bundle.checklistItems} />
                     </CardContent>
                   </Card>
-                </aside>
+
+                  <aside>
+                    <Card className={cn("border", theme.accentBorder)}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Salad className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
+                          Dietary restrictions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <DietarySummary guests={bundle.guests} />
+                      </CardContent>
+                    </Card>
+                  </aside>
+                </div>
+              )
+            ) : null}
+          </section>
+
+          <section aria-labelledby="contributions-heading" className="space-y-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className={cn("text-sm font-semibold uppercase tracking-[0.18em]", theme.accentText)}>
+                  Contributions
+                </p>
+                <h2 id="contributions-heading" className="mt-2 text-3xl font-semibold">
+                  Contributions
+                </h2>
               </div>
-            </>
-          )}
-        </section>
+              <Link
+                href={`/event/${eventId}/setup`}
+                className={cn(buttonVariants({ variant: "secondary" }), "w-full sm:w-auto")}
+              >
+                <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                Edit checklist
+              </Link>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <StatCard label="Items claimed" value={`${claimedItems.length}/${bringItems.length}`} />
+              <StatCard label="Still needed" value={stillNeededItems.length} />
+              {bundle.event.pitchInEnabled ? (
+                <StatCard label="Pitch-in spots" value={pitchInValue} />
+              ) : null}
+            </div>
+
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setContributionsExpanded((expanded) => !expanded)}
+            >
+              {contributionsExpanded ? (
+                <ChevronUp className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="h-4 w-4" aria-hidden="true" />
+              )}
+              {contributionsExpanded ? "Hide contributions" : "View contributions"}
+            </Button>
+
+            {contributionsExpanded ? (
+              <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+                <div className="space-y-6">
+                  <Card className={cn("border", theme.accentBorder)}>
+                    <CardHeader>
+                      <CardTitle>Still needed</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {stillNeededItems.length > 0 ? (
+                        <div className="space-y-2">
+                          {stillNeededItems.map((item) => (
+                            <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                              <p className="font-semibold">{item.title}</p>
+                              <p className="text-ink/55">{getMissingItemDetail(item)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState title="Everything is claimed" description="A very tidy board." />
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className={cn("border", theme.accentBorder)}>
+                    <CardHeader>
+                      <CardTitle>Claimed</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {claimedItems.length > 0 ? (
+                        <div className="space-y-2">
+                          {claimedItems.map((item) => (
+                            <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                              <p className="font-semibold">{item.title}</p>
+                              <p className="text-ink/55">{getClaimedItemDetail(item)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptyState title="No claimed items yet" description="Guest claims will show up here." />
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {bundle.event.pitchInEnabled ? (
+                  <aside className="space-y-5">
+                    <PitchInCard event={bundle.event} hostView />
+                    {pitchInItems.length > 0 ? (
+                      <Card className={cn("border", theme.accentBorder)}>
+                        <CardHeader>
+                          <CardTitle>Pitch-in progress</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {pitchInItems.map((item) => (
+                              <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                                <p className="font-semibold">{item.title}</p>
+                                <p className="text-ink/55">
+                                  {claimedSlotCount(item)}/{totalSlotCount(item)} spots claimed
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : null}
+                  </aside>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
+        </div>
       </div>
     </main>
   );
