@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   AlertCircle,
+  ArrowUp,
   CalendarClock,
   Check,
   ChevronDown,
@@ -206,6 +207,10 @@ export default function HostDashboardPage() {
 
   function getClaimedItemDetail(item: ChecklistItem) {
     return item.claimedByName ? `Claimed by ${item.claimedByName}` : categoryLabels[item.category];
+  }
+
+  function handleBackToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   if (loaded && !bundle) {
@@ -516,6 +521,13 @@ export default function HostDashboardPage() {
               </div>
             ) : null}
           </section>
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <Button type="button" variant="ghost" size="sm" onClick={handleBackToTop}>
+            <ArrowUp className="h-4 w-4" aria-hidden="true" />
+            Back to top
+          </Button>
         </div>
       </div>
     </main>
