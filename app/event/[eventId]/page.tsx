@@ -366,7 +366,7 @@ export default function PublicEventPage() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-6">
-            <EventHero event={bundle.event} />
+            <EventHero event={bundle.event} showImageLabels={false} showHostEyebrow={false} />
 
             <Card className={cn("border", theme.accentBorder)}>
               <CardHeader>
