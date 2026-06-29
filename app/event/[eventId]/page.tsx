@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestContributionCard } from "@/components/GuestContributionCard";
 import { GuestList } from "@/components/GuestList";
-import { PitchInCard } from "@/components/PitchInCard";
 import { RSVPCard } from "@/components/RSVPCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -365,7 +364,7 @@ export default function PublicEventPage() {
           </Link>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-6">
           <div className="space-y-6">
             <EventHero event={bundle.event} showImageLabels={false} showHostEyebrow={false} />
 
@@ -480,12 +479,6 @@ export default function PublicEventPage() {
               </Button>
             ) : null}
           </div>
-
-          <aside className="space-y-5">
-            {shouldShowContributionOptions ? (
-              <PitchInCard event={bundle.event} enabled={hasPitchIn} />
-            ) : null}
-          </aside>
         </div>
 
         {currentGuest ? (

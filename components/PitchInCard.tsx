@@ -5,16 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, normalizeVenmoHandle, venmoProfileUrl } from "@/lib/utils";
 import { getEventTheme } from "@/lib/themes";
 
-export function PitchInCard({
-  event,
-  hostView = false,
-  enabled
-}: {
-  event: DinnerEvent;
-  hostView?: boolean;
-  enabled?: boolean;
-}) {
-  if (!enabled && !event.pitchInEnabled) {
+export function PitchInCard({ event, hostView = false }: { event: DinnerEvent; hostView?: boolean }) {
+  if (!event.pitchInEnabled) {
     return null;
   }
 

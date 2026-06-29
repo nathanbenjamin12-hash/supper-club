@@ -389,7 +389,7 @@ export function EventForm({
         <CardHeader>
           <CardTitle>Cover style</CardTitle>
           <p className="text-sm text-ink/60">
-            This theme now carries through the invite, dashboard, money card, and accents.
+            This theme now carries through the invite, dashboard, contributions, and accents.
           </p>
         </CardHeader>
         <CardContent>

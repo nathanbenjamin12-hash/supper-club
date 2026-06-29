@@ -52,7 +52,8 @@ function itemDetail(item: ChecklistItem) {
   if (isMoneyItem(item)) {
     const claimedSpots = item.moneyClaims?.length ?? 0;
     const totalSpots = item.totalSpots ?? 1;
-    return `${Math.max(totalSpots - claimedSpots, 0)} of ${totalSpots} spots left`;
+    const amount = item.amountPerPerson ? `$${item.amountPerPerson}` : "Amount not set";
+    return `${amount} each | ${Math.max(totalSpots - claimedSpots, 0)} of ${totalSpots} spots left`;
   }
 
   return categoryLabels[item.category];
@@ -95,6 +96,12 @@ export function GuestContributionCard({
   const claimedItems = items.filter((item) => itemIsClaimedBySomeoneElse(item, currentGuest));
   const editableItems = items.filter((item) => guestOwnsItem(item, currentGuest) || itemIsAvailable(item, currentGuest));
   const selectionItems = selectionMode && currentGuest ? editableItems : availableItems;
+  const regularSelectionItems = selectionItems.filter((item) => !isMoneyItem(item));
+  const pitchInSelectionItems = selectionItems.filter(isMoneyItem);
+  const regularEditableItems = editableItems.filter((item) => !isMoneyItem(item));
+  const pitchInEditableItems = editableItems.filter(isMoneyItem);
+  const claimedRegularItems = claimedItems.filter((item) => !isMoneyItem(item));
+  const claimedPitchInItems = claimedItems.filter(isMoneyItem);
   const ownClaimIds = ownClaims.map((item) => item.id);
   const [draftItemIds, setDraftItemIds] = useState<string[]>(ownClaimIds);
   const [isSaving, setIsSaving] = useState(false);
@@ -130,6 +137,74 @@ export function GuestContributionCard({
     }
   }
 
+  function renderSelectionCard(item: ChecklistItem) {
+    const selected = itemIsSelected(item);
+
+    return (
+      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-semibold">{item.title}</p>
+            <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
+            {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
+          </div>
+          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
+        </div>
+        <Button
+          type="button"
+          variant={selected ? "secondary" : "default"}
+          className={cn("mt-3 w-full", !selected && theme.cta)}
+          aria-pressed={selected}
+          onClick={() => onToggleSelection?.(item)}
+        >
+          {selected ? "Remove from RSVP" : isMoneyItem(item) ? "Select pitch-in" : "Select this"}
+        </Button>
+      </div>
+    );
+  }
+
+  function renderDraftCard(item: ChecklistItem) {
+    const selected = draftItemIsSelected(item);
+
+    return (
+      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-semibold">{item.title}</p>
+            <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
+            {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
+          </div>
+          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
+        </div>
+        <Button
+          type="button"
+          variant={selected ? "secondary" : "default"}
+          className={cn("mt-3 w-full", !selected && theme.cta)}
+          aria-pressed={selected}
+          onClick={() => toggleDraftItem(item)}
+        >
+          {selected ? "Remove from list" : isMoneyItem(item) ? "Select pitch-in" : "Select this"}
+        </Button>
+      </div>
+    );
+  }
+
+  function renderClaimedCard(item: ChecklistItem) {
+    return (
+      <div key={item.id} className="rounded-lg border border-olive/18 bg-cream p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-semibold">{item.title}</p>
+            <p className="mt-1 text-sm text-ink/60">{claimedDetail(item)}</p>
+            {isMoneyItem(item) ? <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p> : null}
+            {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
+          </div>
+          <Badge tone="claimed">{isMoneyItem(item) ? "Full" : "Claimed"}</Badge>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card className={cn("border", theme.accentBorder)}>
       <CardHeader>
@@ -156,7 +231,7 @@ export function GuestContributionCard({
               <div className={cn("rounded-lg p-4", theme.softPanel)}>
                 <p className="flex items-center gap-2 text-sm font-semibold text-olive">
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                  Selected to bring:
+                  Selected contributions:
                 </p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
                   {selectedItems.map((item) => (
@@ -166,75 +241,61 @@ export function GuestContributionCard({
               </div>
             ) : null}
 
-            {selectionItems.length > 0 ? (
+            {regularSelectionItems.length > 0 ? (
               <section className="space-y-3" aria-labelledby="available-contributions-heading">
                 <h3 id="available-contributions-heading" className="text-lg font-semibold">
                   {currentGuest ? "Your options" : "Available to claim"}
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {selectionItems.map((item) => {
-                    const selected = itemIsSelected(item);
-
-                    return (
-                      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-semibold">{item.title}</p>
-                            <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
-                          </div>
-                          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
-                        </div>
-                        <Button
-                          type="button"
-                          variant={selected ? "secondary" : "default"}
-                          className={cn("mt-3 w-full", !selected && theme.cta)}
-                          aria-pressed={selected}
-                          onClick={() => onToggleSelection?.(item)}
-                        >
-                          {selected ? "Remove from RSVP" : "Select this"}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                  {regularSelectionItems.map((item) => renderSelectionCard(item))}
                 </div>
               </section>
-            ) : (
+            ) : null}
+
+            {pitchInSelectionItems.length > 0 || claimedPitchInItems.length > 0 ? (
+              <section className="space-y-3" aria-labelledby="pitch-in-contributions-heading">
+                <h3 id="pitch-in-contributions-heading" className="text-lg font-semibold">
+                  Pitch in
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {pitchInSelectionItems.map((item) => renderSelectionCard(item))}
+                  {claimedPitchInItems.map((item) => renderClaimedCard(item))}
+                </div>
+              </section>
+            ) : null}
+
+            {regularSelectionItems.length === 0 &&
+            pitchInSelectionItems.length === 0 &&
+            claimedPitchInItems.length === 0 ? (
               <EmptyState title="Everything is claimed" description="The board is full for now." />
-            )}
+            ) : null}
           </>
         ) : (
           <>
             <section className="space-y-3">
-              {editableItems.length > 0 ? (
+              {regularEditableItems.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {editableItems.map((item) => {
-                    const selected = draftItemIsSelected(item);
-
-                    return (
-                      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-semibold">{item.title}</p>
-                            <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
-                          </div>
-                          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
-                        </div>
-                        <Button
-                          type="button"
-                          variant={selected ? "secondary" : "default"}
-                          className={cn("mt-3 w-full", !selected && theme.cta)}
-                          aria-pressed={selected}
-                          onClick={() => toggleDraftItem(item)}
-                        >
-                          {selected ? "Remove from list" : "Select this"}
-                        </Button>
-                      </div>
-                    );
-                  })}
+                  {regularEditableItems.map((item) => renderDraftCard(item))}
                 </div>
-              ) : (
+              ) : null}
+
+              {pitchInEditableItems.length > 0 || claimedPitchInItems.length > 0 ? (
+                <section className="space-y-3" aria-labelledby="edit-pitch-in-contributions-heading">
+                  <h3 id="edit-pitch-in-contributions-heading" className="text-lg font-semibold">
+                    Pitch in
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {pitchInEditableItems.map((item) => renderDraftCard(item))}
+                    {claimedPitchInItems.map((item) => renderClaimedCard(item))}
+                  </div>
+                </section>
+              ) : null}
+
+              {regularEditableItems.length === 0 &&
+              pitchInEditableItems.length === 0 &&
+              claimedPitchInItems.length === 0 ? (
                 <EmptyState title="Everything is claimed" description="The board is full for now." />
-              )}
+              ) : null}
 
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Button
@@ -254,23 +315,13 @@ export function GuestContributionCard({
           </>
         )}
 
-        {claimedItems.length > 0 ? (
+        {claimedRegularItems.length > 0 ? (
           <section className="space-y-3" aria-labelledby="claimed-contributions-heading">
             <h3 id="claimed-contributions-heading" className="text-lg font-semibold">
               Already claimed
             </h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              {claimedItems.map((item) => (
-                <div key={item.id} className="rounded-lg border border-olive/18 bg-cream p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-semibold">{item.title}</p>
-                      <p className="mt-1 text-sm text-ink/60">{claimedDetail(item)}</p>
-                    </div>
-                    <Badge tone="claimed">Claimed</Badge>
-                  </div>
-                </div>
-              ))}
+              {claimedRegularItems.map((item) => renderClaimedCard(item))}
             </div>
           </section>
         ) : null}

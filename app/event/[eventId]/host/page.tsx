@@ -22,7 +22,6 @@ import { EmptyState } from "@/components/EmptyState";
 import { EventHero } from "@/components/EventHero";
 import { GuestList } from "@/components/GuestList";
 import { HostFlowNav } from "@/components/HostFlowNav";
-import { PitchInCard } from "@/components/PitchInCard";
 import { StatCard } from "@/components/StatCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -208,6 +207,11 @@ export default function HostDashboardPage() {
 
   function getClaimedItemDetail(item: ChecklistItem) {
     return item.claimedByName ? `Claimed by ${item.claimedByName}` : categoryLabels[item.category];
+  }
+
+  function getPitchInItemDetail(item: ChecklistItem) {
+    const amount = item.amountPerPerson ? `$${item.amountPerPerson} each` : "Amount not set";
+    return `${amount} | ${claimedSlotCount(item)}/${totalSlotCount(item)} claimed`;
   }
 
   function handleBackToTop() {
@@ -452,73 +456,67 @@ export default function HostDashboardPage() {
             </Button>
 
             {contributionsExpanded ? (
-              <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-                <div className="space-y-6">
-                  <Card className={cn("border", theme.accentBorder)}>
-                    <CardHeader>
-                      <CardTitle>Still needed</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {stillNeededItems.length > 0 ? (
-                        <div className="space-y-2">
-                          {stillNeededItems.map((item) => (
-                            <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                              <p className="font-semibold">{item.title}</p>
-                              <p className="text-ink/55">{getMissingItemDetail(item)}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <EmptyState title="Everything is claimed" description="A very tidy board." />
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className={cn("border", theme.accentBorder)}>
-                    <CardHeader>
-                      <CardTitle>Claimed</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {claimedItems.length > 0 ? (
-                        <div className="space-y-2">
-                          {claimedItems.map((item) => (
-                            <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                              <p className="font-semibold">{item.title}</p>
-                              <p className="text-ink/55">{getClaimedItemDetail(item)}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <EmptyState title="No claimed items yet" description="Guest claims will show up here." />
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
+              <div className="space-y-6">
+                <Card className={cn("border", theme.accentBorder)}>
+                  <CardHeader>
+                    <CardTitle>Still needed</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {stillNeededItems.length > 0 ? (
+                      <div className="space-y-2">
+                        {stillNeededItems.map((item) => (
+                          <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                            <p className="font-semibold">{item.title}</p>
+                            <p className="text-ink/55">{getMissingItemDetail(item)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <EmptyState title="Everything is claimed" description="A very tidy board." />
+                    )}
+                  </CardContent>
+                </Card>
 
                 {hasPitchIn ? (
-                  <aside className="space-y-5">
-                    <PitchInCard event={bundle.event} hostView enabled={hasPitchIn} />
-                    {pitchInItems.length > 0 ? (
-                      <Card className={cn("border", theme.accentBorder)}>
-                        <CardHeader>
-                          <CardTitle>Pitch-in progress</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            {pitchInItems.map((item) => (
-                              <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                                <p className="font-semibold">{item.title}</p>
-                                <p className="text-ink/55">
-                                  {claimedSlotCount(item)}/{totalSlotCount(item)} spots claimed
-                                </p>
-                              </div>
-                            ))}
+                  <Card className={cn("border", theme.accentBorder)}>
+                    <CardHeader>
+                      <CardTitle>Pitch-ins</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {pitchInItems.map((item) => (
+                          <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                            <p className="font-semibold">{item.title}</p>
+                            <p className="text-ink/55">{getPitchInItemDetail(item)}</p>
+                            {item.description ? (
+                              <p className="mt-1 text-ink/65">{item.description}</p>
+                            ) : null}
                           </div>
-                        </CardContent>
-                      </Card>
-                    ) : null}
-                  </aside>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : null}
+
+                <Card className={cn("border", theme.accentBorder)}>
+                  <CardHeader>
+                    <CardTitle>Claimed</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {claimedItems.length > 0 ? (
+                      <div className="space-y-2">
+                        {claimedItems.map((item) => (
+                          <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                            <p className="font-semibold">{item.title}</p>
+                            <p className="text-ink/55">{getClaimedItemDetail(item)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <EmptyState title="No claimed items yet" description="Guest claims will show up here." />
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             ) : null}
           </section>

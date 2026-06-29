@@ -7,7 +7,6 @@ import { AtSign, ClipboardList, DollarSign, Home, ListPlus } from "lucide-react"
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { HostFlowNav } from "@/components/HostFlowNav";
-import { PitchInCard } from "@/components/PitchInCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -220,12 +219,6 @@ export default function EventSetupPage() {
     await reload();
   }
 
-  async function handleSaveVenmoHandle() {
-    await savePitchInEventConfig(bundle?.checklistItems ?? [], venmoHandle);
-    setFormMessage("Venmo handle saved.");
-    await reload();
-  }
-
   if (loaded && !bundle) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
@@ -245,7 +238,6 @@ export default function EventSetupPage() {
   }
 
   const theme = getEventTheme(bundle.event.coverStyle);
-  const pitchInItems = bundle.checklistItems.filter(isMoneyItem);
   const itemNamePlaceholder =
     itemType === "money" ? "Pitch in for dinner" : category ? categoryItemPlaceholders[category] : "Item name";
 
@@ -410,11 +402,6 @@ export default function EventSetupPage() {
                         <ListPlus className="h-4 w-4" aria-hidden="true" />
                         Add item
                       </Button>
-                      {itemType === "money" ? (
-                        <Button type="button" variant="secondary" onClick={handleSaveVenmoHandle}>
-                          Save Venmo handle
-                        </Button>
-                      ) : null}
                       {formMessage ? (
                         <p className={cn("text-sm font-semibold", theme.accentText)}>{formMessage}</p>
                       ) : null}
@@ -433,8 +420,6 @@ export default function EventSetupPage() {
             </div>
 
             <aside className="space-y-5">
-              <PitchInCard event={bundle.event} hostView enabled={pitchInItems.length > 0} />
-
               <Card className={cn("border", theme.accentBorder)}>
                 <CardHeader>
                   <CardTitle>Still needed</CardTitle>
