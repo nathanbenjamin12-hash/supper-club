@@ -29,6 +29,17 @@ import {
 import { getEventTheme } from "@/lib/themes";
 import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
 
+const categoryItemPlaceholders: Record<ChecklistCategory, string> = {
+  appetizers: "Cheese board",
+  mains: "Lasagna",
+  sides: "Caesar salad",
+  desserts: "Brownies",
+  drinks: "Red wine",
+  supplies: "Ice",
+  games: "Checkers",
+  other: "Folding chairs"
+};
+
 export default function EventSetupPage() {
   const params = useParams<{ eventId: string }>();
   const eventId = params.eventId;
@@ -36,7 +47,7 @@ export default function EventSetupPage() {
   const [loaded, setLoaded] = useState(false);
   const [itemType, setItemType] = useState<ChecklistItemType>("bring");
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ChecklistCategory>("other");
+  const [category, setCategory] = useState<ChecklistCategory | "">("");
   const [quantity, setQuantity] = useState("");
   const [amountPerPerson, setAmountPerPerson] = useState("");
   const [totalSpots, setTotalSpots] = useState("");
@@ -119,7 +130,7 @@ export default function EventSetupPage() {
     } else {
       await addSharedChecklistItem(eventId, {
         title: title.trim(),
-        category,
+        category: category || "other",
         itemType: "bring",
         quantity: quantity ? Number(quantity) : undefined,
         description: description.trim() || undefined,
@@ -165,6 +176,8 @@ export default function EventSetupPage() {
   }
 
   const theme = getEventTheme(bundle.event.coverStyle);
+  const itemNamePlaceholder =
+    itemType === "money" ? "Pitch in for dinner" : category ? categoryItemPlaceholders[category] : "Item name";
 
   return (
     <main className={cn("min-h-screen", theme.pageBackground)}>
@@ -246,14 +259,17 @@ export default function EventSetupPage() {
                       <Input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
-                        placeholder={itemType === "money" ? "Pitch in for dinner" : "Vegetarian side"}
+                        placeholder={itemNamePlaceholder}
                       />
                       {itemType === "bring" ? (
                         <>
                           <Select
                             value={category}
-                            onChange={(event) => setCategory(event.target.value as ChecklistCategory)}
+                            onChange={(event) => setCategory(event.target.value as ChecklistCategory | "")}
                           >
+                            <option value="" disabled>
+                              Category
+                            </option>
                             {categoryOrder.map((candidate) => (
                               <option key={candidate} value={candidate}>
                                 {categoryLabels[candidate]}
