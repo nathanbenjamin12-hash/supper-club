@@ -21,9 +21,12 @@ export function GuestList({
     <div className="space-y-3">
       {guests.map((guest) => {
         const shouldShowDietaryDetails = showDietaryDetails && guest.rsvpStatus === "yes";
-        const contributions = checklistItems.filter(
+        const regularContributions = checklistItems.filter(
+          (item) => (item.itemType ?? "bring") !== "money" && item.claimedByGuestId === guest.id
+        );
+        const pitchInContributions = checklistItems.filter(
           (item) =>
-            item.claimedByGuestId === guest.id ||
+            (item.itemType ?? "bring") === "money" &&
             item.moneyClaims?.some((claim) => claim.guestId === guest.id)
         );
 
@@ -38,9 +41,14 @@ export function GuestList({
                   <UsersRound className="h-4 w-4 shrink-0 text-olive" aria-hidden="true" />
                   <span className="truncate">{guest.name}</span>
                 </p>
-                {contributions.length > 0 ? (
+                {regularContributions.length > 0 ? (
                   <p className="mt-1 text-sm text-ink/60">
-                    Contributing {contributions.map((item) => item.title).join(", ")}
+                    Contributing {regularContributions.map((item) => item.title).join(", ")}
+                  </p>
+                ) : null}
+                {pitchInContributions.length > 0 ? (
+                  <p className="mt-1 text-sm text-ink/60">
+                    Pitching in for {pitchInContributions.map((item) => item.title).join(", ")}
                   </p>
                 ) : null}
               </div>

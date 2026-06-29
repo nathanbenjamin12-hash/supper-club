@@ -102,3 +102,26 @@ export function venmoProfileUrl(handle?: string) {
   const normalized = normalizeVenmoHandle(handle);
   return normalized ? `https://venmo.com/u/${encodeURIComponent(normalized)}` : undefined;
 }
+
+export function venmoPaymentUrl(handle?: string, amount?: number, note?: string) {
+  const normalized = normalizeVenmoHandle(handle);
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  const params = new URLSearchParams({
+    txn: "pay",
+    recipients: normalized
+  });
+
+  if (amount && amount > 0) {
+    params.set("amount", String(amount));
+  }
+
+  if (note?.trim()) {
+    params.set("note", note.trim());
+  }
+
+  return `https://venmo.com/?${params.toString()}`;
+}

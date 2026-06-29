@@ -241,17 +241,6 @@ export function GuestContributionCard({
               </div>
             ) : null}
 
-            {regularSelectionItems.length > 0 ? (
-              <section className="space-y-3" aria-labelledby="available-contributions-heading">
-                <h3 id="available-contributions-heading" className="text-lg font-semibold">
-                  {currentGuest ? "Your options" : "Available to claim"}
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {regularSelectionItems.map((item) => renderSelectionCard(item))}
-                </div>
-              </section>
-            ) : null}
-
             {pitchInSelectionItems.length > 0 || claimedPitchInItems.length > 0 ? (
               <section className="space-y-3" aria-labelledby="pitch-in-contributions-heading">
                 <h3 id="pitch-in-contributions-heading" className="text-lg font-semibold">
@@ -260,6 +249,17 @@ export function GuestContributionCard({
                 <div className="grid gap-3 sm:grid-cols-2">
                   {pitchInSelectionItems.map((item) => renderSelectionCard(item))}
                   {claimedPitchInItems.map((item) => renderClaimedCard(item))}
+                </div>
+              </section>
+            ) : null}
+
+            {regularSelectionItems.length > 0 ? (
+              <section className="space-y-3" aria-labelledby="available-contributions-heading">
+                <h3 id="available-contributions-heading" className="text-lg font-semibold">
+                  {currentGuest ? "Your options" : "Available to claim"}
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {regularSelectionItems.map((item) => renderSelectionCard(item))}
                 </div>
               </section>
             ) : null}
@@ -273,12 +273,6 @@ export function GuestContributionCard({
         ) : (
           <>
             <section className="space-y-3">
-              {regularEditableItems.length > 0 ? (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {regularEditableItems.map((item) => renderDraftCard(item))}
-                </div>
-              ) : null}
-
               {pitchInEditableItems.length > 0 || claimedPitchInItems.length > 0 ? (
                 <section className="space-y-3" aria-labelledby="edit-pitch-in-contributions-heading">
                   <h3 id="edit-pitch-in-contributions-heading" className="text-lg font-semibold">
@@ -289,6 +283,12 @@ export function GuestContributionCard({
                     {claimedPitchInItems.map((item) => renderClaimedCard(item))}
                   </div>
                 </section>
+              ) : null}
+
+              {regularEditableItems.length > 0 ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {regularEditableItems.map((item) => renderDraftCard(item))}
+                </div>
               ) : null}
 
               {regularEditableItems.length === 0 &&

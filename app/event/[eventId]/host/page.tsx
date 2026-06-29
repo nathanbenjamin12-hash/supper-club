@@ -211,7 +211,7 @@ export default function HostDashboardPage() {
 
   function getPitchInItemDetail(item: ChecklistItem) {
     const amount = item.amountPerPerson ? `$${item.amountPerPerson} each` : "Amount not set";
-    return `${amount} | ${claimedSlotCount(item)}/${totalSlotCount(item)} claimed`;
+    return `${item.title} — ${amount} — ${claimedSlotCount(item)}/${totalSlotCount(item)} claimed`;
   }
 
   function handleBackToTop() {
@@ -457,6 +457,26 @@ export default function HostDashboardPage() {
 
             {contributionsExpanded ? (
               <div className="space-y-6">
+                {hasPitchIn ? (
+                  <Card className={cn("border", theme.accentBorder)}>
+                    <CardHeader>
+                      <CardTitle>Pitch-ins</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {pitchInItems.map((item) => (
+                          <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
+                            <p className="font-semibold">{getPitchInItemDetail(item)}</p>
+                            {item.description ? (
+                              <p className="mt-1 text-ink/65">{item.description}</p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null}
+
                 <Card className={cn("border", theme.accentBorder)}>
                   <CardHeader>
                     <CardTitle>Still needed</CardTitle>
@@ -476,27 +496,6 @@ export default function HostDashboardPage() {
                     )}
                   </CardContent>
                 </Card>
-
-                {hasPitchIn ? (
-                  <Card className={cn("border", theme.accentBorder)}>
-                    <CardHeader>
-                      <CardTitle>Pitch-ins</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {pitchInItems.map((item) => (
-                          <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                            <p className="font-semibold">{item.title}</p>
-                            <p className="text-ink/55">{getPitchInItemDetail(item)}</p>
-                            {item.description ? (
-                              <p className="mt-1 text-ink/65">{item.description}</p>
-                            ) : null}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : null}
 
                 <Card className={cn("border", theme.accentBorder)}>
                   <CardHeader>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Heart, RefreshCw, Send, Utensils } from "lucide-react";
 import type { ChecklistItem, DinnerEvent, Guest, GuestDraft, RSVPStatus } from "@/types/events";
 import { getEventTheme } from "@/lib/themes";
-import { cn, cleanOptional, normalizeVenmoHandle, rsvpLabels, venmoProfileUrl } from "@/lib/utils";
+import { cn, cleanOptional, normalizeVenmoHandle, rsvpLabels, venmoPaymentUrl, venmoProfileUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -60,7 +60,6 @@ export function RSVPCard({
 
   const savedStatus = currentGuest?.rsvpStatus ?? submittedStatus;
   const venmoHandle = normalizeVenmoHandle(event?.venmoHandle ?? event?.venmoUrl);
-  const venmoUrl = venmoProfileUrl(venmoHandle);
   const claimedMoneyItems = claimedItems.filter((item) => (item.itemType ?? "bring") === "money");
   const savedMessage: Record<RSVPStatus, string> = {
     yes: "You're in!",
@@ -324,23 +323,29 @@ export function RSVPCard({
               ) : (
                 <p className="mt-2 text-sm text-ink/65">Nothing yet.</p>
               )}
-              {venmoHandle && venmoUrl && claimedMoneyItems.length > 0 ? (
+              {venmoHandle && claimedMoneyItems.length > 0 ? (
                 <div className="mt-3 space-y-2 rounded-lg bg-stone/70 p-3 text-sm text-ink/70">
-                  {claimedMoneyItems.map((item) => (
-                    <p key={item.id}>
-                      Venmo{" "}
-                      <a
-                        href={venmoUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={cn("font-semibold underline underline-offset-2", theme.accentText)}
-                      >
-                        @{venmoHandle}
-                      </a>{" "}
-                      {item.amountPerPerson ? `$${item.amountPerPerson} ` : ""}
-                      for {item.title}
-                    </p>
-                  ))}
+                  {claimedMoneyItems.map((item) => {
+                    const paymentUrl =
+                      venmoPaymentUrl(venmoHandle, item.amountPerPerson, item.title) ??
+                      venmoProfileUrl(venmoHandle);
+
+                    return paymentUrl ? (
+                      <p key={item.id}>
+                        Venmo{" "}
+                        <a
+                          href={paymentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={cn("font-semibold underline underline-offset-2", theme.accentText)}
+                        >
+                          @{venmoHandle}
+                        </a>{" "}
+                        {item.amountPerPerson ? `$${item.amountPerPerson} ` : ""}
+                        for {item.title}
+                      </p>
+                    ) : null;
+                  })}
                 </div>
               ) : null}
             </div>
