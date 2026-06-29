@@ -152,6 +152,7 @@ export default function HostDashboardPage() {
 
   const bringItems = requiredItems.filter((item) => !isMoneyItem(item));
   const pitchInItems = requiredItems.filter(isMoneyItem);
+  const hasPitchIn = pitchInItems.length > 0;
   const stillNeededItems = bringItems.filter((item) => !item.claimedByGuestId);
   const claimedItems = bringItems.filter((item) => item.claimedByGuestId);
   const guestNotes =
@@ -432,7 +433,7 @@ export default function HostDashboardPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               <StatCard label="Items claimed" value={`${claimedItems.length}/${bringItems.length}`} />
               <StatCard label="Still needed" value={stillNeededItems.length} />
-              {bundle.event.pitchInEnabled ? (
+              {hasPitchIn ? (
                 <StatCard label="Pitch-in spots" value={pitchInValue} />
               ) : null}
             </div>
@@ -494,9 +495,9 @@ export default function HostDashboardPage() {
                   </Card>
                 </div>
 
-                {bundle.event.pitchInEnabled ? (
+                {hasPitchIn ? (
                   <aside className="space-y-5">
-                    <PitchInCard event={bundle.event} hostView />
+                    <PitchInCard event={bundle.event} hostView enabled={hasPitchIn} />
                     {pitchInItems.length > 0 ? (
                       <Card className={cn("border", theme.accentBorder)}>
                         <CardHeader>

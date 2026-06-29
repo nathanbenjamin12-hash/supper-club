@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
-  AtSign,
   CalendarDays,
-  DollarSign,
   ListPlus,
   MapPin,
   Trash2,
@@ -87,21 +85,12 @@ export function EventForm({
   const [description, setDescription] = useState(event?.description ?? "");
   const [eventType, setEventType] = useState<EventType>(event?.eventType ?? "dinner_party");
   const [coverStyle, setCoverStyle] = useState(event?.coverStyle ?? coverStyles[0]);
-  const [pitchInEnabled, setPitchInEnabled] = useState(event?.pitchInEnabled ?? false);
-  const [venmoHandle, setVenmoHandle] = useState(
-    event?.venmoHandle ?? normalizeVenmoHandle(event?.venmoUrl) ?? ""
-  );
   const [customItems, setCustomItems] = useState<ChecklistItemDraft[]>([]);
   const [customItemPreset, setCustomItemPreset] = useState(contributionPresets[0].label);
   const [customItemTitle, setCustomItemTitle] = useState("");
   const [customItemCategory, setCustomItemCategory] = useState<ChecklistCategory>("other");
   const [customItemQuantity, setCustomItemQuantity] = useState("");
   const [customItemDescription, setCustomItemDescription] = useState("");
-  const [moneyItems, setMoneyItems] = useState<ChecklistItemDraft[]>([]);
-  const [moneyTitle, setMoneyTitle] = useState("Pitch in for dinner");
-  const [moneyAmount, setMoneyAmount] = useState("");
-  const [moneySpots, setMoneySpots] = useState("");
-  const [moneyNote, setMoneyNote] = useState("");
   const [error, setError] = useState("");
 
   const missingFields = useMemo(() => {
@@ -162,48 +151,6 @@ export function EventForm({
     setCustomItems((items) => items.filter((_, index) => index !== indexToRemove));
   }
 
-  function handleAddMoneyItem() {
-    const amount = Number(moneyAmount);
-    const spots = Number(moneySpots);
-
-    if (!moneyTitle.trim()) {
-      setError("Add a title for the pitch-in contribution.");
-      return;
-    }
-
-    if (!moneyAmount || Number.isNaN(amount) || amount <= 0) {
-      setError("Add an amount per person greater than $0.");
-      return;
-    }
-
-    if (!moneySpots || Number.isNaN(spots) || spots < 1 || !Number.isInteger(spots)) {
-      setError("Add the number of available pitch-in spots.");
-      return;
-    }
-
-    setMoneyItems((items) => [
-      ...items,
-      {
-        title: moneyTitle.trim(),
-        category: "other",
-        itemType: "money",
-        isRequired: true,
-        amountPerPerson: amount,
-        totalSpots: spots,
-        description: cleanOptional(moneyNote)
-      }
-    ]);
-    setMoneyTitle("Pitch in for dinner");
-    setMoneyAmount("");
-    setMoneySpots("");
-    setMoneyNote("");
-    setError("");
-  }
-
-  function removeMoneyItem(indexToRemove: number) {
-    setMoneyItems((items) => items.filter((_, index) => index !== indexToRemove));
-  }
-
   function handleSubmit(formEvent: React.FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
 
@@ -212,11 +159,8 @@ export function EventForm({
       return;
     }
 
-    const normalizedVenmoHandle = normalizeVenmoHandle(venmoHandle);
-    const starterItems = [
-      ...(eventType === "custom" ? customItems : []),
-      ...(pitchInEnabled ? moneyItems : [])
-    ];
+    const starterItems = eventType === "custom" ? customItems : [];
+    const existingVenmoHandle = event?.venmoHandle ?? normalizeVenmoHandle(event?.venmoUrl);
 
     setError("");
     onSubmit({
@@ -228,9 +172,9 @@ export function EventForm({
       description: cleanOptional(description),
       eventType,
       coverStyle,
-      pitchInEnabled,
-      recommendedContributionAmount: undefined,
-      venmoHandle: pitchInEnabled ? normalizedVenmoHandle : undefined,
+      pitchInEnabled: event?.pitchInEnabled ?? false,
+      recommendedContributionAmount: event?.recommendedContributionAmount,
+      venmoHandle: existingVenmoHandle,
       venmoUrl: undefined
     }, starterItems);
   }
@@ -436,130 +380,6 @@ export function EventForm({
                   ))}
                 </div>
               ) : null}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-olive" aria-hidden="true" />
-            Pitch in money
-          </CardTitle>
-          <p className="text-sm text-ink/60">
-            Optional for shared groceries, drinks, delivery, or supplies.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <label className="flex items-start gap-3 rounded-lg bg-stone/70 p-4 text-sm font-semibold">
-            <input
-              type="checkbox"
-              checked={pitchInEnabled}
-              onChange={(event) => setPitchInEnabled(event.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-ink/20 text-base sm:text-sm"
-            />
-            <span>
-              Show a pitch-in section on the invite
-              <span className="mt-1 block font-normal text-ink/60">
-                Guests can claim available money spots. Add a Venmo handle so payment links are ready.
-              </span>
-            </span>
-          </label>
-
-          {pitchInEnabled ? (
-            <div className="space-y-4">
-              <label className="grid gap-2 text-sm font-semibold">
-                Venmo handle
-                <span className="relative">
-                  <AtSign
-                    className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    value={venmoHandle}
-                    onChange={(event) => setVenmoHandle(event.target.value)}
-                    placeholder="@nathanbenjamin or nathanbenjamin"
-                    className="pl-10"
-                  />
-                </span>
-              </label>
-
-              <div className="rounded-lg bg-stone/70 p-4">
-                <p className="font-semibold">Add a pitch-in contribution</p>
-                <p className="mt-1 text-sm text-ink/60">
-                  Set how many guests can claim a money spot.
-                </p>
-                <div className="mt-4 grid gap-3">
-                  <Input
-                    value={moneyTitle}
-                    onChange={(event) => setMoneyTitle(event.target.value)}
-                    placeholder="Pitch in for dinner"
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <span className="relative">
-                      <DollarSign
-                        className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
-                        aria-hidden="true"
-                      />
-                      <Input
-                        value={moneyAmount}
-                        onChange={(event) => setMoneyAmount(event.target.value)}
-                        type="number"
-                        min="1"
-                        step="1"
-                        placeholder="Amount per person"
-                        className="pl-10"
-                      />
-                    </span>
-                    <Input
-                      value={moneySpots}
-                      onChange={(event) => setMoneySpots(event.target.value)}
-                      type="number"
-                      min="1"
-                      step="1"
-                      placeholder="Available spots"
-                    />
-                  </div>
-                  <Textarea
-                    value={moneyNote}
-                    onChange={(event) => setMoneyNote(event.target.value)}
-                    placeholder="Optional note, like what this helps cover"
-                    className="min-h-20"
-                  />
-                  <Button type="button" variant="secondary" onClick={handleAddMoneyItem}>
-                    <ListPlus className="h-4 w-4" aria-hidden="true" />
-                    Add pitch-in spot
-                  </Button>
-                </div>
-
-                {moneyItems.length > 0 ? (
-                  <div className="mt-4 grid gap-2">
-                    {moneyItems.map((item, index) => (
-                      <div
-                        key={`${item.title}-${index}`}
-                        className="flex items-center justify-between gap-3 rounded-md bg-cream p-3 text-sm shadow-sm"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold">{item.title}</p>
-                          <p className="text-ink/55">
-                            ${item.amountPerPerson} each | {item.totalSpots} spots
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeMoneyItem(index)}
-                          aria-label={`Remove ${item.title}`}
-                        >
-                          <Trash2 className="h-4 w-4" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
             </div>
           ) : null}
         </CardContent>

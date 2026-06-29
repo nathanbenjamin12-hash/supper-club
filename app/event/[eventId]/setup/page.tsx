@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ClipboardList, DollarSign, Home, ListPlus } from "lucide-react";
+import { AtSign, ClipboardList, DollarSign, Home, ListPlus } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { HostFlowNav } from "@/components/HostFlowNav";
@@ -18,16 +18,19 @@ import type {
   ChecklistItem,
   ChecklistItemDraft,
   ChecklistItemType,
+  DinnerEvent,
+  EventDraft,
   EventBundle
 } from "@/types/events";
 import {
   addSharedChecklistItem,
   deleteSharedChecklistItem,
   getSharedEventBundle,
+  updateSharedEvent,
   updateSharedChecklistItem
 } from "@/lib/eventApi";
 import { getEventTheme } from "@/lib/themes";
-import { categoryLabels, categoryOrder, cn } from "@/lib/utils";
+import { categoryLabels, categoryOrder, cn, normalizeVenmoHandle } from "@/lib/utils";
 
 const categoryItemPlaceholders: Record<ChecklistCategory, string> = {
   appetizers: "Cheese board",
@@ -52,10 +55,57 @@ export default function EventSetupPage() {
   const [amountPerPerson, setAmountPerPerson] = useState("");
   const [totalSpots, setTotalSpots] = useState("");
   const [description, setDescription] = useState("");
+  const [venmoHandle, setVenmoHandle] = useState("");
   const [formMessage, setFormMessage] = useState("");
 
   async function reload() {
     setBundle(await getSharedEventBundle(eventId));
+  }
+
+  function isMoneyItem(item: ChecklistItem | ChecklistItemDraft) {
+    return (item.itemType ?? "bring") === "money";
+  }
+
+  function eventToDraft(event: DinnerEvent, overrides: Partial<EventDraft> = {}): EventDraft {
+    return {
+      title: event.title,
+      hostName: event.hostName,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      eventType: event.eventType,
+      coverStyle: event.coverStyle,
+      pitchInEnabled: event.pitchInEnabled,
+      recommendedContributionAmount: event.recommendedContributionAmount,
+      venmoHandle: event.venmoHandle ?? normalizeVenmoHandle(event.venmoUrl),
+      venmoUrl: undefined,
+      ...overrides
+    };
+  }
+
+  async function savePitchInEventConfig(
+    checklistItems: Array<ChecklistItem | ChecklistItemDraft>,
+    handleValue = venmoHandle
+  ) {
+    if (!bundle) {
+      return;
+    }
+
+    const pitchInEnabled = checklistItems.some(isMoneyItem);
+    const event = await updateSharedEvent(
+      eventId,
+      eventToDraft(bundle.event, {
+        pitchInEnabled,
+        recommendedContributionAmount: undefined,
+        venmoHandle: normalizeVenmoHandle(handleValue),
+        venmoUrl: undefined
+      })
+    );
+
+    if (event) {
+      setBundle((currentBundle) => (currentBundle ? { ...currentBundle, event } : currentBundle));
+    }
   }
 
   useEffect(() => {
@@ -69,6 +119,7 @@ export default function EventSetupPage() {
       }
 
       setBundle(nextBundle);
+      setVenmoHandle(nextBundle?.event.venmoHandle ?? normalizeVenmoHandle(nextBundle?.event.venmoUrl) ?? "");
       setLoaded(true);
     }
 
@@ -118,7 +169,7 @@ export default function EventSetupPage() {
         return;
       }
 
-      await addSharedChecklistItem(eventId, {
+      const addedItem = await addSharedChecklistItem(eventId, {
         title: title.trim(),
         category: "other",
         itemType: "money",
@@ -127,6 +178,10 @@ export default function EventSetupPage() {
         description: description.trim() || undefined,
         isRequired: true
       });
+
+      if (addedItem && bundle) {
+        await savePitchInEventConfig([...bundle.checklistItems, addedItem], venmoHandle);
+      }
     } else {
       await addSharedChecklistItem(eventId, {
         title: title.trim(),
@@ -148,12 +203,26 @@ export default function EventSetupPage() {
   }
 
   async function handleDelete(item: ChecklistItem) {
+    const nextChecklistItems = bundle?.checklistItems.filter((candidate) => candidate.id !== item.id) ?? [];
     await deleteSharedChecklistItem(eventId, item.id);
+    await savePitchInEventConfig(nextChecklistItems);
     await reload();
   }
 
   async function handleEdit(item: ChecklistItem, draft: ChecklistItemDraft) {
+    const nextChecklistItems =
+      bundle?.checklistItems.map((candidate) =>
+        candidate.id === item.id ? { ...candidate, ...draft, itemType: draft.itemType ?? "bring" } : candidate
+      ) ?? [];
+
     await updateSharedChecklistItem(eventId, item.id, draft);
+    await savePitchInEventConfig(nextChecklistItems);
+    await reload();
+  }
+
+  async function handleSaveVenmoHandle() {
+    await savePitchInEventConfig(bundle?.checklistItems ?? [], venmoHandle);
+    setFormMessage("Venmo handle saved.");
     await reload();
   }
 
@@ -176,6 +245,7 @@ export default function EventSetupPage() {
   }
 
   const theme = getEventTheme(bundle.event.coverStyle);
+  const pitchInItems = bundle.checklistItems.filter(isMoneyItem);
   const itemNamePlaceholder =
     itemType === "money" ? "Pitch in for dinner" : category ? categoryItemPlaceholders[category] : "Item name";
 
@@ -312,6 +382,23 @@ export default function EventSetupPage() {
                         </>
                       )}
                     </div>
+                    {itemType === "money" ? (
+                      <label className="mt-3 grid gap-2 text-sm font-semibold">
+                        Venmo handle
+                        <span className="relative">
+                          <AtSign
+                            className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
+                            aria-hidden="true"
+                          />
+                          <Input
+                            value={venmoHandle}
+                            onChange={(event) => setVenmoHandle(event.target.value)}
+                            placeholder="james-smith"
+                            className="pl-10"
+                          />
+                        </span>
+                      </label>
+                    ) : null}
                     <Textarea
                       value={description}
                       onChange={(event) => setDescription(event.target.value)}
@@ -323,6 +410,11 @@ export default function EventSetupPage() {
                         <ListPlus className="h-4 w-4" aria-hidden="true" />
                         Add item
                       </Button>
+                      {itemType === "money" ? (
+                        <Button type="button" variant="secondary" onClick={handleSaveVenmoHandle}>
+                          Save Venmo handle
+                        </Button>
+                      ) : null}
                       {formMessage ? (
                         <p className={cn("text-sm font-semibold", theme.accentText)}>{formMessage}</p>
                       ) : null}
@@ -341,7 +433,7 @@ export default function EventSetupPage() {
             </div>
 
             <aside className="space-y-5">
-              <PitchInCard event={bundle.event} hostView />
+              <PitchInCard event={bundle.event} hostView enabled={pitchInItems.length > 0} />
 
               <Card className={cn("border", theme.accentBorder)}>
                 <CardHeader>

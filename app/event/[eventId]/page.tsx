@@ -331,6 +331,7 @@ export default function PublicEventPage() {
     .filter((guestNote) => guestNote.note.length > 0);
   const bringItems = bundle.checklistItems.filter((item) => !isMoneyItem(item));
   const moneyItems = bundle.checklistItems.filter(isMoneyItem);
+  const hasPitchIn = moneyItems.length > 0;
   const claimedBringItems = bringItems.reduce((total, item) => total + claimedSlotCount(item), 0);
   const totalBringItems = bringItems.reduce((total, item) => total + totalSlotCount(item), 0);
   const claimedPitchInSpots = moneyItems.reduce((total, item) => total + claimedSlotCount(item), 0);
@@ -396,7 +397,7 @@ export default function PublicEventPage() {
                     </p>
                     <p className="mt-1 text-sm text-ink/60">items claimed</p>
                   </div>
-                  {bundle.event.pitchInEnabled ? (
+                  {hasPitchIn ? (
                     <div className={cn("rounded-lg p-3", theme.softPanel)}>
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">Pitch-in</p>
                       <p className="mt-1 text-2xl font-semibold">
@@ -482,7 +483,7 @@ export default function PublicEventPage() {
 
           <aside className="space-y-5">
             {shouldShowContributionOptions ? (
-              <PitchInCard event={bundle.event} />
+              <PitchInCard event={bundle.event} enabled={hasPitchIn} />
             ) : null}
           </aside>
         </div>
