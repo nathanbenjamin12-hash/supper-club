@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { AtSign, ClipboardList, DollarSign, Home, ListPlus } from "lucide-react";
+import { ArrowUp, AtSign, ClipboardList, DollarSign, Home, ListPlus } from "lucide-react";
 import { ChecklistBoard } from "@/components/ChecklistBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { HostFlowNav } from "@/components/HostFlowNav";
@@ -129,19 +129,6 @@ export default function EventSetupPage() {
     };
   }, [eventId]);
 
-  const missingItems =
-    bundle?.checklistItems.filter((item) => {
-      if (!item.isRequired) {
-        return false;
-      }
-
-      if ((item.itemType ?? "bring") === "money") {
-        return (item.moneyClaims?.length ?? 0) < (item.totalSpots ?? 1);
-      }
-
-      return !item.claimedByGuestId;
-    }) ?? [];
-
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -219,6 +206,10 @@ export default function EventSetupPage() {
     await reload();
   }
 
+  function handleBackToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   if (loaded && !bundle) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
@@ -280,172 +271,149 @@ export default function EventSetupPage() {
             </CardHeader>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-            <div className="space-y-6">
-              <Card className={cn("border", theme.accentBorder)}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
-                    Checklist before sharing
-                  </CardTitle>
-                  <p className="text-sm text-ink/60">
-                    Shape the food, drinks, supplies, and pitch-in spots guests will see.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <form onSubmit={handleAdd} className={cn("rounded-lg p-4", theme.softPanel)}>
-                    <div className="mb-3 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setItemType("bring")}
-                        className={cn(
-                          "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "bring" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
-                        )}
-                      >
-                        Bring item
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setItemType("money")}
-                        className={cn(
-                          "rounded-lg px-3 py-2 text-sm font-semibold transition",
-                          itemType === "money" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
-                        )}
-                      >
-                        Pitch-in money
-                      </button>
-                    </div>
+          <Card className={cn("border", theme.accentBorder)}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className={cn("h-5 w-5", theme.iconText)} aria-hidden="true" />
+                Checklist before sharing
+              </CardTitle>
+              <p className="text-sm text-ink/60">
+                Shape the food, drinks, supplies, and pitch-in spots guests will see.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <form onSubmit={handleAdd} className={cn("rounded-lg p-4", theme.softPanel)}>
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setItemType("bring")}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-sm font-semibold transition",
+                      itemType === "bring" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
+                    )}
+                  >
+                    Bring item
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setItemType("money")}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-sm font-semibold transition",
+                      itemType === "money" ? theme.cta : "bg-cream text-ink ring-1 ring-ink/10"
+                    )}
+                  >
+                    Pitch-in money
+                  </button>
+                </div>
 
-                    <div className="grid gap-3 sm:grid-cols-[1fr_170px_100px]">
-                      <Input
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
-                        placeholder={itemNamePlaceholder}
-                      />
-                      {itemType === "bring" ? (
-                        <>
-                          <Select
-                            value={category}
-                            onChange={(event) => setCategory(event.target.value as ChecklistCategory | "")}
-                          >
-                            <option value="" disabled>
-                              Category
-                            </option>
-                            {categoryOrder.map((candidate) => (
-                              <option key={candidate} value={candidate}>
-                                {categoryLabels[candidate]}
-                              </option>
-                            ))}
-                          </Select>
-                          <Input
-                            value={quantity}
-                            onChange={(event) => setQuantity(event.target.value)}
-                            type="number"
-                            min="1"
-                            placeholder="Qty"
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <span className="relative">
-                            <DollarSign
-                              className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
-                              aria-hidden="true"
-                            />
-                            <Input
-                              value={amountPerPerson}
-                              onChange={(event) => setAmountPerPerson(event.target.value)}
-                              type="number"
-                              min="1"
-                              step="1"
-                              placeholder="Amount"
-                              className="pl-10"
-                            />
-                          </span>
-                          <Input
-                            value={totalSpots}
-                            onChange={(event) => setTotalSpots(event.target.value)}
-                            type="number"
-                            min="1"
-                            step="1"
-                            placeholder="Spots"
-                          />
-                        </>
-                      )}
-                    </div>
-                    {itemType === "money" ? (
-                      <label className="mt-3 grid gap-2 text-sm font-semibold">
-                        Venmo handle
-                        <span className="relative">
-                          <AtSign
-                            className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
-                            aria-hidden="true"
-                          />
-                          <Input
-                            value={venmoHandle}
-                            onChange={(event) => setVenmoHandle(event.target.value)}
-                            placeholder="james-smith"
-                            className="pl-10"
-                          />
-                        </span>
-                      </label>
-                    ) : null}
-                    <Textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Optional description"
-                      className="mt-3 min-h-20"
-                    />
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <Button type="submit" variant="default" className={cn(theme.cta)}>
-                        <ListPlus className="h-4 w-4" aria-hidden="true" />
-                        Add item
-                      </Button>
-                      {formMessage ? (
-                        <p className={cn("text-sm font-semibold", theme.accentText)}>{formMessage}</p>
-                      ) : null}
-                    </div>
-                  </form>
-
-                  <ChecklistBoard
-                    items={bundle.checklistItems}
-                    event={bundle.event}
-                    hostControls
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
+                <div className="grid gap-3 sm:grid-cols-[1fr_170px_100px]">
+                  <Input
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder={itemNamePlaceholder}
                   />
-                </CardContent>
-              </Card>
-            </div>
-
-            <aside className="space-y-5">
-              <Card className={cn("border", theme.accentBorder)}>
-                <CardHeader>
-                  <CardTitle>Still needed</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {missingItems.length > 0 ? (
-                    <div className="space-y-2">
-                      {missingItems.map((item) => (
-                        <div key={item.id} className={cn("rounded-lg p-3 text-sm", theme.softPanel)}>
-                          <p className="font-semibold">{item.title}</p>
-                          <p className="text-ink/55">
-                            {(item.itemType ?? "bring") === "money"
-                              ? `${Math.max((item.totalSpots ?? 1) - (item.moneyClaims?.length ?? 0), 0)} spots left`
-                              : categoryLabels[item.category]}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                  {itemType === "bring" ? (
+                    <>
+                      <Select
+                        value={category}
+                        onChange={(event) => setCategory(event.target.value as ChecklistCategory | "")}
+                      >
+                        <option value="" disabled>
+                          Category
+                        </option>
+                        {categoryOrder.map((candidate) => (
+                          <option key={candidate} value={candidate}>
+                            {categoryLabels[candidate]}
+                          </option>
+                        ))}
+                      </Select>
+                      <Input
+                        value={quantity}
+                        onChange={(event) => setQuantity(event.target.value)}
+                        type="number"
+                        min="1"
+                        placeholder="Qty"
+                      />
+                    </>
                   ) : (
-                    <EmptyState title="Everything is claimed" description="A very tidy board." />
+                    <>
+                      <span className="relative">
+                        <DollarSign
+                          className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
+                          aria-hidden="true"
+                        />
+                        <Input
+                          value={amountPerPerson}
+                          onChange={(event) => setAmountPerPerson(event.target.value)}
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="Amount"
+                          className="pl-10"
+                        />
+                      </span>
+                      <Input
+                        value={totalSpots}
+                        onChange={(event) => setTotalSpots(event.target.value)}
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="Spots"
+                      />
+                    </>
                   )}
-                </CardContent>
-              </Card>
-            </aside>
-          </div>
+                </div>
+                {itemType === "money" ? (
+                  <label className="mt-3 grid gap-2 text-sm font-semibold">
+                    Venmo handle
+                    <span className="relative">
+                      <AtSign
+                        className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-ink/35"
+                        aria-hidden="true"
+                      />
+                      <Input
+                        value={venmoHandle}
+                        onChange={(event) => setVenmoHandle(event.target.value)}
+                        placeholder="james-smith"
+                        className="pl-10"
+                      />
+                    </span>
+                  </label>
+                ) : null}
+                <Textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Optional description"
+                  className="mt-3 min-h-20"
+                />
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <Button type="submit" variant="default" className={cn(theme.cta)}>
+                    <ListPlus className="h-4 w-4" aria-hidden="true" />
+                    Add item
+                  </Button>
+                  {formMessage ? (
+                    <p className={cn("text-sm font-semibold", theme.accentText)}>{formMessage}</p>
+                  ) : null}
+                </div>
+              </form>
+
+              <ChecklistBoard
+                items={bundle.checklistItems}
+                event={bundle.event}
+                hostControls
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+              />
+            </CardContent>
+          </Card>
         </section>
+
+        <div className="mt-6 flex justify-center">
+          <Button type="button" variant="ghost" size="sm" onClick={handleBackToTop}>
+            <ArrowUp className="h-4 w-4" aria-hidden="true" />
+            Back to top
+          </Button>
+        </div>
       </div>
     </main>
   );
