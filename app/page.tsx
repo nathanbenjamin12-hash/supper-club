@@ -19,23 +19,23 @@ const heroImage =
 
 const features = [
   {
-    title: "Elegant invites",
-    text: "Share the essential details in a guest experience that feels considered from the first tap.",
+    title: "Create in minutes",
+    text: "Start with a template or build your own, then share a polished invite in just a few clicks.",
     icon: Utensils
   },
   {
-    title: "RSVPs with context",
-    text: "Collect responses, dietary notes, allergies, and host notes without chasing the group chat.",
+    title: "Know who's coming",
+    text: "Collect RSVPs, dietary restrictions, and guest updates without chasing the group chat.",
     icon: Salad
   },
   {
-    title: "Thoughtful contributions",
-    text: "Let guests claim dishes, drinks, supplies, or pitch-in spots with clear availability.",
+    title: "Let guests pitch in",
+    text: "Friends can claim food, drinks, supplies, or pitch-in spots before they arrive.",
     icon: ClipboardList
   },
   {
-    title: "Host clarity",
-    text: "Review what is needed, who is coming, and what everyone is bringing before dinner.",
+    title: "Enjoy hosting",
+    text: "See what's covered, what's still needed, and spend less time coordinating.",
     icon: HandCoins
   }
 ];
@@ -52,19 +52,18 @@ export default function LandingPage() {
           sizes="100vw"
           className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/86 via-ink/48 to-ink/18" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/58 to-ink/28" />
         <div className="mx-auto flex min-h-[72vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
           <div className="max-w-3xl text-cream">
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cream/80">
               <Leaf className="h-4 w-4" aria-hidden="true" />
-              Host people well
+              HOST PEOPLE WELL
             </p>
             <h1 className="mt-5 font-display text-6xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
-              Dinner, thoughtfully planned.
+              Hosting is more fun when everyone pitches in.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/82">
-              Supper Club helps hosts send refined invites, collect RSVPs, coordinate
-              contributions, and keep the table feeling easy.
+              Create an invite, collect RSVPs, and let guests claim what they&apos;ll bring, all in one place.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "h-12")}>
@@ -90,7 +89,7 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <p className="eyebrow">A calmer way to gather</p>
             <h2 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">
-              The details stay organized, so the evening can feel generous.
+              The evening starts here.
             </h2>
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
