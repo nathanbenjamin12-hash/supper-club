@@ -10,14 +10,13 @@ import {
   Wine
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=1800&q=85";
-const hostPreviewImage =
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=85";
+  "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1800&q=85";
+const detailImage =
+  "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=1200&q=85";
 
 const features = [
   {
@@ -42,21 +41,28 @@ const features = [
   }
 ];
 
+const previewRows = [
+  ["Wine", "Emma"],
+  ["Salad", "Available"],
+  ["Dessert", "Marcus"],
+  ["Pitch in $15", "6 of 10 contributed"]
+];
+
 export default function LandingPage() {
   return (
-    <main className="bg-[#17120f]">
-      <section className="relative isolate overflow-hidden bg-ink">
+    <main className="bg-[#100c09] text-cream">
+      <section className="relative isolate overflow-hidden bg-[#100c09]">
         <Image
           src={heroImage}
-          alt="Candlelit dinner table with wine and shared plates at home"
+          alt="Wine, herbs, and candlelit dinner details on a dark apartment table"
           fill
           priority
           sizes="100vw"
-          className="absolute inset-0 -z-20 h-full w-full object-cover object-center saturate-[0.9]"
+          className="absolute inset-0 -z-20 h-full w-full scale-[1.02] object-cover object-center brightness-[0.82] contrast-[1.04] saturate-[0.82]"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#17120f]/90 via-[#17120f]/62 to-[#17120f]/24" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#17120f] via-[#17120f]/72 to-[#17120f]/28" />
-        <div className="mx-auto flex min-h-[82vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#100c09]/96 via-[#100c09]/72 to-[#100c09]/22" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#100c09] via-[#100c09]/58 to-[#100c09]/28" />
+        <div className="mx-auto flex min-h-[88vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
           <div className="max-w-3xl text-cream">
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-honey">
               <Leaf className="h-4 w-4" aria-hidden="true" />
@@ -77,7 +83,7 @@ export default function LandingPage() {
                 href="/event/sample-dinner-party"
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "h-12 border-cream/40 bg-cream/10 text-cream backdrop-blur hover:bg-cream/18"
+                  "h-12 border-cream/35 bg-cream/[0.08] text-cream backdrop-blur hover:bg-cream/15"
                 )}
               >
                 View sample
@@ -87,110 +93,131 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y border-cream/10 bg-[#17120f] text-cream">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+      <section className="bg-[#d9c39d] text-[#17120f]">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
           <div className="max-w-2xl">
-            <h2 className="text-4xl font-semibold leading-tight text-cream sm:text-5xl">
+            <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
               The evening starts here.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid overflow-hidden rounded-sm border border-[#17120f]/14 bg-[#17120f]/14 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card
-                  key={feature.title}
-                  className="border-cream/10 bg-cream/[0.07] text-cream shadow-none"
-                >
-                  <CardHeader>
-                    <span className="grid h-11 w-11 place-items-center rounded-md bg-cream/10 text-honey ring-1 ring-cream/10">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <CardTitle className="text-cream">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-6 text-cream/68">{feature.text}</p>
-                  </CardContent>
-                </Card>
+                <article key={feature.title} className="min-h-[240px] bg-[#dfcaa6] p-6 sm:p-7">
+                  <Icon className="h-5 w-5 text-[#5a4d36]" aria-hidden="true" />
+                  <h3 className="mt-10 font-display text-2xl font-semibold leading-tight text-[#17120f]">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-6 text-[#17120f]/68">{feature.text}</p>
+                </article>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#f5ede4]">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-20">
-          <div className="flex flex-col justify-center">
-            <Badge className="w-fit bg-ink text-cream ring-0" tone="neutral">
+      <section className="relative overflow-hidden bg-[#100c09] text-cream">
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block">
+          <Image
+            src={detailImage}
+            alt="Wine and candlelit table details"
+            fill
+            sizes="50vw"
+            className="object-cover opacity-[0.22] saturate-[0.78]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#100c09] via-[#100c09]/55 to-[#100c09]/20" />
+        </div>
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:py-24">
+          <div>
+            <Badge className="w-fit bg-honey/15 text-honey ring-1 ring-honey/20" tone="neutral">
               Host view
             </Badge>
             <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
               See the table come together before anyone arrives.
             </h2>
-            <p className="mt-4 text-base leading-7 text-ink/68">
+            <p className="mt-4 text-base leading-7 text-cream/70">
               Keep the checklist, pitch-in spots, guest notes, and dietary details in one
               composed place. No accounts, no noise, no extra ceremony.
             </p>
-            <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "mt-7 w-fit")}>
+            <Link
+              href="/create"
+              className={cn(
+                buttonVariants({ variant: "secondary" }),
+                "mt-7 w-fit bg-[#d9c39d] text-[#17120f] hover:bg-[#cdb68c]"
+              )}
+            >
               Create an invite
             </Link>
           </div>
 
-          <Card className="overflow-hidden border-ink/10 bg-[#1f1713] text-cream shadow-soft">
-            <div className="relative h-64 sm:h-80">
-              <Image
-                src={hostPreviewImage}
-                alt="Shared plates, wine, and dinner details on a home table"
-                fill
-                sizes="(min-width: 1024px) 560px, 100vw"
-                className="object-cover opacity-90 saturate-[0.92]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1f1713]/70 via-transparent to-transparent" />
+          <div className="relative min-h-[560px] overflow-hidden rounded-sm border border-cream/[0.12] bg-[#1b130f] p-4 shadow-[0_34px_100px_rgba(0,0,0,0.38)] sm:p-6">
+            <Image
+              src={detailImage}
+              alt="Wine bottles, herbs, and a dark apartment kitchen counter"
+              fill
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="object-cover opacity-[0.42] saturate-[0.72]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#120d0a] via-[#120d0a]/74 to-[#120d0a]/18" />
+            <div className="relative ml-auto flex min-h-[520px] w-full max-w-[330px] items-center">
+              <div className="w-full rounded-[2rem] border border-cream/[0.14] bg-[#090806] p-3 shadow-[0_28px_80px_rgba(0,0,0,0.56)]">
+                <div className="rounded-[1.45rem] border border-cream/10 bg-[#14110f] p-5">
+                    <p className="text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-cream/45">
+                    Supper Club
+                  </p>
+                  <div className="mt-8">
+                    <h3 className="font-display text-3xl font-semibold leading-none text-cream">
+                      Sunday Dinner at home
+                    </h3>
+                    <p className="mt-4 text-xs leading-5 text-cream/55">
+                      Sat, May 24
+                      <br />
+                      8 Sea St
+                      <br />
+                      Brooklyn, NY
+                    </p>
+                  </div>
+                  <div className="mt-8 grid grid-cols-3 gap-2 text-center">
+                    {[
+                      ["12", "In"],
+                      ["3", "Maybe"],
+                      ["1", "Out"]
+                    ].map(([value, label]) => (
+                      <div key={label} className="rounded-md bg-cream/[0.08] px-2 py-3">
+                        <p className="text-2xl font-semibold text-cream">{value}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-cream/50">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    {previewRows.map(([item, owner]) => (
+                      <div
+                        key={item}
+                        className="flex items-center justify-between rounded-md bg-cream/[0.07] px-3 py-2.5"
+                      >
+                        <span className="text-sm font-semibold text-cream">{item}</span>
+                        <span className="text-xs text-cream/55">{owner}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <CardContent className="space-y-5 p-5 sm:p-6">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                {[
-                  ["12", "In"],
-                  ["3", "Maybe"],
-                  ["1", "Can't make it"]
-                ].map(([value, label]) => (
-                  <div key={label} className="rounded-md bg-cream/10 p-3 ring-1 ring-cream/10">
-                    <p className="text-3xl font-semibold text-cream">{value}</p>
-                    <p className="mt-1 text-xs font-semibold text-cream/58">{label}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {[
-                  ["Wine", "Emma"],
-                  ["Salad", "Available"],
-                  ["Dessert", "Marcus"],
-                  ["Pitch in $15", "6 of 10 contributed"]
-                ].map(([item, owner]) => (
-                  <div
-                    key={item}
-                    className="flex items-center justify-between rounded-md bg-cream/[0.08] p-3 ring-1 ring-cream/10"
-                  >
-                    <span className="font-semibold text-cream">{item}</span>
-                    <span className="text-sm text-cream/62">{owner}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
       </section>
 
-      <section className="bg-[#f5ede4] px-4 pb-16 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-5 rounded-lg border border-cream/12 bg-[#17120f] p-6 text-cream shadow-soft sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+      <section className="bg-[#d9c39d] px-4 py-16 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-6 rounded-sm border border-[#17120f]/14 bg-[#dfcaa6] p-7 text-[#17120f] shadow-soft sm:grid-cols-[1fr_auto] sm:items-center sm:p-9">
           <div>
-            <Wine className="h-8 w-8 text-honey" aria-hidden="true" />
+            <Wine className="h-8 w-8 text-[#5a4d36]" aria-hidden="true" />
             <h2 className="mt-4 text-3xl font-semibold">Host people well.</h2>
-            <p className="mt-2 max-w-2xl text-cream/72">
+            <p className="mt-2 max-w-2xl text-[#17120f]/70">
               Create an invite, collect RSVPs, and let friends pitch in, without chasing the group chat.
             </p>
           </div>
-          <Link href="/create" className={cn(buttonVariants({ variant: "secondary" }), "h-12")}>
+          <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "h-12")}>
             Start hosting
           </Link>
         </div>
