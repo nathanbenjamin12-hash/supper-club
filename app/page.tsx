@@ -10,12 +10,11 @@ import {
   Wine
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const heroImage =
-  "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1800&q=85";
+  "https://images.unsplash.com/photo-1661006116755-0f7f7b1db2b8?auto=format&fit=crop&w=1800&q=85";
 
 const features = [
   {
@@ -40,29 +39,37 @@ const features = [
   }
 ];
 
+const previewRows = [
+  ["Wine", "Emma"],
+  ["Salad", "Available"],
+  ["Dessert", "Marcus"],
+  ["Pitch in $15", "6 of 10 contributed"]
+];
+
 export default function LandingPage() {
   return (
-    <main>
-      <section className="relative isolate overflow-hidden">
+    <main className="bg-[#100c09] text-cream">
+      <section className="relative isolate overflow-hidden bg-[#100c09]">
         <Image
           src={heroImage}
-          alt="Friends gathered around a casual dinner table at home"
+          alt="Five friends gathered around a warm apartment dinner table"
           fill
           priority
           sizes="100vw"
-          className="absolute inset-0 -z-20 h-full w-full object-cover"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center brightness-[0.78] contrast-[1.02] saturate-[0.9]"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/58 to-ink/28" />
-        <div className="mx-auto flex min-h-[72vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#100c09]/96 via-[#100c09]/72 to-[#100c09]/22" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#100c09] via-[#100c09]/58 to-[#100c09]/28" />
+        <div className="mx-auto flex min-h-[88vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
           <div className="max-w-3xl text-cream">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cream/80">
+            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-honey">
               <Leaf className="h-4 w-4" aria-hidden="true" />
               HOST PEOPLE WELL
             </p>
-            <h1 className="mt-5 font-display text-6xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
+            <h1 className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
               Hosting is more fun when everyone pitches in.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/82">
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/86">
               Create an invite, collect RSVPs, and let guests claim what they&apos;ll bring, all in one place.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -74,7 +81,7 @@ export default function LandingPage() {
                 href="/event/sample-dinner-party"
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "h-12 border-cream/40 bg-cream/10 text-cream backdrop-blur hover:bg-cream/18"
+                  "h-12 border-cream/35 bg-cream/[0.08] text-cream backdrop-blur hover:bg-cream/15"
                 )}
               >
                 View sample
@@ -84,101 +91,106 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="surface-linen border-b border-ink/8">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+      <section className="bg-[#d9c39d] text-[#17120f]">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
           <div className="max-w-2xl">
             <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
               The evening starts here.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid overflow-hidden rounded-sm border border-[#17120f]/14 bg-[#17120f]/14 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title}>
-                  <CardHeader>
-                    <span className="grid h-11 w-11 place-items-center rounded-md bg-stone text-olive">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <CardTitle>{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-6 text-ink/65">{feature.text}</p>
-                  </CardContent>
-                </Card>
+                <article key={feature.title} className="min-h-[240px] bg-[#dfcaa6] p-6 sm:p-7">
+                  <Icon className="h-5 w-5 text-[#5a4d36]" aria-hidden="true" />
+                  <h3 className="mt-10 font-display text-2xl font-semibold leading-tight text-[#17120f]">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-6 text-[#17120f]/68">{feature.text}</p>
+                </article>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-20">
-        <div className="flex flex-col justify-center">
-          <Badge className="w-fit" tone="neutral">
-            Host view
-          </Badge>
-          <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-            See the table come together before anyone arrives.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-ink/68">
-            Keep the checklist, pitch-in spots, guest notes, and dietary details in one
-            composed place. No accounts, no noise, no extra ceremony.
-          </p>
-          <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "mt-7 w-fit")}>
-            Create an invite
-          </Link>
-        </div>
-
-        <Card className="overflow-hidden bg-cream">
-          <div className="relative h-56 sm:h-72">
-            <Image
-              src="https://images.unsplash.com/photo-1772724317488-b901d235d419?auto=format&fit=crop&w=1200&q=80"
-              alt="Friends making pizza together in a home kitchen"
-              fill
-              sizes="(min-width: 1024px) 560px, 100vw"
-              className="object-cover"
-            />
+      <section className="bg-[#f4ead9] text-[#17120f]">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:py-24">
+          <div>
+            <Badge className="w-fit bg-[#17120f] text-cream ring-0" tone="neutral">
+              Host view
+            </Badge>
+            <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+              See the table come together before anyone arrives.
+            </h2>
+            <p className="mt-4 text-base leading-7 text-[#17120f]/68">
+              Keep the checklist, pitch-in spots, guest notes, and dietary details in one
+              composed place. No accounts, no noise, no extra ceremony.
+            </p>
+            <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "mt-7 w-fit")}>
+              Create an invite
+            </Link>
           </div>
-          <CardContent className="space-y-5 pt-5">
-            <div className="grid grid-cols-3 gap-3 text-center">
-              {[
-                ["12", "In"],
-                ["3", "Maybe"],
-                ["1", "Can't make it"]
-              ].map(([value, label]) => (
-                <div key={label} className="rounded-md bg-stone p-3">
-                  <p className="text-3xl font-semibold">{value}</p>
-                  <p className="mt-1 text-xs font-semibold text-ink/55">{label}</p>
-                </div>
-              ))}
+
+          <div className="rounded-sm border border-[#17120f]/12 bg-[#fff8ee] p-4 shadow-soft sm:p-6">
+            <div className="border-b border-[#17120f]/10 pb-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6b614f]">
+                Sunday Dinner at home
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {[
+                  ["12", "In"],
+                  ["3", "Maybe"],
+                  ["1", "Can't make it"]
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-md bg-[#efe1cc] p-4">
+                    <p className="text-3xl font-semibold text-[#17120f]">{value}</p>
+                    <p className="mt-1 text-xs font-semibold text-[#17120f]/55">{label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="space-y-2">
-              {[
-                ["Wine", "Emma"],
-                ["Salad", "Available"],
-                ["Dessert", "Marcus"],
-                ["Pitch in $15", "6 of 10 contributed"]
-              ].map(([item, owner]) => (
-                <div key={item} className="flex items-center justify-between rounded-md bg-stone/70 p-3">
-                  <span className="font-semibold">{item}</span>
-                  <span className="text-sm text-ink/60">{owner}</span>
+
+            <div className="grid gap-5 py-5 sm:grid-cols-[0.82fr_1.18fr]">
+              <div>
+                <p className="text-sm font-semibold text-[#17120f]">Guest notes</p>
+                <div className="mt-3 rounded-md bg-[#efe1cc] p-4">
+                  <p className="text-sm leading-6 text-[#17120f]/68">
+                    2 guests have dietary restrictions.
+                  </p>
                 </div>
-              ))}
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-[#17120f]">Contributions</p>
+                <div className="mt-3 space-y-2">
+                  {previewRows.map(([item, owner]) => (
+                    <div
+                      key={item}
+                      className="flex items-center justify-between rounded-md bg-[#efe1cc] px-3 py-3"
+                    >
+                      <span className="font-semibold text-[#17120f]">{item}</span>
+                      <span className="text-sm text-[#17120f]/58">{owner}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
-      <section className="px-4 pb-16 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-5 rounded-lg bg-ink p-6 text-cream sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+      <section className="bg-[#d9c39d] px-4 py-16 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-6 rounded-sm border border-[#17120f]/14 bg-[#dfcaa6] p-7 text-[#17120f] shadow-soft sm:grid-cols-[1fr_auto] sm:items-center sm:p-9">
           <div>
-            <Wine className="h-8 w-8 text-honey" aria-hidden="true" />
+            <Wine className="h-8 w-8 text-[#5a4d36]" aria-hidden="true" />
             <h2 className="mt-4 text-3xl font-semibold">Host people well.</h2>
-            <p className="mt-2 max-w-2xl text-cream/72">
+            <p className="mt-2 max-w-2xl text-[#17120f]/70">
               Create an invite, collect RSVPs, and let friends pitch in, without chasing the group chat.
             </p>
           </div>
-          <Link href="/create" className={cn(buttonVariants({ variant: "secondary" }), "h-12")}>
+          <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "h-12")}>
             Start hosting
           </Link>
         </div>
