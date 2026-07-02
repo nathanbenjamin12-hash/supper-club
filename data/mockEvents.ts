@@ -14,40 +14,48 @@ export const starterChecklistTemplates: Record<
   Partial<Record<ChecklistCategory, string[]>>
 > = {
   dinner_party: {
-    appetizers: ["Bread or appetizer"],
+    appetizers: ["Snack board"],
     mains: ["Main dish"],
-    sides: ["Side", "Salad"],
-    desserts: ["Dessert"],
-    drinks: ["Wine", "Non-alcoholic drinks"]
+    sides: ["Side dish"],
+    desserts: ["Ice cream"],
+    drinks: ["Red wine"],
+    supplies: ["Ice"],
+    other: ["Bread"]
   },
   bbq: {
-    mains: ["Burgers or main"],
-    sides: ["Side", "Chips"],
-    desserts: ["Dessert"],
-    drinks: ["Drinks"],
+    mains: ["Burgers"],
+    sides: ["Chips"],
+    desserts: ["Sweet treat"],
+    drinks: ["Beer"],
     supplies: ["Ice"],
-    games: ["Lawn game"]
+    games: ["Cornhole"],
+    other: ["Charcoal"]
   },
   game_night: {
-    mains: ["Pizza or main"],
-    sides: ["Snacks"],
-    desserts: ["Dessert"],
-    drinks: ["Drinks"],
-    games: ["Board or card game"],
-    supplies: ["Ice", "Extra chairs"]
+    appetizers: ["Snacks"],
+    mains: ["Pizza"],
+    desserts: ["Cookies"],
+    drinks: ["Soda"],
+    supplies: ["Dice"],
+    games: ["Catan"],
+    other: ["Extra chair"]
   },
   friendsgiving: {
-    mains: ["Turkey or main"],
-    sides: ["Side"],
-    desserts: ["Pie or dessert"],
-    drinks: ["Wine"],
-    supplies: ["Ice", "Serving utensils", "Leftover containers"]
+    appetizers: ["Cheese board"],
+    mains: ["Turkey (fried)"],
+    sides: ["Stuffing"],
+    desserts: ["Pie"],
+    drinks: ["White wine"],
+    supplies: ["Serving utensils"],
+    other: ["Leftover containers"]
   },
   birthday: {
-    appetizers: ["Snacks"],
-    desserts: ["Cake"],
-    drinks: ["Drinks"],
-    supplies: ["Ice", "Plates and napkins", "Candles", "Decorations"]
+    appetizers: ["Cheese board"],
+    mains: ["Pizza"],
+    desserts: ["Birthday cake"],
+    drinks: ["Beer"],
+    supplies: ["Plates & napkins", "Candles"],
+    other: ["Decorations"]
   },
   custom: {
     other: []
