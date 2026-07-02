@@ -14,50 +14,40 @@ export const starterChecklistTemplates: Record<
   Partial<Record<ChecklistCategory, string[]>>
 > = {
   dinner_party: {
-    appetizers: ["Appetizer", "Cheese board", "Bread or crackers"],
+    appetizers: ["Bread or appetizer"],
     mains: ["Main dish"],
-    sides: ["Salad", "Vegetable side", "Starch side"],
+    sides: ["Side", "Salad"],
     desserts: ["Dessert"],
-    drinks: ["Red wine", "White wine", "Non-alcoholic drinks", "Sparkling water"],
-    supplies: ["Ice", "Napkins", "Extra chairs"],
-    games: ["Card game", "Board game"]
+    drinks: ["Wine", "Non-alcoholic drinks"]
   },
   bbq: {
-    mains: ["Burgers", "Hot dogs", "Vegetarian option"],
-    sides: ["Chips", "Salad", "Fruit", "Corn"],
-    drinks: ["Beer", "Soda", "Water"],
-    supplies: ["Ice", "Charcoal/propane", "Plates", "Napkins"],
-    games: ["Cornhole", "Cards"]
+    mains: ["Burgers or main"],
+    sides: ["Side", "Chips"],
+    desserts: ["Dessert"],
+    drinks: ["Drinks"],
+    supplies: ["Ice"],
+    games: ["Lawn game"]
   },
   game_night: {
-    mains: ["Pizza"],
+    mains: ["Pizza or main"],
     sides: ["Snacks"],
     desserts: ["Dessert"],
-    drinks: ["Beer/wine", "Non-alcoholic drinks"],
-    games: ["Board game", "Card game", "Party game"],
-    supplies: ["Score pads", "Pens", "Extra chairs"]
+    drinks: ["Drinks"],
+    games: ["Board or card game"],
+    supplies: ["Ice", "Extra chairs"]
   },
   friendsgiving: {
-    mains: ["Turkey or main dish", "Vegetarian main"],
-    sides: [
-      "Stuffing",
-      "Mashed potatoes",
-      "Cranberry sauce",
-      "Green beans",
-      "Sweet potatoes"
-    ],
-    desserts: ["Pie", "Cookies"],
-    drinks: ["Wine", "Cider", "Non-alcoholic drinks"],
+    mains: ["Turkey or main"],
+    sides: ["Side"],
+    desserts: ["Pie or dessert"],
+    drinks: ["Wine"],
     supplies: ["Ice", "Serving utensils", "Leftover containers"]
   },
   birthday: {
-    appetizers: ["Snack board"],
-    mains: ["Easy main dish"],
-    sides: ["Fruit", "Chips"],
-    desserts: ["Cake", "Cupcakes"],
-    drinks: ["Sparkling water", "Wine or beer"],
-    supplies: ["Candles", "Plates", "Napkins"],
-    games: ["Party game"]
+    appetizers: ["Snacks"],
+    desserts: ["Cake"],
+    drinks: ["Drinks"],
+    supplies: ["Ice", "Plates and napkins", "Candles", "Decorations"]
   },
   custom: {
     other: []
