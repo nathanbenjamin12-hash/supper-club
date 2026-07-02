@@ -87,8 +87,7 @@ export default function LandingPage() {
       <section className="surface-linen border-b border-ink/8">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
           <div className="max-w-2xl">
-            <p className="eyebrow">A calmer way to gather</p>
-            <h2 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">
+            <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
               The evening starts here.
             </h2>
           </div>
@@ -174,9 +173,9 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-6xl gap-5 rounded-lg bg-ink p-6 text-cream sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
           <div>
             <Wine className="h-8 w-8 text-honey" aria-hidden="true" />
-            <h2 className="mt-4 text-3xl font-semibold">Let the evening feel easy.</h2>
+            <h2 className="mt-4 text-3xl font-semibold">Host people well.</h2>
             <p className="mt-2 max-w-2xl text-cream/72">
-              Supper Club keeps the practical planning quiet, clear, and ready for guests.
+              Create an invite, collect RSVPs, and let friends pitch in, without chasing the group chat.
             </p>
           </div>
           <Link href="/create" className={cn(buttonVariants({ variant: "secondary" }), "h-12")}>
