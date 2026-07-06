@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   CalendarDays,
+  Clock,
   ListPlus,
   MapPin,
   Trash2,
@@ -66,35 +67,35 @@ function formatDisplayDate(value: string) {
   }).format(parsed);
 }
 
-function ThemeMiniPreview({ theme }: { theme: EventTheme }) {
+function ThemeMiniPreview({
+  theme,
+  date,
+  time,
+  location
+}: {
+  theme: EventTheme;
+  date: string;
+  time: string;
+  location: string;
+}) {
   return (
-    <span className="mt-4 block overflow-hidden rounded-lg border border-ink/10 bg-cream shadow-sm">
-      <span
-        className="relative isolate block h-24 overflow-hidden bg-cover bg-center"
-        style={{ backgroundImage: `url(${theme.imageUrl})` }}
-      >
-        <span className={cn("absolute inset-0 -z-10", theme.heroGradient)} />
-        <span className={cn("absolute inset-0", theme.heroOverlay)} />
-        <span className="absolute bottom-3 left-3 right-3 font-display text-xl font-semibold leading-tight text-cream">
-          Pasta night
-        </span>
+    <span className="block rounded-lg border border-ink/10 bg-cream/78 p-3 shadow-sm">
+      <span className="block font-display text-xl font-semibold leading-tight text-ink">
+        {theme.label}
       </span>
-      <span className="block space-y-3 p-3">
-        <span className="grid grid-cols-2 gap-2 text-[11px] font-semibold text-ink/65">
-          <span className={cn("rounded-md p-2", theme.softPanel)}>
-            <CalendarDays className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
-            Sat, 7:00 PM
-          </span>
-          <span className={cn("rounded-md p-2", theme.softPanel)}>
-            <MapPin className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
-            At home
-          </span>
+      <span className="mt-1 block text-sm leading-5 text-ink/62">{theme.description}</span>
+      <span className="mt-3 grid gap-2 text-[11px] font-semibold text-ink/65 sm:grid-cols-3">
+        <span className={cn("rounded-md p-2", theme.softPanel)}>
+          <CalendarDays className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
+          {formatDisplayDate(date)}
         </span>
-        <span
-          className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-cream"
-          style={{ backgroundColor: theme.primaryAccent }}
-        >
-          RSVP
+        <span className={cn("rounded-md p-2", theme.softPanel)}>
+          <Clock className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
+          {time.trim() || "Time TBD"}
+        </span>
+        <span className={cn("rounded-md p-2", theme.softPanel)}>
+          <MapPin className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
+          {location.trim() || "At home"}
         </span>
       </span>
     </span>
@@ -426,32 +427,62 @@ export function EventForm({
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {eventThemes.map((theme) => (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => setCoverStyle(theme.id)}
-                aria-pressed={coverStyle === theme.id}
-                style={coverStyle === theme.id ? { borderColor: theme.borderAccent } : undefined}
-                className={cn(
-                  "relative min-h-32 overflow-hidden rounded-lg border bg-cream p-4 text-left transition hover:border-olive/30",
-                  coverStyle === theme.id
-                    ? `${theme.accentBorder} shadow-subtle ring-2 ring-ink/10`
-                    : "border-ink/10 hover:border-ink/20"
-                )}
-              >
-                <span className={cn("absolute inset-x-0 top-0 h-3", theme.swatch)} />
-                <span className={cn("mt-2 inline-flex rounded-md px-2.5 py-1 text-xs font-semibold", theme.chip)}>
-                  {coverStyle === theme.id ? "Selected" : "Theme"}
-                </span>
-                <span className="mt-4 block font-semibold">{theme.label}</span>
-                <span className="mt-1 block text-sm leading-5 text-ink/60">
-                  {theme.description}
-                </span>
-                {coverStyle === theme.id ? <ThemeMiniPreview theme={theme} /> : null}
-              </button>
-            ))}
+          <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {eventThemes.map((theme) => {
+              const isSelected = coverStyle === theme.id;
+
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => setCoverStyle(theme.id)}
+                  aria-pressed={isSelected}
+                  style={isSelected ? { borderColor: theme.borderAccent } : undefined}
+                  className={cn(
+                    "relative flex min-h-[22rem] flex-col overflow-hidden rounded-lg border bg-cream text-left shadow-sm transition hover:border-olive/30",
+                    isSelected
+                      ? `${theme.accentBorder} shadow-subtle ring-2 ring-ink/10`
+                      : "border-ink/10 hover:border-ink/20"
+                  )}
+                >
+                  <span className={cn("absolute inset-x-0 top-0 z-10 h-3", theme.swatch)} />
+                  <span
+                    className="relative block h-44 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${theme.imageUrl})` }}
+                  >
+                    {isSelected ? (
+                      <span
+                        className={cn(
+                          "absolute left-4 top-5 inline-flex rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm",
+                          theme.chip
+                        )}
+                      >
+                        Selected
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="block flex-1 p-4">
+                    {isSelected ? (
+                      <ThemeMiniPreview
+                        theme={theme}
+                        date={date}
+                        time={time}
+                        location={location}
+                      />
+                    ) : (
+                      <>
+                        <span className={cn("block font-display text-2xl font-semibold", theme.accentText)}>
+                          {theme.label}
+                        </span>
+                        <span className="mt-2 block text-sm leading-6 text-ink/60">
+                          {theme.description}
+                        </span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

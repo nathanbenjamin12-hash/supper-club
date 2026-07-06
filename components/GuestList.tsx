@@ -1,17 +1,36 @@
 import { UsersRound } from "lucide-react";
 import type { ChecklistItem, Guest } from "@/types/events";
-import { rsvpLabels } from "@/lib/utils";
+import type { EventTheme } from "@/lib/themes";
+import { cn, rsvpLabels } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/EmptyState";
+
+function themedGuestBadge(guest: Guest, theme?: EventTheme) {
+  if (!theme) {
+    return undefined;
+  }
+
+  if (guest.rsvpStatus === "yes") {
+    return theme.chip;
+  }
+
+  if (guest.rsvpStatus === "maybe") {
+    return theme.openBadge;
+  }
+
+  return "bg-ink/8 text-ink/60 ring-1 ring-ink/10";
+}
 
 export function GuestList({
   guests,
   checklistItems = [],
-  showDietaryDetails = true
+  showDietaryDetails = true,
+  theme
 }: {
   guests: Guest[];
   checklistItems?: ChecklistItem[];
   showDietaryDetails?: boolean;
+  theme?: EventTheme;
 }) {
   if (guests.length === 0) {
     return <EmptyState title="No guests yet" description="The list will fill in as people RSVP." />;
@@ -33,12 +52,12 @@ export function GuestList({
         return (
           <div
             key={guest.id}
-            className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm"
+            className={cn("rounded-lg border p-4 shadow-sm", theme?.accentBorder ?? "border-ink/8", theme?.cardAccent ?? "bg-cream")}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-semibold">
-                  <UsersRound className="h-4 w-4 shrink-0 text-olive" aria-hidden="true" />
+                  <UsersRound className={cn("h-4 w-4 shrink-0 text-olive", theme?.iconText)} aria-hidden="true" />
                   <span className="truncate">{guest.name}</span>
                 </p>
                 {regularContributions.length > 0 ? (
@@ -52,7 +71,9 @@ export function GuestList({
                   </p>
                 ) : null}
               </div>
-              <Badge tone={guest.rsvpStatus}>{rsvpLabels[guest.rsvpStatus]}</Badge>
+              <Badge tone={guest.rsvpStatus} className={themedGuestBadge(guest, theme)}>
+                {rsvpLabels[guest.rsvpStatus]}
+              </Badge>
             </div>
             {shouldShowDietaryDetails && guest.dietaryRestrictions ? (
               <p className="mt-3 text-sm font-medium text-ink/70">

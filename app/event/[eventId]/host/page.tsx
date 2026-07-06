@@ -369,6 +369,7 @@ export default function HostDashboardPage() {
                       guests={bundle.guests}
                       checklistItems={bundle.checklistItems}
                       showDietaryDetails={false}
+                      theme={theme}
                     />
                   </CardContent>
                 </Card>

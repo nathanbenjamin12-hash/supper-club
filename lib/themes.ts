@@ -49,9 +49,8 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#f3e2cf] text-terracotta ring-1 ring-terracotta/16",
     cta: "bg-terracotta text-cream hover:bg-[#974c38]",
     glow: "bg-honey/25",
-    imageUrl:
-      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Friends gathered around a casual dinner table at home"
+    imageUrl: "/theme-art/candlelit-table.svg",
+    imageAlt: "Illustrated candlelit dinner table with linen, candles, wine, and warm terracotta light"
   },
   {
     id: "sage garden",
@@ -77,9 +76,8 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-sage/12 text-olive ring-1 ring-olive/14",
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-sage/25",
-    imageUrl:
-      "https://images.unsplash.com/photo-1661006117166-6227bfc9c8b0?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Friends talking and eating around a cozy table"
+    imageUrl: "/theme-art/sage-garden.svg",
+    imageAlt: "Illustrated sage green table with herbs, ceramic bowls, open windows, and fresh ingredients"
   },
   {
     id: "wine night",
@@ -105,9 +103,8 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#6f2f3a]/8 text-[#6f2f3a] ring-1 ring-[#6f2f3a]/12",
     cta: "bg-[#6f2f3a] text-cream hover:bg-[#5e2731]",
     glow: "bg-[#6f2f3a]/18",
-    imageUrl:
-      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Friends sharing wine and dinner in a warm home setting"
+    imageUrl: "/theme-art/wine-room.svg",
+    imageAlt: "Illustrated low-lit wine room table with a wine bottle, glass, candle, wood, and burgundy tones"
   },
   {
     id: "sunny brunch",
@@ -133,9 +130,8 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-honey/12 text-[#735b2e] ring-1 ring-honey/16",
     cta: "bg-[#735b2e] text-cream hover:bg-[#5f4924]",
     glow: "bg-honey/25",
-    imageUrl:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Homemade food shared across a casual table"
+    imageUrl: "/theme-art/sunday-brunch.svg",
+    imageAlt: "Illustrated Sunday brunch table with morning light, coffee, pastries, fruit, flowers, and honey"
   },
   {
     id: "game table",
@@ -161,9 +157,8 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#1f4a3d]/8 text-[#1f4a3d] ring-1 ring-[#1f4a3d]/12",
     cta: "bg-[#1f4a3d] text-cream hover:bg-[#193c32]",
     glow: "bg-olive/20",
-    imageUrl:
-      "https://images.unsplash.com/photo-1772724317488-b901d235d419?auto=format&fit=crop&w=1600&q=80",
-    imageAlt: "Friends making pizza together in a home kitchen"
+    imageUrl: "/theme-art/table-games.svg",
+    imageAlt: "Illustrated late-night table with a board game, cards, dice, snacks, drinks, evergreen, and oak"
   }
 ];
 

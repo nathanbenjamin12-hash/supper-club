@@ -421,6 +421,7 @@ export default function PublicEventPage() {
                     guests={bundle.guests}
                     checklistItems={bundle.checklistItems}
                     showDietaryDetails={false}
+                    theme={theme}
                   />
                 ) : null}
               </CardContent>

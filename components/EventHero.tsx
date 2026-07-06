@@ -23,6 +23,7 @@ export function EventHero({
           src={theme.imageUrl}
           alt={theme.imageAlt}
           fill
+          unoptimized
           sizes="(min-width: 1024px) 760px, 100vw"
           className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
