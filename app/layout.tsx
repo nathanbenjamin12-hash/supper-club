@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="sticky top-0 z-30 border-b border-ink/6 bg-cream/82 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-ink/8 bg-cream shadow-subtle">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
             <Link href="/" className="flex items-center gap-2.5 font-semibold">
               <span className="text-olive">
@@ -24,16 +24,16 @@ export default function RootLayout({
               </span>
               <span className="font-display text-xl leading-none">Supper Club</span>
             </Link>
-            <nav className="flex items-center gap-2 text-sm font-medium">
+            <nav className="flex items-center gap-3 text-sm font-medium sm:gap-4">
               <Link
                 href="/event/sample-dinner-party"
-                className="rounded-md px-2 py-2 text-ink/64 transition hover:bg-stone/70 hover:text-ink sm:px-3"
+                className="whitespace-nowrap text-ink/64 transition hover:text-ink"
               >
                 Sample invite
               </Link>
               <Link
                 href="/create"
-                className="inline-flex items-center rounded-md bg-ink px-4 py-2 text-sm font-semibold text-cream shadow-subtle transition hover:bg-olive"
+                className="inline-flex h-10 shrink-0 items-center rounded-md bg-ink px-4 text-sm font-semibold text-cream shadow-subtle transition hover:bg-olive"
               >
                 Create invite
               </Link>

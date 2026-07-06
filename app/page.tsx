@@ -2,10 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarCheck2,
-  ClipboardList,
-  HandCoins,
-  Salad,
-  Utensils
+  CalendarPlus,
+  ListChecks,
+  PartyPopper,
+  UserCheck
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,22 +17,26 @@ const features = [
   {
     title: "Create in minutes",
     text: "Start with a template or build your own, then share a polished invite in just a few clicks.",
-    icon: Utensils
+    icon: CalendarPlus,
+    iconClassName: "bg-[#17120f] text-[#f4ead9]"
   },
   {
     title: "Know who's coming",
     text: "Collect RSVPs, dietary restrictions, and guest updates without chasing the group chat.",
-    icon: Salad
+    icon: UserCheck,
+    iconClassName: "bg-olive text-cream"
   },
   {
     title: "Let guests pitch in",
     text: "Friends can claim food, drinks, supplies, or pitch-in spots before they arrive.",
-    icon: ClipboardList
+    icon: ListChecks,
+    iconClassName: "bg-terracotta text-cream"
   },
   {
     title: "Enjoy hosting",
     text: "See what's covered, what's still needed, and spend less time coordinating.",
-    icon: HandCoins
+    icon: PartyPopper,
+    iconClassName: "bg-honey text-[#17120f]"
   }
 ];
 
@@ -65,7 +69,10 @@ export default function LandingPage() {
             <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/86">
               Create an invite, collect RSVPs, and let guests claim what they&apos;ll bring, all in one place.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <p className="mt-4 text-sm font-semibold text-cream/78">
+              Free to use. No accounts required.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "h-12")}>
                 <CalendarCheck2 className="h-5 w-5" aria-hidden="true" />
                 Create an invite
@@ -80,9 +87,6 @@ export default function LandingPage() {
                 View sample
               </Link>
             </div>
-            <p className="mt-4 text-sm font-semibold text-cream/78">
-              Free to use. No accounts required.
-            </p>
           </div>
         </div>
       </section>
@@ -102,7 +106,7 @@ export default function LandingPage() {
                   key={feature.title}
                   className="min-h-[232px] rounded-md border border-[#17120f]/12 bg-[#ead7b8] p-6 shadow-subtle sm:p-7"
                 >
-                  <span className="grid h-10 w-10 place-items-center rounded-md bg-[#17120f] text-[#f4ead9]">
+                  <span className={cn("grid h-10 w-10 place-items-center rounded-md", feature.iconClassName)}>
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <h3 className="mt-8 font-display text-2xl font-semibold leading-tight text-[#17120f]">
@@ -123,7 +127,7 @@ export default function LandingPage() {
               See the table come together before anyone arrives.
             </h2>
             <p className="mt-4 text-base leading-7 text-[#17120f]/68">
-              Keep the checklist, pitch-in spots, guest notes, and dietary details in one calm place.
+              Keep the checklist, guest notes, dietary details, and contributions in one place.
             </p>
             <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "mt-7 w-fit")}>
               Create an invite
@@ -132,8 +136,8 @@ export default function LandingPage() {
 
           <div className="rounded-sm border border-[#17120f]/12 bg-[#fff8ee] p-4 shadow-soft sm:p-6">
             <div className="border-b border-[#17120f]/10 pb-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6b614f]">
-                Sunday Dinner at home
+              <p className="font-display text-2xl font-semibold leading-tight text-[#17120f]">
+                Pasta Night at Lucy&apos;s
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
