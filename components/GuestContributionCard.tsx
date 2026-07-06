@@ -141,14 +141,16 @@ export function GuestContributionCard({
     const selected = itemIsSelected(item);
 
     return (
-      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+      <div key={item.id} className={cn("rounded-lg border p-4 shadow-sm", theme.accentBorder, theme.cardAccent)}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold">{item.title}</p>
             <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
             {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
           </div>
-          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
+          <Badge tone={selected ? "claimed" : "open"} className={selected ? theme.chip : theme.openBadge}>
+            {selected ? "Selected" : "Open"}
+          </Badge>
         </div>
         <Button
           type="button"
@@ -167,14 +169,16 @@ export function GuestContributionCard({
     const selected = draftItemIsSelected(item);
 
     return (
-      <div key={item.id} className="rounded-lg border border-ink/8 bg-cream p-4 shadow-sm">
+      <div key={item.id} className={cn("rounded-lg border p-4 shadow-sm", theme.accentBorder, theme.cardAccent)}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold">{item.title}</p>
             <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p>
             {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
           </div>
-          <Badge tone={selected ? "claimed" : "open"}>{selected ? "Selected" : "Open"}</Badge>
+          <Badge tone={selected ? "claimed" : "open"} className={selected ? theme.chip : theme.openBadge}>
+            {selected ? "Selected" : "Open"}
+          </Badge>
         </div>
         <Button
           type="button"
@@ -191,7 +195,7 @@ export function GuestContributionCard({
 
   function renderClaimedCard(item: ChecklistItem) {
     return (
-      <div key={item.id} className="rounded-lg border border-olive/18 bg-cream p-4 shadow-sm">
+      <div key={item.id} className={cn("rounded-lg border p-4 shadow-sm", theme.accentBorder, theme.cardAccent)}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-semibold">{item.title}</p>
@@ -199,7 +203,9 @@ export function GuestContributionCard({
             {isMoneyItem(item) ? <p className="mt-1 text-sm text-ink/60">{itemDetail(item)}</p> : null}
             {item.description ? <p className="mt-1 text-sm text-ink/65">{item.description}</p> : null}
           </div>
-          <Badge tone="claimed">{isMoneyItem(item) ? "Full" : "Claimed"}</Badge>
+          <Badge tone="claimed" className={theme.chip}>
+            {isMoneyItem(item) ? "Full" : "Claimed"}
+          </Badge>
         </div>
       </div>
     );

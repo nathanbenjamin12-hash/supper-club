@@ -26,7 +26,7 @@ export function EventHero({
           sizes="(min-width: 1024px) 760px, 100vw"
           className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/82 via-ink/42 to-ink/12" />
+        <div className={cn("absolute inset-0 -z-10", theme.heroOverlay)} />
         {showImageLabels ? (
           <>
             <div className="absolute right-5 top-5 hidden rounded-md border border-cream/25 bg-cream/12 px-4 py-3 text-sm font-semibold text-cream shadow-subtle backdrop-blur sm:block">
@@ -73,7 +73,7 @@ export function EventHero({
         </div>
       </div>
       {event.description ? (
-        <div className="border-t border-ink/8 px-5 py-4 text-ink/75 sm:px-6">
+        <div className={cn("border-t px-5 py-4 text-ink/75 sm:px-6", theme.divider)}>
           {event.description}
         </div>
       ) : null}

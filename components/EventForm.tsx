@@ -21,10 +21,9 @@ import {
   categoryOrder,
   cleanOptional,
   cn,
-  eventTypeLabels,
   normalizeVenmoHandle
 } from "@/lib/utils";
-import { coverStyles, eventThemes, getEventTheme } from "@/lib/themes";
+import { coverStyles, eventThemes, type EventTheme } from "@/lib/themes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,6 +66,41 @@ function formatDisplayDate(value: string) {
   }).format(parsed);
 }
 
+function ThemeMiniPreview({ theme }: { theme: EventTheme }) {
+  return (
+    <span className="mt-4 block overflow-hidden rounded-lg border border-ink/10 bg-cream shadow-sm">
+      <span
+        className="relative isolate block h-24 overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: `url(${theme.imageUrl})` }}
+      >
+        <span className={cn("absolute inset-0 -z-10", theme.heroGradient)} />
+        <span className={cn("absolute inset-0", theme.heroOverlay)} />
+        <span className="absolute bottom-3 left-3 right-3 font-display text-xl font-semibold leading-tight text-cream">
+          Pasta night
+        </span>
+      </span>
+      <span className="block space-y-3 p-3">
+        <span className="grid grid-cols-2 gap-2 text-[11px] font-semibold text-ink/65">
+          <span className={cn("rounded-md p-2", theme.softPanel)}>
+            <CalendarDays className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
+            Sat, 7:00 PM
+          </span>
+          <span className={cn("rounded-md p-2", theme.softPanel)}>
+            <MapPin className={cn("mb-1 h-3.5 w-3.5", theme.iconText)} aria-hidden="true" />
+            At home
+          </span>
+        </span>
+        <span
+          className="block rounded-md px-3 py-2 text-center text-xs font-semibold text-cream"
+          style={{ backgroundColor: theme.primaryAccent }}
+        >
+          RSVP
+        </span>
+      </span>
+    </span>
+  );
+}
+
 export function EventForm({
   event,
   submitLabel,
@@ -102,7 +136,6 @@ export function EventForm({
     if (!location.trim()) missing.push("location");
     return missing;
   }, [date, hostName, location, time, title]);
-  const selectedTheme = getEventTheme(coverStyle);
   const selectedPreset = contributionPresets.find((preset) => preset.label === customItemPreset);
   const isCustomPreset = customItemPreset === "Custom";
 
@@ -399,10 +432,12 @@ export function EventForm({
                 key={theme.id}
                 type="button"
                 onClick={() => setCoverStyle(theme.id)}
+                aria-pressed={coverStyle === theme.id}
+                style={coverStyle === theme.id ? { borderColor: theme.borderAccent } : undefined}
                 className={cn(
                   "relative min-h-32 overflow-hidden rounded-lg border bg-cream p-4 text-left transition hover:border-olive/30",
                   coverStyle === theme.id
-                    ? `${theme.accentBorder} shadow-subtle ring-2 ring-olive/15`
+                    ? `${theme.accentBorder} shadow-subtle ring-2 ring-ink/10`
                     : "border-ink/10 hover:border-ink/20"
                 )}
               >
@@ -414,12 +449,10 @@ export function EventForm({
                 <span className="mt-1 block text-sm leading-5 text-ink/60">
                   {theme.description}
                 </span>
+                {coverStyle === theme.id ? <ThemeMiniPreview theme={theme} /> : null}
               </button>
             ))}
           </div>
-          <p className={cn("mt-4 rounded-lg p-3 text-sm font-semibold", selectedTheme.softPanel, selectedTheme.accentText)}>
-            Current template: {eventTypeLabels[eventType]} | Current theme: {selectedTheme.label}
-          </p>
         </CardContent>
       </Card>
 

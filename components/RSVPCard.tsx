@@ -253,7 +253,7 @@ export function RSVPCard({
             </label>
 
             {updateRsvpStatus === "yes" ? (
-              <div className="rounded-lg bg-stone/70 p-4">
+              <div className={cn("rounded-lg p-4", theme.softPanel)}>
                 <p className="flex items-center gap-2 text-sm font-semibold">
                   <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
                   Anything the group should know?
@@ -269,7 +269,7 @@ export function RSVPCard({
             ) : null}
 
             {selectedItems.length > 0 ? (
-              <div className="rounded-lg border border-ink/8 bg-cream p-3">
+              <div className={cn("rounded-lg border p-3", theme.accentBorder, theme.cardAccent)}>
                 <p className="text-sm font-semibold">Selected to bring:</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
                   {selectedItems.map((item) => (
@@ -307,12 +307,12 @@ export function RSVPCard({
             {savedMessage[savedStatus]}
           </p>
           {statusMessage ? (
-            <p className="rounded-lg border border-ink/8 bg-cream p-3 text-sm font-semibold text-ink/70">
+            <p className={cn("rounded-lg border p-3 text-sm font-semibold text-ink/70", theme.accentBorder, theme.cardAccent)}>
               {statusMessage}
             </p>
           ) : null}
           {savedStatus === "yes" ? (
-            <div className="rounded-lg border border-ink/8 bg-cream p-3">
+            <div className={cn("rounded-lg border p-3", theme.accentBorder, theme.cardAccent)}>
               <p className="text-sm font-semibold">You&apos;re bringing:</p>
               {claimedItems.length > 0 ? (
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
@@ -324,7 +324,7 @@ export function RSVPCard({
                 <p className="mt-2 text-sm text-ink/65">Nothing yet.</p>
               )}
               {venmoHandle && claimedMoneyItems.length > 0 ? (
-                <div className="mt-3 space-y-2 rounded-lg bg-stone/70 p-3 text-sm text-ink/70">
+                <div className={cn("mt-3 space-y-2 rounded-lg p-3 text-sm text-ink/70", theme.softPanel)}>
                   {claimedMoneyItems.map((item) => {
                     const paymentUrl =
                       venmoPaymentUrl(venmoHandle, item.amountPerPerson, item.title) ??
@@ -442,7 +442,7 @@ export function RSVPCard({
           </label>
 
           {status === "yes" ? (
-            <div className="rounded-lg bg-stone/70 p-4">
+            <div className={cn("rounded-lg p-4", theme.softPanel)}>
               <p className="flex items-center gap-2 text-sm font-semibold">
                 <Utensils className={cn("h-4 w-4", theme.iconText)} aria-hidden="true" />
                 Anything the group should know?
@@ -458,7 +458,7 @@ export function RSVPCard({
           ) : null}
 
           {selectedItems.length > 0 ? (
-            <div className="rounded-lg border border-ink/8 bg-cream p-3">
+            <div className={cn("rounded-lg border p-3", theme.accentBorder, theme.cardAccent)}>
               <p className="text-sm font-semibold">Selected to bring:</p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/70">
                 {selectedItems.map((item) => (
