@@ -4,13 +4,10 @@ import {
   CalendarCheck2,
   ClipboardList,
   HandCoins,
-  Leaf,
   Salad,
-  Utensils,
-  Wine
+  Utensils
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const heroImage =
@@ -60,13 +57,9 @@ export default function LandingPage() {
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#100c09]/96 via-[#100c09]/72 to-[#100c09]/22" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#100c09] via-[#100c09]/58 to-[#100c09]/28" />
-        <div className="mx-auto flex min-h-[88vh] max-w-6xl items-end px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+        <div className="mx-auto flex min-h-[78vh] max-w-6xl items-end px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
           <div className="max-w-3xl text-cream">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-honey">
-              <Leaf className="h-4 w-4" aria-hidden="true" />
-              HOST PEOPLE WELL
-            </p>
-            <h1 className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[0.98] sm:text-7xl lg:text-8xl">
+            <h1 className="max-w-4xl font-display text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">
               Hosting is more fun when everyone pitches in.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/86">
@@ -87,6 +80,9 @@ export default function LandingPage() {
                 View sample
               </Link>
             </div>
+            <p className="mt-4 text-sm font-semibold text-cream/78">
+              Free to use. No accounts required.
+            </p>
           </div>
         </div>
       </section>
@@ -98,13 +94,18 @@ export default function LandingPage() {
               The evening starts here.
             </h2>
           </div>
-          <div className="mt-10 grid overflow-hidden rounded-sm border border-[#17120f]/14 bg-[#17120f]/14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <article key={feature.title} className="min-h-[240px] bg-[#dfcaa6] p-6 sm:p-7">
-                  <Icon className="h-5 w-5 text-[#5a4d36]" aria-hidden="true" />
-                  <h3 className="mt-10 font-display text-2xl font-semibold leading-tight text-[#17120f]">
+                <article
+                  key={feature.title}
+                  className="min-h-[232px] rounded-md border border-[#17120f]/12 bg-[#ead7b8] p-6 shadow-subtle sm:p-7"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-md bg-[#17120f] text-[#f4ead9]">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-8 font-display text-2xl font-semibold leading-tight text-[#17120f]">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-sm leading-6 text-[#17120f]/68">{feature.text}</p>
@@ -118,15 +119,11 @@ export default function LandingPage() {
       <section className="bg-[#f4ead9] text-[#17120f]">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:py-24">
           <div>
-            <Badge className="w-fit bg-[#17120f] text-cream ring-0" tone="neutral">
-              Host view
-            </Badge>
-            <h2 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
+            <h2 className="text-4xl font-semibold leading-tight sm:text-5xl">
               See the table come together before anyone arrives.
             </h2>
             <p className="mt-4 text-base leading-7 text-[#17120f]/68">
-              Keep the checklist, pitch-in spots, guest notes, and dietary details in one
-              composed place. No accounts, no noise, no extra ceremony.
+              Keep the checklist, pitch-in spots, guest notes, and dietary details in one calm place.
             </p>
             <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "mt-7 w-fit")}>
               Create an invite
@@ -178,21 +175,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="bg-[#d9c39d] px-4 py-16 sm:px-6">
-        <div className="mx-auto grid max-w-6xl gap-6 rounded-sm border border-[#17120f]/14 bg-[#dfcaa6] p-7 text-[#17120f] shadow-soft sm:grid-cols-[1fr_auto] sm:items-center sm:p-9">
-          <div>
-            <Wine className="h-8 w-8 text-[#5a4d36]" aria-hidden="true" />
-            <h2 className="mt-4 text-3xl font-semibold">Host people well.</h2>
-            <p className="mt-2 max-w-2xl text-[#17120f]/70">
-              Create an invite, collect RSVPs, and let friends pitch in, without chasing the group chat.
-            </p>
-          </div>
-          <Link href="/create" className={cn(buttonVariants({ variant: "default" }), "h-12")}>
-            Start hosting
-          </Link>
         </div>
       </section>
     </main>
