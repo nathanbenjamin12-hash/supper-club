@@ -49,7 +49,7 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#f3e2cf] text-terracotta ring-1 ring-terracotta/16",
     cta: "bg-terracotta text-cream hover:bg-[#974c38]",
     glow: "bg-honey/25",
-    imageUrl: "/theme-art/candlelit-table.svg",
+    imageUrl: "/theme-art/candlelit-table.png",
     imageAlt: "Illustrated candlelit dinner table with linen, candles, wine, and warm terracotta light"
   },
   {
@@ -76,7 +76,7 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-sage/12 text-olive ring-1 ring-olive/14",
     cta: "bg-olive text-cream hover:bg-[#556149]",
     glow: "bg-sage/25",
-    imageUrl: "/theme-art/sage-garden.svg",
+    imageUrl: "/theme-art/sage-garden.png",
     imageAlt: "Illustrated sage green table with herbs, ceramic bowls, open windows, and fresh ingredients"
   },
   {
@@ -103,7 +103,7 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#6f2f3a]/8 text-[#6f2f3a] ring-1 ring-[#6f2f3a]/12",
     cta: "bg-[#6f2f3a] text-cream hover:bg-[#5e2731]",
     glow: "bg-[#6f2f3a]/18",
-    imageUrl: "/theme-art/wine-room.svg",
+    imageUrl: "/theme-art/wine-room.png",
     imageAlt: "Illustrated low-lit wine room table with a wine bottle, glass, candle, wood, and burgundy tones"
   },
   {
@@ -130,7 +130,7 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-honey/12 text-[#735b2e] ring-1 ring-honey/16",
     cta: "bg-[#735b2e] text-cream hover:bg-[#5f4924]",
     glow: "bg-honey/25",
-    imageUrl: "/theme-art/sunday-brunch.svg",
+    imageUrl: "/theme-art/sunday-brunch.png",
     imageAlt: "Illustrated Sunday brunch table with morning light, coffee, pastries, fruit, flowers, and honey"
   },
   {
@@ -157,8 +157,35 @@ export const eventThemes: EventTheme[] = [
     openBadge: "bg-[#1f4a3d]/8 text-[#1f4a3d] ring-1 ring-[#1f4a3d]/12",
     cta: "bg-[#1f4a3d] text-cream hover:bg-[#193c32]",
     glow: "bg-olive/20",
-    imageUrl: "/theme-art/table-games.svg",
+    imageUrl: "/theme-art/table-games.png",
     imageAlt: "Illustrated late-night table with a board game, cards, dice, snacks, drinks, evergreen, and oak"
+  },
+  {
+    id: "outdoor picnic",
+    label: "Outdoor Picnic",
+    description: "Fresh air, soft sunshine, and easy afternoons outdoors.",
+    primaryAccent: "#6f7f4f",
+    secondaryAccent: "#c8644f",
+    subtleTint: "#f4f0df",
+    borderAccent: "#6f7f4f",
+    swatch: "bg-gradient-to-br from-[#fff8e8] via-[#d7dfb0] to-[#c8644f]",
+    heroGradient:
+      "bg-[linear-gradient(135deg,#fff8e8_0%,#d7dfb0_54%,#c8644f_100%)]",
+    heroOverlay: "bg-[linear-gradient(180deg,rgba(82,94,52,0.06)_0%,rgba(105,122,72,0.28)_48%,rgba(48,59,35,0.72)_100%)]",
+    pageBackground:
+      "bg-[linear-gradient(180deg,#faf7f2_0%,#f5f0df_52%,#eef3e4_100%)]",
+    softPanel: "bg-[#f4f0df]",
+    cardAccent: "bg-[#fffaf0]",
+    divider: "border-[#6f7f4f]/18",
+    accentText: "text-[#6f7f4f]",
+    accentBorder: "border-[#6f7f4f]/20",
+    iconText: "text-[#6f7f4f]",
+    chip: "bg-[#6f7f4f]/12 text-[#5a6841] ring-1 ring-[#6f7f4f]/18",
+    openBadge: "bg-[#f4f0df] text-[#5a6841] ring-1 ring-[#6f7f4f]/16",
+    cta: "bg-[#6f7f4f] text-cream hover:bg-[#5a6841]",
+    glow: "bg-[#c8644f]/18",
+    imageUrl: "/theme-art/outdoor-picnic.png",
+    imageAlt: "Illustrated outdoor picnic with fresh greens, natural linen, warm sunlight, soft picnic reds, and light wood tones"
   }
 ];
 
