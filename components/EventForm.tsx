@@ -403,7 +403,7 @@ export function EventForm({
                   aria-pressed={isSelected}
                   style={isSelected ? { borderColor: theme.borderAccent } : undefined}
                   className={cn(
-                    "relative flex h-[21rem] flex-col overflow-hidden rounded-lg border bg-cream text-left shadow-sm transition hover:border-olive/30",
+                    "relative flex flex-col overflow-hidden rounded-lg border bg-cream text-left shadow-sm transition hover:border-olive/30",
                     isSelected
                       ? `${theme.accentBorder} bg-cream shadow-subtle ring-2 ring-ink/10`
                       : "border-ink/10 hover:border-ink/20"
@@ -411,15 +411,12 @@ export function EventForm({
                 >
                   <span className={cn("absolute inset-x-0 top-0 z-10 h-3", theme.swatch)} />
                   <span
-                    className="block h-48 bg-cover bg-center"
+                    className="block aspect-[3/2] w-full bg-cover bg-center"
                     style={{ backgroundImage: `url(${theme.imageUrl})` }}
                   />
-                  <span className="flex flex-1 flex-col p-4">
-                    <span className={cn("block font-display text-2xl font-semibold", isSelected ? theme.accentText : "text-ink")}>
+                  <span className="p-3.5">
+                    <span className={cn("block font-display text-xl font-semibold leading-tight", isSelected ? theme.accentText : "text-ink")}>
                       {theme.label}
-                    </span>
-                    <span className="mt-2 block text-sm leading-6 text-ink/60">
-                      {theme.description}
                     </span>
                   </span>
                 </button>
@@ -435,9 +432,11 @@ export function EventForm({
         </div>
       ) : null}
 
-      <Button type="submit" className="w-full sm:w-auto" variant="default">
-        {submitLabel}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" className="w-full sm:w-auto" variant="default">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }
