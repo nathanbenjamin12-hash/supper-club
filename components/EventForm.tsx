@@ -21,10 +21,9 @@ import {
   categoryOrder,
   cleanOptional,
   cn,
-  eventTypeLabels,
   normalizeVenmoHandle
 } from "@/lib/utils";
-import { coverStyles, eventThemes, getEventTheme } from "@/lib/themes";
+import { coverStyles, eventThemes } from "@/lib/themes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -102,7 +101,6 @@ export function EventForm({
     if (!location.trim()) missing.push("location");
     return missing;
   }, [date, hostName, location, time, title]);
-  const selectedTheme = getEventTheme(coverStyle);
   const selectedPreset = contributionPresets.find((preset) => preset.label === customItemPreset);
   const isCustomPreset = customItemPreset === "Custom";
 
@@ -393,33 +391,38 @@ export function EventForm({
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {eventThemes.map((theme) => (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => setCoverStyle(theme.id)}
-                className={cn(
-                  "relative min-h-32 overflow-hidden rounded-lg border bg-cream p-4 text-left transition hover:border-olive/30",
-                  coverStyle === theme.id
-                    ? `${theme.accentBorder} shadow-subtle ring-2 ring-olive/15`
-                    : "border-ink/10 hover:border-ink/20"
-                )}
-              >
-                <span className={cn("absolute inset-x-0 top-0 h-3", theme.swatch)} />
-                <span className={cn("mt-2 inline-flex rounded-md px-2.5 py-1 text-xs font-semibold", theme.chip)}>
-                  {coverStyle === theme.id ? "Selected" : "Theme"}
-                </span>
-                <span className="mt-4 block font-semibold">{theme.label}</span>
-                <span className="mt-1 block text-sm leading-5 text-ink/60">
-                  {theme.description}
-                </span>
-              </button>
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {eventThemes.map((theme) => {
+              const isSelected = coverStyle === theme.id;
+
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => setCoverStyle(theme.id)}
+                  aria-pressed={isSelected}
+                  style={isSelected ? { borderColor: theme.borderAccent } : undefined}
+                  className={cn(
+                    "relative flex flex-col overflow-hidden rounded-lg border bg-cream text-left shadow-sm transition hover:border-olive/30",
+                    isSelected
+                      ? `${theme.accentBorder} bg-cream shadow-subtle ring-2 ring-ink/10`
+                      : "border-ink/10 hover:border-ink/20"
+                  )}
+                >
+                  <span className={cn("absolute inset-x-0 top-0 z-10 h-3", theme.swatch)} />
+                  <span
+                    className="block aspect-[3/2] w-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${theme.imageUrl})` }}
+                  />
+                  <span className="p-3.5">
+                    <span className={cn("block font-display text-xl font-semibold leading-tight", isSelected ? theme.accentText : "text-ink")}>
+                      {theme.label}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <p className={cn("mt-4 rounded-lg p-3 text-sm font-semibold", selectedTheme.softPanel, selectedTheme.accentText)}>
-            Current template: {eventTypeLabels[eventType]} | Current theme: {selectedTheme.label}
-          </p>
         </CardContent>
       </Card>
 
@@ -429,9 +432,11 @@ export function EventForm({
         </div>
       ) : null}
 
-      <Button type="submit" className="w-full sm:w-auto" variant="default">
-        {submitLabel}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" className="w-full sm:w-auto" variant="default">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

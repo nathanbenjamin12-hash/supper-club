@@ -323,16 +323,22 @@ export default function HostDashboardPage() {
               <StatCard
                 label="Going"
                 value={stats.yes}
+                className={cn(theme.accentBorder, theme.cardAccent)}
+                iconClassName={theme.iconText}
                 icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
               />
               <StatCard
                 label="Maybe"
                 value={stats.maybe}
+                className={cn(theme.accentBorder, theme.cardAccent)}
+                iconClassName={theme.iconText}
                 icon={<CalendarClock className="h-5 w-5" aria-hidden="true" />}
               />
               <StatCard
                 label="Not attending"
                 value={stats.no}
+                className={cn(theme.accentBorder, theme.cardAccent)}
+                iconClassName={theme.iconText}
                 icon={<UsersRound className="h-5 w-5" aria-hidden="true" />}
               />
             </div>
@@ -363,6 +369,7 @@ export default function HostDashboardPage() {
                       guests={bundle.guests}
                       checklistItems={bundle.checklistItems}
                       showDietaryDetails={false}
+                      theme={theme}
                     />
                   </CardContent>
                 </Card>
@@ -401,7 +408,7 @@ export default function HostDashboardPage() {
                           <p className="font-semibold">{guestNote.name}</p>
                           <p className="mt-2 flex gap-2 text-ink/70">
                             <AlertCircle
-                              className="mt-0.5 h-4 w-4 shrink-0 text-terracotta"
+                              className={cn("mt-0.5 h-4 w-4 shrink-0", theme.iconText)}
                               aria-hidden="true"
                             />
                             <span>Dietary restriction: {guestNote.note}</span>
@@ -435,10 +442,22 @@ export default function HostDashboardPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <StatCard label="Items claimed" value={`${claimedItems.length}/${bringItems.length}`} />
-              <StatCard label="Still needed" value={stillNeededItems.length} />
+              <StatCard
+                label="Items claimed"
+                value={`${claimedItems.length}/${bringItems.length}`}
+                className={cn(theme.accentBorder, theme.cardAccent)}
+              />
+              <StatCard
+                label="Still needed"
+                value={stillNeededItems.length}
+                className={cn(theme.accentBorder, theme.cardAccent)}
+              />
               {hasPitchIn ? (
-                <StatCard label="Pitch-in spots" value={pitchInValue} />
+                <StatCard
+                  label="Pitch-in spots"
+                  value={pitchInValue}
+                  className={cn(theme.accentBorder, theme.cardAccent)}
+                />
               ) : null}
             </div>
 
